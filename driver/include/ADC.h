@@ -121,8 +121,8 @@ typedef enum  multi_adc_mode{
 
 
 int32_t set_ADC_multimode( uint8_t multi_mode);
-int32_t enable_ADC_interrupt( uint8_t adc_id ,uint32_t int_mask)
-int32_t set_ADC_resolution( uint8_t adc_id, uint8_t adc_resolution)
+int32_t enable_ADC_interrupt( uint8_t adc_id ,uint32_t int_mask);
+int32_t set_ADC_resolution( uint8_t adc_id, uint8_t adc_resolution);
 int32_t set_ADC_sample_time( uint8_t adc_id, uint8_t channel_id, uint8_t sample_time);
 int32_t set_ADC_inject_offset( uint8_t adc_id, uint8_t inject_channel_idx ,uint16_t  sub_raw_offset);
 int32_t set_ADC_wdg_HTR( uint8_t adc_id, uint16_t  wdg_htr);
