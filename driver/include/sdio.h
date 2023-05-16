@@ -1,0 +1,91 @@
+
+
+#ifndef  STM32_SDIO_H
+#define  STM32_SDIO_H
+
+#include  <stdint.h>
+
+
+#define  SDIO_POWER_PWRCTRL        0x3              // power supply control bits
+
+
+#define  SDIO_CLKCR_HWFC_EN             (1<<14)             // HW flow control enable
+#define  SDIO_CLKCR_NEGEDGE             (1<<13)             // SDIO_CK dephasing selection bit
+#define  SDIO_CLKCR_WIDBUS              (0x3<<11)           // wide bus mode enable bit
+#define  SDIO_CLKCR_BYPASS              (1<<10)             // clock divider bypass enable bi
+#define  SDIO_CLKCR_PWRSAV              (1<<9)              // power saving configuration bit
+#define  SDIO_CLKCR_CLKEN               (1<<8)              // clock enable bit
+#define  SDIO_CLKCR_CLKDIV              0xff                // clock divide factor
+
+
+#define  SDIO_ARG_CMDARG        0xffffffff      // command argument
+
+
+#define  SDIO_CMD_ATACMD                (1<<14)                 // CE-ATA command
+#define  SDIO_CMD_NIEN                  (1<<13)                 // not interrupt enable
+#define  SDIO_CMD_ENCMD                 (1<<12)                    // enable CMD completion
+#define  SDIO_CMD_SDIOSPEND             (1<<11)                     // SD I/O suspend command
+#define  SDIO_CMD_CPSMEN                (1<<10)                     // command path state machine enable
+#define  SDIO_CMD_WAITPEND              (1<<9)                  // CPSM waits for ends of data transfer
+#define  SDIO_CMD_WAITINT                  (1<<8)               // CPSM waits for interrupt request
+#define  SDIO_CMD_WAITRESP              (0x3<<6)                // wait for response bits
+#define  SDIO_CMD_CMDINDEX              0x3f                    // command index
+
+
+#define  SDIO_RESPCMD_RESPCMD          0x3f             // response command index
+
+#define  SDIO_DCTRL_SDIOEN              (1<<11)             // SD I/O enable functions
+#define  SDIO_DCTRL_RWMOD               (1<<10)             // read wait mode
+#define  SDIO_DCTRL_RWSTOP              (1<<9)              // read wait stop
+#define  SDIO_DCTRL_RWSTART             (1<<8)              // read wait start
+#define  SDIO_DCTRL_DBLOCKSIZE          0xf0                // data block size
+#define  SDIO_DCTRL_DMAEN               0X8                 // DMA enable bit
+#define  SDIO_DCTRL_DTMODE              0X4                 // Stream or SDIO multibyte data transfer
+#define  SDIO_DCTRL_DTDIR               0X2                 // from card to controller
+#define  SDIO_DCTRL_DTEN                0x1                 // data transfer enabled bit
+
+
+#define  SDIO_DCOUNT_DATACOUNT              0x1ffffff              // data count value
+
+#define  SDIO_STA_CEATAEND              (1<<23)                 // CE-ATA command completion signal received for CMD61
+#define  SDIO_STA_SDIOIT                (1<<22)                 // SDIO interrupt received
+#define  SDIO_STA_RXDAVL                (1<<21)                 // data available in receive FIFO
+#define  SDIO_STA_TXDAVL                (1<<20)                 // data available in transmit FIFO
+#define  SDIO_STA_RXFIFOE               (1<<19)                 // receive FIFO empty
+#define  SDIO_STA_TXFIFOE               (1<<18)                 // transmit FIFO empty
+#define  SDIO_STA_RXFIFOF               (1<<17)                 // receive FIFO full
+#define  SDIO_STA_TXFIFOF               (1<<16)                 // transmit FIFO full
+#define  SDIO_STA_RXFIFOHF              (1<<15)                 // receive FIFO half full
+#define  SDIO_STA_TXFIFOHE              (1<<14)                 // transmit FIFO half empty
+#define  SDIO_STA_RXACT                 (1<<13)                 // data receive in progress
+#define  SDIO_STA_TXACT                 (1<<12)                 // data transmit in progress
+#define  SDIO_STA_CMDACT                (1<<11)                 // command transfer in progress
+#define  SDIO_STA_DBCKEND               (1<<10)                 // data block sent/received
+#define  SDIO_STA_STBITERR              (1<<9)                  // start bit not detected
+#define  SDIO_STA_DATAEND               (1<<8)                  // data end
+#define  SDIO_STA_CMDSENT               (1<<7)                     // command sent
+#define  SDIO_STA_CMDREND               (1<<6)                  // command response received
+#define  SDIO_STA_RXOVERR               (1<<5)                  // received FIFO overrun error
+#define  SDIO_STA_TXUNDERR              (1<<4)                  // transmit FIFO underrun error
+#define  SDIO_STA_DTIMEOUT              0x8                     // data timeout
+#define  SDIO_STA_CTIMEOUT              0x4                     // command response timeout
+#define  SDIO_STA_DCRCFAIL              0x2                     // CRC check failed
+#define  SDIO_STA_CCRCFAIL              0x1                      // command response received (CRC check failed)
+
+
+
+#define  SDIO_FIFOCNT_FIFOCOUNT              0xffffff                   // number of words to be written to or read from the FIFO
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
