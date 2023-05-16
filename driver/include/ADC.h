@@ -1,10 +1,8 @@
 
-
 #ifndef  STM32_ADC_H
 #define  STM32_ADC_H
 
 #include  <stdint.h>
-#include  <stdbool.h>
 
 #define  MAX_ADC_CHANNEL_ID     18
 #define  MAX_ADC_EXT_CHANNEL_ID     15
