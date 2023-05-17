@@ -18,15 +18,16 @@ typedef enum {
     BIT12_15CYCLE = 0,
     BIT10_13CYCLE,
     BIT8_11CYCLE,
-    BIT6_9CYCLE
+    BIT6_9CYCLE,
+    ADC_RESOLUTION_MAX  =  BIT6_9CYCLE,
 }ADC_resolution_t;
 
 typedef enum {
     ADC1 =0,
     ADC2,
     ADC3,
-    ADC_NUMBER
-}ADC_ID_t;
+    ADC_ID_MAX  =  ADC3,
+}ADC_id_t;
 
 
 typedef enum{
@@ -34,8 +35,8 @@ typedef enum{
     TRIGGER_DETECT_DISABLE = 0,
     TRIGGER_DETECT_RISE,
     TRIGGER_DETECT_FALL,
-    TRIGGER_DETECT_BOTH
-
+    TRIGGER_DETECT_BOTH,
+    TRIGGER_DETECT_MAX  =  TRIGGER_DETECT_BOTH,
 }external_trigger_polarity_t;
 
 
@@ -56,7 +57,8 @@ typedef enum {
     T5_CC3_EVENT,
     T8_CC1_EVENT,
     T8_TRGO_EVENT,
-    EXTI_LINE11
+    EXTI_LINE11,
+    REGYLAR_EXTERNAL_EVENT_MAX  =  EXTI_LINE11,
 
 }regular_external_event_t;
 
@@ -78,7 +80,8 @@ typedef enum {
     T8_CC2_EVENT,
     T8_CC3_EVENT,
     T8_CC4_EVENT,
-    EXTI_LINE15
+    EXTI_LINE15,
+    INJEXTED_EXTERNAL_EVENT_MAX = EXTI_LINE15,
 
 }injected_external_event_t;
 
@@ -92,12 +95,13 @@ typedef enum {
     SAMPLE_84_CYCLE,
     SAMPLE_112_CYCLE,
     SAMPLE_144_CYCLE,
-    SAMPLE_480_CYCLE
+    SAMPLE_480_CYCLE,
+    SAMPLIE_TIME_MAX_CYCLE  = SAMPLE_480_CYCLE,
 
 }sampling_time_t;
 
 
-typedef enum  multi_adc_mode{
+typedef enum {
 
     INDEPENDENT_MODE = 0,
     DUAL_REGULAR_INJECTED,
@@ -111,7 +115,8 @@ typedef enum  multi_adc_mode{
     TRIPLE_INJECTED_ONLY = 21,
     TRIPLE_REGULA_ONLY,
     TRIPLE_INTERLEAVED_ONLY,
-    TRIPLE_ALTERNATE_ONLY = 25
+    TRIPLE_ALTERNATE_ONLY = 25,
+    NULTI_ADC_MODE_MAX =  TRIPLE_ALTERNATE_ONLY,
 
 }multi_adc_mode_t;
 
