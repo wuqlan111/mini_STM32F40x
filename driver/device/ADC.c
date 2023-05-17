@@ -1,7 +1,7 @@
 
 #include  <stdlib.h>
 #include  "../include/ADC.h"
-
+#include  "util.h"
 
 #define  ADC_SR_OVERRUN     (1<<5)      // overrun occurred
 #define  ADC_SR_START     (1<<4)      // regular channel conversion started
@@ -92,8 +92,7 @@
 #define   ADC3_REG_OFFSET        0x200
 #define   ADC_COMMON_OFFSET         0x300
 
-typedef struct ADC_reg{
-
+typedef struct {
     volatile  uint32_t  adc_sr;
     volatile  uint32_t  adc_cr1;
     volatile  uint32_t  adc_cr2;
@@ -114,23 +113,39 @@ typedef struct ADC_reg{
     volatile  uint32_t  adc_jdr3;
     volatile  uint32_t  adc_jdr4;
     volatile  uint32_t  adc_dr;
+}ATTRIBUTE_PACKED ADC_reg_t;
 
-}ADC_reg_t;
 
-
-typedef struct ADC_creg{
-
+typedef struct {
     volatile  uint32_t  adc_csr;
     volatile  uint32_t  adc_ccr;
     volatile  uint32_t  adc_cdr;
+}ATTRIBUTE_PACKED ADC_creg_t;
 
-}ADC_creg_t;
 
-
-ADC_reg_t * const ALL_ADCs[ADC_NUMBER] = {  (ADC_reg_t *)(ADC1_REG_OFFSET + ADC1_REG_OFFSET),
+ADC_reg_t * const ALL_ADCs[ADC_ID_MAX + 1] = {  (ADC_reg_t *)(ADC1_REG_OFFSET + ADC1_REG_OFFSET),
                                             (ADC_reg_t *)(ADC1_REG_OFFSET + ADC2_REG_OFFSET),
                                             (ADC_reg_t *)(ADC1_REG_OFFSET + ADC3_REG_OFFSET) };
 ADC_creg_t * const ADC_cregs = (ADC_creg_t *)(ADC1_REG_OFFSET + ADC_COMMON_OFFSET);
+
+
+
+int32_t  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 int32_t set_ADC_multimode(uint8_t multi_mode){

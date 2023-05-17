@@ -2,15 +2,11 @@
 #ifndef  STM32_ADC_H
 #define  STM32_ADC_H
 
-#include  <stdint.h>
+// #include  <stdint.h>
+#include  "util.h"
 
 #define  MAX_ADC_CHANNEL_ID     18
 #define  MAX_ADC_EXT_CHANNEL_ID     15
-
-#define  ADC_OVERRUN_INT    (1<<26)
-#define  ADC_JEOC_INT    (1<<7)
-#define  ADC_WATCHDOG_INT    (1<<6)
-#define  ADC_EOC_INT    (1<<5)
 
 
 
@@ -119,6 +115,55 @@ typedef enum {
     NULTI_ADC_MODE_MAX =  TRIPLE_ALTERNATE_ONLY,
 
 }multi_adc_mode_t;
+
+
+typedef struct {
+    uint16_t  watchdog_higher_thresold;
+    uint16_t  watchdog_lower_thresold;    
+    uint8_t  interrupt_eoc_enable;
+    uint8_t  interrupt_watchdog_enbale;
+    uint8_t  interrupt_overrun_enbale;
+    uint8_t  adc_resolution;
+    uint8_t  watchdog_all_channel;
+    uint8_t  watchdog_channel_select;
+    uint8_t  left_align;
+    uint8_t  enable_continue;
+}ATTRIBUTE_PACKED ADCx_config_t;
+
+typedef struct {
+    uint8_t  enable_watchdog;
+    uint8_t  discontinuous_channel_count;
+    uint8_t  discontinuous_mode_enable;
+    uint8_t  external_trigger_polarity;
+    uint8_t  external_event_select;
+} ATTRIBUTE_PACKED ADCx_regular_group_config_t;
+
+typedef struct {
+    uint8_t  enable_watchdog;
+    uint8_t  discontinuous_mode_enable;
+    uint8_t  automatic_injected_enable;
+    uint8_t  jeoc_interrupt_enable;
+    uint8_t  external_trigger_polarity;
+    uint8_t  external_event_select;
+    uint8_t  injected_sequence_length;
+} ATTRIBUTE_PACKED ADCx_inject_group_config_t;
+
+typedef struct {
+    uint8_t  channel_select;
+    uint8_t  sample_time;
+    uint8_t  sequence_number;
+    uint8_t  regular_group;
+
+} ATTRIBUTE_PACKED ADCx_channel_config_t;
+
+
+int32_t init_ADCx_config(uint32_t  adc,  ADCx_config_t * init_info);
+int32_t init_ADCx_regular_group_config(uint32_t  adc,  ADCx_regular_group_config_t *  config);
+int32_t init_ADCx_inject_group_config(uint32_t  adc,   ADCx_inject_group_config_t *  config);
+int32_t init_ADCx_channel_config(uint32_t  adc,  ADCx_channel_config_t *  config);
+
+
+
 
 
 int32_t set_ADC_multimode( uint8_t multi_mode);

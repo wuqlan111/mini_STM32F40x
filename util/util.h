@@ -29,8 +29,8 @@ REGISTER_OPS(16, uint16_t)
 REGISTER_OPS(32, uint32_t)
 
 
-
-
+#define  ATTRIBUTE_PACKED     __attribute__((packed))
+#define  ATTRIBUTE_ALIGN(align)     __attribute__((aligned(align)))
 
 
 #endif

@@ -2,7 +2,9 @@
     "files.associations": {
         "compare": "c",
         "type_traits": "c",
-        "*.c":"c",
-        "*.h":"c"
+        "*.c": "c",
+        "*.h": "c",
+        "limits": "c",
+        "new": "c"
     }
 }
