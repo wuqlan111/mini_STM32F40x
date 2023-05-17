@@ -14,24 +14,22 @@
 
 
 
-typedef enum ADC_resolution{
-
+typedef enum {
     BIT12_15CYCLE = 0,
     BIT10_13CYCLE,
     BIT8_11CYCLE,
     BIT6_9CYCLE
-
 }ADC_resolution_t;
 
-typedef enum ADC_ID{
+typedef enum {
     ADC1 =0,
     ADC2,
     ADC3,
     ADC_NUMBER
-}ADC_id_t;
+}ADC_ID_t;
 
 
-typedef enum external_trigger_polarity{
+typedef enum{
 
     TRIGGER_DETECT_DISABLE = 0,
     TRIGGER_DETECT_RISE,
@@ -41,7 +39,7 @@ typedef enum external_trigger_polarity{
 }external_trigger_polarity_t;
 
 
-typedef enum  regular_external_event{
+typedef enum {
 
     T1_CC1_EVENT = 0,
     T1_CC2_EVENT,
@@ -63,7 +61,7 @@ typedef enum  regular_external_event{
 }regular_external_event_t;
 
 
-typedef enum  injected_external_event{
+typedef enum {
 
     T1_CC4_EVENT = 0,
     T1_TRGO_EVENT,
@@ -85,7 +83,7 @@ typedef enum  injected_external_event{
 }injected_external_event_t;
 
 
-typedef enum  sampling_time{
+typedef enum {
 
     SAMPLE_3_CYCLE = 0,
     SAMPLE_15_CYCLE,
