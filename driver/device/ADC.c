@@ -126,24 +126,116 @@
 
 int32_t init_ADCx_config(uint32_t  adc,  ADCx_config_t * init_info)
 {
-    if (!ADC_ID_VALID(adc) || init_info) {
+    uint32_t  flag, mask;
+    if (!ADC_ID_VALID(adc) || !init_info) {
         return  -1;
     }
 
     REG32_WRITE(ADC_HTR_REG_ADDR(adc), init_info->watchdog_higher_thresold & 0xfff);
     REG32_WRITE(ADC_LTR_REG_ADDR(adc), init_info->watchdog_lower_thresold & 0xfff);
 
+    if (init_info->interrupt_watchdog_enbale)
+        flag = ADC_CR1_AWDIE;
+    if (init_info->interrupt_overrun_enbale)
+        flag |= ADC_CR1_OVRIE;
+    if (init_info->interrupt_eoc_enable)
+        flag |= ADC_CR1_EOCIE;
+    
+    flag |= init_info->adc_resolution << 24;
+    if (!init_info->watchdog_all_channel)
+        flag  |=  ADC_CR1_AWDSGL;
+    
+    flag |= init_info->watchdog_channel_select;
+    mask =  ADC_CR1_AWDIE | ADC_CR1_OVRIE | ADC_CR1_RES | ADC_CR1_EOCIE |
+                ADC_CR1_AWDSGL | ADC_CR1_AWDCH;
+    
+    REG32_UPDATE(ADC_CR1_REG_ADDR(adc), flag, mask);
 
+    if (init_info->left_align)
+        flag = ADC_CR2_ALIGN;
+    if (init_info->enable_continue)
+        flag |= ADC_CR2_CONT;
+
+    mask  =  ADC_CR2_ALIGN | ADC_CR2_CONT;
+    REG32_UPDATE(ADC_CR2_REG_ADDR(adc), flag,  mask);
+    return  0;
 
 }
 
 
+int32_t init_ADCx_regular_group_config(uint32_t  adc,  ADCx_regular_group_config_t *  config)
+{
+    uint32_t  flag, mask;
+    if (!ADC_ID_VALID(adc) || !config) {
+        return  -1;
+    }
+
+    if (config->enable_watchdog)
+        flag = ADC_CR1_AWDEN;
+
+    flag |= config->discontinuous_channel_count << 13;
+    if (config->discontinuous_mode_enable)
+        flag |= ADC_CR1_DISCEN;
+    mask = ADC_CR1_AWDEN | ADC_CR1_DISCNUM | ADC_CR1_DISCEN;
+    REG32_UPDATE(ADC_CR1_REG_ADDR(adc), flag, mask);
+
+    flag = config->external_trigger_polarity << 28;
+    flag |= config->external_event_select << 24;
+    mask  =  ADC_CR2_EXTEN | ADC_CR2_EXTSEL;
+    REG32_UPDATE(ADC_CR2_REG_ADDR(adc),  flag,  mask);
+    return  0;
+
+}
+
+
+int32_t init_ADCx_inject_group_config(uint32_t  adc,   ADCx_inject_group_config_t * config)
+{
+    uint32_t  flag, mask;
+    if (!ADC_ID_VALID(adc) || !config) {
+        return  -1;
+    }
+
+    if (config->enable_watchdog)
+        flag |= ADC_CR1_JAWDEN;
+    if (config->discontinuous_mode_enable)
+        flag |=  ADC_CR1_JDISCEN;
+    if (config->jeoc_interrupt_enable)
+        flag |= ADC_CR1_JEOCIE;
+    if (config->automatic_injected_enable)
+        flag |= ADC_CR1_JAUTO;
+    mask =  ADC_CR1_JAWDEN | ADC_CR1_JDISCEN | ADC_CR1_JEOCIE | ADC_CR1_JAUTO;
+    REG32_UPDATE(ADC_CR1_REG_ADDR(adc), flag,  mask);
+
+    flag = config->external_trigger_polarity << 20;
+    flag |= config->external_event_select << 16;
+    mask  =  ADC_CR2_JEXTEN | ADC_CR2_JEXTSEL;
+    REG32_UPDATE(ADC_CR2_REG_ADDR(adc),  flag,  mask);
+    return  0;
+
+}
+
+
+int32_t init_ADCx_channel_config(uint32_t  adc,  ADCx_channel_config_t *  config)
+{
+    uint32_t  flag, mask;
+    if (!ADC_ID_VALID(adc) || !config) {
+        return  -1;
+    }
+
+    if (config->regular_group) {
+        
+
+
+    } else {
 
 
 
-int32_t init_ADCx_regular_group_config(uint32_t  adc,  ADCx_regular_group_config_t *  config);
-int32_t init_ADCx_inject_group_config(uint32_t  adc,   ADCx_inject_group_config_t *  config);
-int32_t init_ADCx_channel_config(uint32_t  adc,  ADCx_channel_config_t *  config);
+
+    }
+
+
+
+}
 
 
 
