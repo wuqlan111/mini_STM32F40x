@@ -1,7 +1,39 @@
 
+#include  <memory.h>
 #include  <stdlib.h>
 #include  "../include/ADC.h"
 #include  "util.h"
+
+#define   ADC_REG_BASE    (0x40012000u)
+#define   ADC_REGS_STEP         (0x100u)       
+#define   ADC_COMMON_OFFSET         (0x300)
+
+#define   ADC_SR_REG_ADDR(n)        (ADC_REG_BASE + ADC_REGS_STEP * (n))
+#define   ADC_CR1_REG_ADDR(n)       (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x4)
+#define   ADC_CR2_REG_ADDR(n)       (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x8)
+#define   ADC_SMPR1_REG_ADDR(n)     (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0xc)
+#define   ADC_SMPR2_REG_ADDR(n)     (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x10)
+#define   ADC_JOFR1_REG_ADDR(n)     (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x14)
+#define   ADC_JOFR2_REG_ADDR(n)     (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x18)
+#define   ADC_JOFR3_REG_ADDR(n)     (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x1c)
+#define   ADC_JOFR4_REG_ADDR(n)     (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x20)
+#define   ADC_HTR_REG_ADDR(n)       (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x24)
+#define   ADC_LTR_REG_ADDR(n)       (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x28)
+#define   ADC_SQR1_REG_ADDR(n)      (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x2c)
+#define   ADC_SQR2_REG_ADDR(n)      (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x30)
+#define   ADC_SQR3_REG_ADDR(n)      (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x34)
+#define   ADC_JSQR_REG_ADDR(n)      (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x38)
+#define   ADC_JDR1_REG_ADDR(n)      (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x3c)
+#define   ADC_JDR2_REG_ADDR(n)      (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x40)
+#define   ADC_JDR3_REG_ADDR(n)      (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x44)
+#define   ADC_JDR4_REG_ADDR(n)      (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x48)
+#define   ADC_DR_REG_ADDR(n)        (ADC_REG_BASE + ADC_REGS_STEP * (n) + 0x4c)
+
+#define   ADC_CSR_REG_ADDR          (ADC_REG_BASE + ADC_COMMON_OFFSET)
+#define   ADC_CCR_REG_ADDR          (ADC_REG_BASE + ADC_COMMON_OFFSET + 0x4)
+#define   ADC_CDR_REG_ADDR          (ADC_REG_BASE + ADC_COMMON_OFFSET + 0x8)
+
+
 
 #define  ADC_SR_OVERRUN     (1<<5)      // overrun occurred
 #define  ADC_SR_START     (1<<4)      // regular channel conversion started
@@ -86,51 +118,32 @@
 #define  ADC_CDR_DATA2          0xffff              // 1st data item of a pair of regular conversions
 
 
-#define   ADC_REG_BASE    0x40012000u
-#define   ADC1_REG_OFFSET        0
-#define   ADC2_REG_OFFSET        0x100
-#define   ADC3_REG_OFFSET        0x200
-#define   ADC_COMMON_OFFSET         0x300
-
-typedef struct {
-    volatile  uint32_t  adc_sr;
-    volatile  uint32_t  adc_cr1;
-    volatile  uint32_t  adc_cr2;
-    volatile  uint32_t  adc_smpr1;
-    volatile  uint32_t  adc_smpr2;
-    volatile  uint32_t  adc_jofr1;
-    volatile  uint32_t  adc_jofr2;
-    volatile  uint32_t  adc_jofr3;
-    volatile  uint32_t  adc_jofr4;
-    volatile  uint32_t  adc_htr;
-    volatile  uint32_t  adc_ltr;
-    volatile  uint32_t  adc_sqr1;
-    volatile  uint32_t  adc_sqr2;
-    volatile  uint32_t  adc_sqr3;
-    volatile  uint32_t  adc_jsqr;
-    volatile  uint32_t  adc_jdr1;
-    volatile  uint32_t  adc_jdr2;
-    volatile  uint32_t  adc_jdr3;
-    volatile  uint32_t  adc_jdr4;
-    volatile  uint32_t  adc_dr;
-}ATTRIBUTE_PACKED ADC_reg_t;
-
-
-typedef struct {
-    volatile  uint32_t  adc_csr;
-    volatile  uint32_t  adc_ccr;
-    volatile  uint32_t  adc_cdr;
-}ATTRIBUTE_PACKED ADC_creg_t;
-
-
-ADC_reg_t * const ALL_ADCs[ADC_ID_MAX + 1] = {  (ADC_reg_t *)(ADC1_REG_OFFSET + ADC1_REG_OFFSET),
-                                            (ADC_reg_t *)(ADC1_REG_OFFSET + ADC2_REG_OFFSET),
-                                            (ADC_reg_t *)(ADC1_REG_OFFSET + ADC3_REG_OFFSET) };
-ADC_creg_t * const ADC_cregs = (ADC_creg_t *)(ADC1_REG_OFFSET + ADC_COMMON_OFFSET);
 
 
 
-int32_t  
+
+
+
+int32_t init_ADCx_config(uint32_t  adc,  ADCx_config_t * init_info)
+{
+    if (!ADC_ID_VALID(adc) || init_info) {
+        return  -1;
+    }
+
+    REG32_WRITE(ADC_HTR_REG_ADDR(adc), init_info->watchdog_higher_thresold & 0xfff);
+    REG32_WRITE(ADC_LTR_REG_ADDR(adc), init_info->watchdog_lower_thresold & 0xfff);
+
+
+
+}
+
+
+
+
+
+int32_t init_ADCx_regular_group_config(uint32_t  adc,  ADCx_regular_group_config_t *  config);
+int32_t init_ADCx_inject_group_config(uint32_t  adc,   ADCx_inject_group_config_t *  config);
+int32_t init_ADCx_channel_config(uint32_t  adc,  ADCx_channel_config_t *  config);
 
 
 
@@ -146,9 +159,8 @@ int32_t
 
 
 
-
-
-int32_t set_ADC_multimode(uint8_t multi_mode){
+int32_t set_ADC_multimode(uint8_t multi_mode) 
+{
 
     if ( multi_mode > ADC_CCR_MULTI )
         return -1;

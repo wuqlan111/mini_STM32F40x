@@ -2,7 +2,7 @@
 #ifndef  STM32_ADC_H
 #define  STM32_ADC_H
 
-// #include  <stdint.h>
+#include  <stdint.h>
 #include  "util.h"
 
 #define  MAX_ADC_CHANNEL_ID     18
@@ -44,7 +44,7 @@ typedef enum {
     T2_CC2_EVENT,
     T2_CC3_EVENT,
     T2_CC4_EVENT,
-    T2_TRGO_EVENT,
+    T2_TRGO1_EVENT,
     T3_CC1_EVENT,
     T3_TRGO_EVENT,
     T4_CC4_EVENT,
@@ -64,7 +64,7 @@ typedef enum {
     T1_CC4_EVENT = 0,
     T1_TRGO_EVENT,
     T2_CC1_EVENT,
-    T2_TRGO_EVENT,
+    T2_TRGO2_EVENT,
     T3_CC2_EVENT,
     T3_CC4_EVENT,
     T4_CC1_EVENT,
@@ -157,6 +157,12 @@ typedef struct {
 } ATTRIBUTE_PACKED ADCx_channel_config_t;
 
 
+
+#define  ADC_ID_VALID(adc)  ( ((adc) <= ADC_ID_MAX) && ((adc) > 0))
+
+
+
+
 int32_t init_ADCx_config(uint32_t  adc,  ADCx_config_t * init_info);
 int32_t init_ADCx_regular_group_config(uint32_t  adc,  ADCx_regular_group_config_t *  config);
 int32_t init_ADCx_inject_group_config(uint32_t  adc,   ADCx_inject_group_config_t *  config);
@@ -166,28 +172,6 @@ int32_t init_ADCx_channel_config(uint32_t  adc,  ADCx_channel_config_t *  config
 
 
 
-int32_t set_ADC_multimode( uint8_t multi_mode);
-int32_t enable_ADC_interrupt( uint8_t adc_id ,uint32_t int_mask);
-int32_t set_ADC_resolution( uint8_t adc_id, uint8_t adc_resolution);
-int32_t set_ADC_sample_time( uint8_t adc_id, uint8_t channel_id, uint8_t sample_time);
-int32_t set_ADC_inject_offset( uint8_t adc_id, uint8_t inject_channel_idx ,uint16_t  sub_raw_offset);
-int32_t set_ADC_wdg_HTR( uint8_t adc_id, uint16_t  wdg_htr);
-int32_t set_ADC_wdg_LTR( uint8_t adc_id, uint16_t  wdg_ltr);
-int32_t set_ADC_discnum( uint8_t adc_id, uint8_t channel_num);
-int32_t set_ADC_wdg_channel( uint8_t adc_id, uint8_t channel_id);
-int32_t set_ADC_regular_trigger( uint8_t adc_id, uint8_t trigger_type, uint8_t ext_event);
-int32_t set_ADC_inject_trigger( uint8_t adc_id, uint8_t trigger_type, uint8_t ext_event);
-int32_t set_ADC_regular_order( uint8_t adc_id, uint8_t channel_id, uint8_t order);
-int32_t set_ADC_inject_order( uint8_t adc_id, uint8_t channel_id, uint8_t order);
-int32_t enable_ADC(uint8_t adc_id);
-int32_t disable_ADC(uint8_t adc_id);
-int32_t enable_discontiouns_mode(uint8_t adc_id, bool inject_group);
-int32_t disable_discontiouns_mode(uint8_t adc_id, bool inject_group);
-int32_t  enable_ADC_wdg(uint8_t adc_id, bool inject_group, uint8_t channel_id);
-int32_t  disable_ADC_wdg(uint8_t adc_id, bool inject_group);
-int16_t  get_regular_data(uint8_t  adc_id);
-int16_t  get_inject_data(uint8_t  adc_id, uint8_t jsq_num);
-int32_t  get_multiadc_data(bool dual_mode);
 
 
 
