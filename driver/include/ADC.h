@@ -151,7 +151,6 @@ typedef struct {
 typedef struct {
     uint8_t  channel_select;
     uint8_t  sample_time;
-    uint8_t  sequence_number;
     uint8_t  regular_group;
 
 } ATTRIBUTE_PACKED ADCx_channel_config_t;

@@ -9,7 +9,7 @@ static inline void REG##width##_WRITE(uint32_t  addr, uint##width##_t val)    \
     volatile uint##width##_t *  p = ( volatile uint##width##_t *)addr;        \
     * p = val;                                      \
 }                                                   \
-static inline uint##width##_t REG##width##_READ(uint32_t  addr, uint##width##_t val)    \
+static inline uint##width##_t REG##width##_READ(uint32_t  addr)    \
 {                                                       \
     volatile uint##width##_t *  p = ( volatile uint##width##_t *)addr;        \
     return *p;                                     \

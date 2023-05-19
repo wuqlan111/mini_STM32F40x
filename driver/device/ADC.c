@@ -214,6 +214,77 @@ int32_t init_ADCx_inject_group_config(uint32_t  adc,   ADCx_inject_group_config_
 
 }
 
+static inline uint32_t  get_ADCx_regular_sequence(uint32_t adc)
+{
+    return  (REG32_READ(ADC_SQR1_REG_ADDR(adc)) >> 20) & 0xf;
+}
+
+
+static inline uint32_t  get_ADCx_injected_sequence(uint32_t adc)
+{
+    return  (REG32_READ(ADC_JSQR_REG_ADDR(adc)) >> 20) & 0x3;
+}
+
+
+static int32_t alloc_regular_sequence(uint32_t adc, uint32_t channel, uint32_t sample_time)
+{
+    uint32_t  len = get_ADCx_regular_sequence(adc);
+    if (len == 0xf ) {
+        return -1;
+    }
+
+    uint32_t  flag, mask;
+    if (len  < 5) {
+        flag  =  channel << ( (len + 1) * 5 );
+        mask  =  0x1f  <<  ( (len + 1) * 5 );
+        REG32_UPDATE(ADC_SQR3_REG_ADDR(adc), flag, mask);
+    } else if (len < 11) {
+        flag  = channel << ((len - 5) * 5);
+        mask  = 0x1f << ((len - 5) * 5);
+        REG32_UPDATE(ADC_SQR2_REG_ADDR(adc), flag, mask);
+    } else {
+        flag  =  channel  << ((len - 11) * 5);
+        mask  = 0x1f << ((len - 11) * 5);
+        REG32_UPDATE(ADC_SQR1_REG_ADDR(adc), flag,  mask);
+    }
+
+    if (channel < 10) {
+        flag  =  sample_time << (3 * channel);
+        mask  =  0x7 << (3 * channel);
+        REG32_UPDATE(ADC_SMPR2_REG_ADDR(adc), flag,  mask);
+    } else {
+        flag  =  sample_time << (3 * (channel - 10) );
+        mask  =  0x7 << (3 * (channel - 10) );
+        REG32_UPDATE(ADC_SMPR2_REG_ADDR(adc), flag,  mask);
+    }
+
+    flag  = (len + 1) << 20;
+    mask  = 0xf << 20;
+    REG32_UPDATE(ADC_SQR1_REG_ADDR(adc), flag, mask);
+    return  0;
+}
+
+
+
+static int32_t alloc_injected_sequence(uint32_t adc, uint32_t channel)
+{
+    uint32_t  len = get_ADCx_injected_sequence(adc);
+    if (len == 0x3 ) {
+        return -1;
+    }
+
+    uint32_t  flag, mask;
+    flag  =  channel << ((len + 1) * 5);
+    mask  =  0x1f <<  ((len + 1) * 5);
+    REG32_UPDATE(ADC_JSQR_REG_ADDR(adc), flag,  mask);
+
+    flag  = (len + 1) << 20;
+    mask  = 0x3 << 20;
+    REG32_UPDATE(ADC_JSQR_REG_ADDR(adc), flag, mask);
+    return  0;
+}
+
+
 
 int32_t init_ADCx_channel_config(uint32_t  adc,  ADCx_channel_config_t *  config)
 {
@@ -222,393 +293,65 @@ int32_t init_ADCx_channel_config(uint32_t  adc,  ADCx_channel_config_t *  config
         return  -1;
     }
 
+    if (config->channel_select > MAX_ADC_CHANNEL_ID) {
+        return -1;
+    }
+
+    if (config->sample_time > 0x7) {
+        return -1;
+    }
+
+
     if (config->regular_group) {
-        
-
-
+        if (alloc_regular_sequence(adc, config->channel_select, config->sample_time))
+            return  -1;
     } else {
-
-
-
-
+        if (alloc_injected_sequence(adc, config->channel_select))
+            return  -1;
     }
 
-
+    return  0;
 
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-int32_t set_ADC_multimode(uint8_t multi_mode) 
+int32_t  start_ADCx_group_conversion(uint32_t adc, uint32_t is_regular)
 {
-
-    if ( multi_mode > ADC_CCR_MULTI )
-        return -1;
-    
-    ADC_cregs->adc_ccr &= ~ADC_CCR_MULTI;
-    ADC_cregs->adc_ccr |= multi_mode;
-
-    return 0;
-
-}
-
-
-int32_t enable_ADC_interrupt(uint8_t adc_id ,uint32_t int_mask){
-
-    uint32_t all_int_mask = ADC_OVERRUN_INT | ADC_JEOC_INT | ADC_WATCHDOG_INT | ADC_EOC_INT;
-
-    if ((int_mask & ~all_int_mask) || adc_id >ADC3)
-        return -1;
-    
-    ALL_ADCs[adc_id]->adc_cr1 |= int_mask;
-
-    return -1;
-
-}
-
-
-int32_t disable_ADC_interrupt( uint8_t adc_id, uint32_t int_mask){
-
-    uint32_t all_int_mask = ADC_CR1_OVRIE | ADC_CR1_JDISCEN | ADC_CR1_AWDIE | ADC_CR1_EOCIE;
-
-    if ((int_mask &  ~all_int_mask)  || adc_id > ADC3)
-        return -1;
-    
-    ALL_ADCs[adc_id]->adc_cr1 &= ~int_mask;
-
-    return -1;
-
-
-}
-
-
-int32_t set_ADC_resolution( uint8_t adc_id, uint8_t adc_resolution){
-
-
-    if ( adc_resolution > BIT6_9CYCLE || adc_id > ADC3)
-        return -1;
-    
-    ALL_ADCs[adc_id]->adc_cr1 &= ~ADC_CR1_RES;
-    ALL_ADCs[adc_id]->adc_cr1 |= (adc_resolution << 24);
-    return -1;
-
-}
-
-
-int32_t  set_ADC_sample_time( uint8_t adc_id, uint8_t channel_id, uint8_t sample_time){
-
-    if ( adc_id > ADC3 || sample_time > SAMPLE_480_CYCLE || channel_id > MAX_ADC_CHANNEL_ID)
-        return -1;
-    
-    if (channel_id > 9)
-    {
-        ALL_ADCs[adc_id]->adc_smpr1 &= ~(0x7<<(channel_id - 10));
-        ALL_ADCs[adc_id]->adc_smpr1 |= (sample_time<<(channel_id - 10));
-    }else{
-
-        ALL_ADCs[adc_id]->adc_smpr1 &= ~(0x7<<channel_id);
-        ALL_ADCs[adc_id]->adc_smpr1 |= (sample_time<<channel_id );
-    }
-    
-    return 0;
-
-}
-
-
-int32_t  set_ADC_inject_offset( uint8_t adc_id, uint8_t inject_channel_idx ,uint16_t  sub_raw_offset){
-
-    if ( adc_id > ADC3 ||sub_raw_offset > ADC_JOFR_JOFFSET  ||  inject_channel_idx > 3)
+    uint32_t  flag, mask;
+    if (adc > ADC_ID_MAX)
         return  -1;
-
-    switch (inject_channel_idx)
-    {
-    case 0:
-        ALL_ADCs[adc_id]->adc_jofr1 &= ~ADC_JOFR_JOFFSET;
-        ALL_ADCs[adc_id]->adc_jofr1 |= sub_raw_offset;
-        break;
-    case 1:
-        ALL_ADCs[adc_id]->adc_jofr2 &= ~ADC_JOFR_JOFFSET;
-        ALL_ADCs[adc_id]->adc_jofr2 |= sub_raw_offset;
-        break;
-
-    case 2:
-        ALL_ADCs[adc_id]->adc_jofr3 &= ~ADC_JOFR_JOFFSET;
-        ALL_ADCs[adc_id]->adc_jofr3 |= sub_raw_offset;
-        break;
-
-    case 3:
-        ALL_ADCs[adc_id]->adc_jofr4 &= ~ADC_JOFR_JOFFSET;
-        ALL_ADCs[adc_id]->adc_jofr4 |= sub_raw_offset;
-        break;
-
-    default:
-        break;
+    
+    if (is_regular) {
+        flag  =  ADC_CR2_SWSTART;
+        mask  =  ADC_CR2_SWSTART;
+    } else {
+        flag  =  ADC_CR2_JSWSTART;
+        mask  =  ADC_CR2_JSWSTART;
     }
+    REG32_UPDATE(ADC_CR2_REG_ADDR(adc), flag,  mask);
+    return  0;
+}
+
+
+int32_t  reset_ADCx_group_conversion(uint32_t adc, uint32_t is_regular)
+{
+    uint32_t  flag, mask;
+    if (adc > ADC_ID_MAX)
+        return  -1;
     
-    return 0;
-
-}
-
-
-
-int32_t set_ADC_wdg_HTR( uint8_t adc_id, uint16_t  wdg_htr){
-
-    if (wdg_htr > ADC_HTR_HT || adc_id > ADC3)
-        return -1;    
-
-    ALL_ADCs[adc_id]->adc_htr =  wdg_htr;
-    return 0;
-
-}
-
-
-int32_t set_ADC_wdg_LTR( uint8_t adc_id, uint16_t  wdg_ltr){
-
-    if (wdg_ltr > ADC_HTR_HT || adc_id > ADC3 )
-        return -1;    
-
-    ALL_ADCs[adc_id]->adc_ltr =  wdg_ltr;
-    return 0;
-
-}
-
-
-
-int32_t set_ADC_discnum( uint8_t adc_id, uint8_t channel_num){
-
-    if ( channel_num > 7 || adc_id > ADC3 )
-        return -1;    
-
-    ALL_ADCs[adc_id]->adc_cr1 &= ~ADC_CR1_DISCNUM;
-    ALL_ADCs[adc_id]->adc_cr1 |= (channel_num << 13);
-    return 0;
-
-}
-
-
-
-int32_t set_ADC_wdg_channel( uint8_t adc_id, uint8_t channel_id){
-
-    if ( channel_id > MAX_ADC_CHANNEL_ID || adc_id > ADC3 )
-        return -1;    
-
-    ALL_ADCs[adc_id]->adc_cr1 &= ~ADC_CR1_AWDCH;
-    ALL_ADCs[adc_id]->adc_cr1 |= (channel_id);
-    return 0;
-
-}
-
-
-int32_t set_ADC_regular_trigger( uint8_t adc_id, uint8_t trigger_type, uint8_t ext_event){
-
-    if (  adc_id > ADC3 || trigger_type > TRIGGER_DETECT_BOTH || ext_event > EXTI_LINE11)
-        return -1;    
-
-    ALL_ADCs[adc_id]->adc_cr2 &= ~ADC_CR2_EXTEN;
-    ALL_ADCs[adc_id]->adc_cr2 |= (trigger_type << 28);
-    ALL_ADCs[adc_id]->adc_cr2 &= ~ADC_CR2_EXTSEL;
-    ALL_ADCs[adc_id]->adc_cr2 |= (ext_event << 24);
-    return 0;
-
-}
-
-int32_t set_ADC_inject_trigger( uint8_t adc_id, uint8_t trigger_type, uint8_t ext_event){
-
-    if (  adc_id > ADC3 || trigger_type > TRIGGER_DETECT_BOTH || ext_event > EXTI_LINE15)
-        return -1;    
-
-    ALL_ADCs[adc_id]->adc_cr2 &= ~ADC_CR2_JEXTEN;
-    ALL_ADCs[adc_id]->adc_cr2 |= (trigger_type << 20);
-    ALL_ADCs[adc_id]->adc_cr2 &= ~ADC_CR2_JEXTSEL;
-    ALL_ADCs[adc_id]->adc_cr2 |= (ext_event << 16);
-    return 0;
-
-}
-
-
-
-int32_t set_ADC_regular_order( uint8_t adc_id, uint8_t channel_id, uint8_t order){
-
-    if (  adc_id > ADC3 || channel_id > MAX_ADC_CHANNEL_ID || !order || order > 16)
-        return -1;    
-
-    if (order > 12){
-        ALL_ADCs[adc_id]->adc_sqr1 &= ~(ADC_SQR1_SQ13<<(order - 13));
-        ALL_ADCs[adc_id]->adc_sqr1 |= (channel_id << (order - 13));
-    }else if (order > 6){
-        ALL_ADCs[adc_id]->adc_sqr1 &= ~(ADC_SQR1_SQ13<<(order - 7));
-        ALL_ADCs[adc_id]->adc_sqr1 |= (channel_id << (order - 7));
-    }else{
-        ALL_ADCs[adc_id]->adc_sqr1 &= ~(ADC_SQR1_SQ13<<(order - 1));
-        ALL_ADCs[adc_id]->adc_sqr1 |= (channel_id << (order - 1));
+    flag = 0;
+    if (is_regular) {
+        mask  =  ADC_CR2_SWSTART;
+    } else {
+        mask  =  ADC_CR2_JSWSTART;
     }
-
-    return 0;
-
-}
-
-int32_t set_ADC_inject_order( uint8_t adc_id, uint8_t channel_id, uint8_t order){
-
-    if (  adc_id > ADC3 || channel_id > MAX_ADC_CHANNEL_ID || !order || order > 4)
-        return -1;    
-
-    ALL_ADCs[adc_id]->adc_jsqr &= ~(ADC_SQR1_SQ13<<(order - 1));
-    ALL_ADCs[adc_id]->adc_jsqr |= (channel_id << (order - 1));
-
-    return 0;
-
-}
-
-
-int32_t enable_ADC(uint8_t adc_id){
-
-    if (adc_id > ADC3)
-        return -1;
-    ALL_ADCs[adc_id]->adc_cr2 |= ADC_CR2_ADON;
-    return 0;
-
-}
-
-int32_t disable_ADC(uint8_t adc_id){
-
-    if (adc_id > ADC3)
-        return -1;
-    ALL_ADCs[adc_id]->adc_cr2 &= ~ADC_CR2_ADON;
-    return 0;
-
-}
-
-
-int32_t enable_discontiouns_mode(uint8_t adc_id, bool inject_group){
-
-    if (adc_id > ADC3)
-        return -1;
-    
-    if (inject_group)
-        ALL_ADCs[adc_id]->adc_cr1 |= ADC_CR1_JDISCEN;
-    else
-        ALL_ADCs[adc_id]->adc_cr1 |= ADC_CR1_DISCEN;
-
-    return 0;
-
-}
-
-int32_t disable_discontiouns_mode(uint8_t adc_id, bool inject_group){
-
-    if (adc_id > ADC3)
-        return -1;
-    
-    if (inject_group)
-        ALL_ADCs[adc_id]->adc_cr1 &= ~ADC_CR1_JDISCEN;
-    else
-        ALL_ADCs[adc_id]->adc_cr1 &=  ~ADC_CR1_DISCEN;
-
-    return 0;
-
-}
-
-
-int32_t  enable_ADC_wdg(uint8_t adc_id, bool inject_group, uint8_t channel_id){
-
-    if (adc_id > ADC3 || channel_id  > MAX_ADC_CHANNEL_ID)
-        return -1;
-    
-    ALL_ADCs[adc_id]->adc_cr1 &= ~ ADC_CR1_AWDCH;
-    ALL_ADCs[adc_id]->adc_cr1 |= channel_id;
-    if (inject_group)
-        ALL_ADCs[adc_id]->adc_cr1 |=  ADC_CR1_JAWDEN;
-    else
-        ALL_ADCs[adc_id]->adc_cr1 |=  ADC_CR1_AWDEN;
-    
-    return 0;
-
-}
-
-int32_t  disable_ADC_wdg(uint8_t adc_id, bool inject_group){
-
-    if (adc_id > ADC3)
-        return -1;
-
-    if (inject_group)
-        ALL_ADCs[adc_id]->adc_cr1 &=   ~ADC_CR1_JAWDEN;
-    else
-        ALL_ADCs[adc_id]->adc_cr1 &=  ~ADC_CR1_AWDEN;
-    
-    return 0;
-
-}
-
-
-int16_t  get_regular_data(uint8_t  adc_id){
-
-    if (adc_id > ADC3)
-        return -1;
-    
-    while (!(ALL_ADCs[adc_id]->adc_sr & ADC_SR_EOC))
-        ;
-    
-    uint16_t adc_data = ALL_ADCs[adc_id]->adc_dr & ADC_DR_DATA;
-    ALL_ADCs[adc_id]->adc_sr &= ~ADC_SR_EOC;
-
-    return adc_data;
-
-}
-
-
-int16_t  get_inject_data(uint8_t  adc_id, uint8_t jsq_num){
-
-    if (adc_id > ADC3 || jsq_num > 4 || !jsq_num )
-        return -1;
-    
-    while (!(ALL_ADCs[adc_id]->adc_sr & ADC_SR_JEOC))
-        ;
-
-    uint16_t adc_data;
-    switch (jsq_num)
-    {
-    case 1:
-        adc_data = ALL_ADCs[adc_id]->adc_jdr1 & ADC_JDR_JDATA;
-        break;
-    case 2:
-        adc_data = ALL_ADCs[adc_id]->adc_jdr2 & ADC_JDR_JDATA;
-        break;
-    case 3:
-        adc_data = ALL_ADCs[adc_id]->adc_jdr3 & ADC_JDR_JDATA;
-        break;
-    case 4:
-        adc_data = ALL_ADCs[adc_id]->adc_jdr4 & ADC_JDR_JDATA;
-        break;
-    }
-
-    ALL_ADCs[adc_id]->adc_sr &= ~ADC_SR_JEOC;
-    return adc_data;
-
+    REG32_UPDATE(ADC_CR2_REG_ADDR(adc), flag,  mask);
+    return  0;
 }
 
 
 
-int32_t  get_multiadc_data(bool dual_mode){
 
-    uint32_t eoc_flag = dual_mode?(3 << 1 | 3 << 9):(3 << 1 | 3 << 9 | 3 << 17);
 
-    //
-    
-    uint32_t mutlti_data =  ADC_cregs->adc_cdr;
-    ADC_cregs->adc_csr &= ~ eoc_flag;
 
-    return mutlti_data;
-
-}
 
