@@ -102,70 +102,40 @@
 #define  CAN_FIRx_FB0           0x1             // recessive bit is expected or identifier must match
 
 
+#define  CAN_REGS_BASE             (0x40006400u)
+#define  CAN_REGS_STEP             (0x400u)
 
-#define   CAN1_REG_BASE             0x40006400u
-#define   CAN2_REG_BASE             0x40006800u
-#define   CAN_CONTROL_OFFSET           0
-#define   CAN_MAILBOX_OFFSET           0x180
-#define   CAN_FILTER_OFFSET           0x200
+#define  CAN_MCR_REG_ADDR(n)         (CAN_REGS_BASE + CAN_REGS_STEP * (n))
+#define  CAN_MSR_REG_ADDR(n)         (CAN_REGS_BASE + CAN_REGS_STEP * (n) +  0x4)
+#define  CAN_TSR_REG_ADDR(n)         (CAN_REGS_BASE + CAN_REGS_STEP * (n) +  0x8)
+#define  CAN_RF0R_REG_ADDR(n)        (CAN_REGS_BASE + CAN_REGS_STEP * (n) +  0xc)
+#define  CAN_RF1R_REG_ADDR(n)        (CAN_REGS_BASE + CAN_REGS_STEP * (n) +  0x10)
+#define  CAN_IER_REG_ADDR(n)         (CAN_REGS_BASE + CAN_REGS_STEP * (n) +  0x14)
+#define  CAN_ESR_REG_ADDR(n)         (CAN_REGS_BASE + CAN_REGS_STEP * (n) +  0x18)
+#define  CAN_BTR_REG_ADDR(n)         (CAN_REGS_BASE + CAN_REGS_STEP * (n) +  0x1c)
 
+#define  MAILBOX_REGS_STEP               (0x10u)
+#define  CAN_TIXR_REG_ADDR(n, mailbox)         (CAN_REGS_BASE + CAN_REGS_STEP * (n) + MAILBOX_REGS_STEP *(mailbox) + 0x180)
+#define  CAN_TDTXR_REG_ADDR(n, mailbox)        (CAN_REGS_BASE + CAN_REGS_STEP * (n) + MAILBOX_REGS_STEP *(mailbox) + 0x184)
+#define  CAN_TDLXR_REG_ADDR(n, mailbox)        (CAN_REGS_BASE + CAN_REGS_STEP * (n) + MAILBOX_REGS_STEP *(mailbox) + 0x188)
+#define  CAN_TDHXR_REG_ADDR(n, mailbox)        (CAN_REGS_BASE + CAN_REGS_STEP * (n) + MAILBOX_REGS_STEP *(mailbox) + 0x18c)
 
-typedef struct can_control{
-
-    volatile uint32_t can_mcr;
-    volatile uint32_t can_msr;
-    volatile uint32_t can_tsr;
-    volatile uint32_t can_rf0r;
-    volatile uint32_t can_rf1r;
-    volatile uint32_t can_ier;
-    volatile uint32_t can_esr;
-    volatile uint32_t can_btr;
-
-}can_control_t;
-
-
-typedef struct mailbox_reg{
-
-    volatile uint32_t can_tixr;
-    volatile uint32_t can_tdtxr;
-    volatile uint32_t can_tdlxr;
-    volatile uint32_t can_tdhxr;
-}mailbox_reg_t;
-
-typedef struct fifo_reg{
-    volatile uint32_t can_rixr;
-    volatile uint32_t can_rdtxr;
-    volatile uint32_t can_rdlxr;
-    volatile uint32_t can_rdhxr;
-}fifo_reg_t;
+#define  FIFO_REGS_STEP               (0x10u)
+#define  CAN_RIXR_REG_ADDR(n, fifo)         (CAN_REGS_BASE + CAN_REGS_STEP * (n) + FIFO_REGS_STEP *(fifo) + 0x1b0)
+#define  CAN_RDTXR_REG_ADDR(n, fifo)        (CAN_REGS_BASE + CAN_REGS_STEP * (n) + FIFO_REGS_STEP *(fifo) + 0x1b4)
+#define  CAN_RDLXR_REG_ADDR(n, fifo)        (CAN_REGS_BASE + CAN_REGS_STEP * (n) + FIFO_REGS_STEP *(fifo) + 0x1b8)
+#define  CAN_RDHXR_REG_ADDR(n, fifo)        (CAN_REGS_BASE + CAN_REGS_STEP * (n) + FIFO_REGS_STEP *(fifo) + 0x1bc)
 
 
-typedef struct can_mailbox{
-    mailbox_reg_t mailboxs[MAILBOX_NUMBER];
-    fifo_reg_t  fifos[FIFO_NUMBER];
-}can_mailbox_t;
+#define  CAN_FMR_REG_ADDR               (CAN_REGS_BASE + 0x200)
+#define  CAN_FMLR_REG_ADDR              (CAN_REGS_BASE + 0x204)
+#define  CAN_FS1R_REG_ADDR              (CAN_REGS_BASE + 0x20c)
+#define  CAN_FFA1R_REG_ADDR             (CAN_REGS_BASE + 0x214)
+#define  CAN_FA1R_REG_ADDR              (CAN_REGS_BASE + 0x21c)
+#define  CAN_FXR1_REG_ADDR(filter)      (CAN_REGS_BASE  +  (filter) * 0x8 + 0x240)
+#define  CAN_FXR2_REG_ADDR(filter)      (CAN_REGS_BASE  +  (filter) * 0x8 + 0x244)
 
 
-typedef struct can_filter{
-    volatile uint32_t can_fmr;
-    volatile uint32_t can_fm1r;
-    volatile uint32_t  reserve1;
-    volatile uint32_t can_fs1r;
-    volatile uint32_t  reserve2;
-    volatile uint32_t can_ffa1r;
-    volatile uint32_t  reserve3;
-    volatile uint32_t can_fa1r;
-    volatile uint32_t  reserve4;
-    volatile uint32_t reserves[7];
-    volatile uint32_t can_firx[ 2 * FILTER_BANK_NUMBER];
-}can_filter_t;
-
-
-can_control_t *  const  can_controls[CAN_NUMBER] = { (can_control_t *)CAN1_REG_BASE,
-                                                (can_control_t *)CAN2_REG_BASE };
-can_mailbox_t *  const  can_mailboxs[CAN_NUMBER] = { (can_control_t *)(CAN1_REG_BASE + CAN_MAILBOX_OFFSET),
-                                                (can_control_t *)(CAN2_REG_BASE + CAN_MAILBOX_OFFSET) };
-can_filter_t  * const  can_filters = (can_filter_t *)(CAN1_REG_BASE + CAN_FILTER_OFFSET);
 
 
 int32_t  enable_CAN_interrupt(uint8_t can_id,  uint32_t int_mask){
