@@ -110,7 +110,9 @@ typedef struct {
 
 }can_rxmsg_t;
 
-
+int32_t  can_global_init(uint32_t  can_id, can_config_t * config);
+int32_t  can_set_global_interrupt(uint32_t  can_id,  can_global_interrupt_config_t * config);
+int32_t  can_set_rxfifo_interrupt(uint32_t  can_id,  can_rxfifo_interrupt_config_t * config);
 
 
 
