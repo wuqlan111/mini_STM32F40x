@@ -8,8 +8,6 @@
 #define  MAX_DATA_LEN       8
 
 
-
-
 enum {
     CAN1 = 0,
     CAN2,
@@ -45,7 +43,55 @@ enum  {
 };
 
 
-typedef  struct can_txmsg{
+typedef union {
+    struct {
+        uint16_t  debug_freeze:1;
+        uint16_t  time_trigger_mode:1;
+        uint16_t  auto_bus_off:1;
+        uint16_t  auto_wakeup:1;
+        uint16_t  auto_retrans:1;
+        uint16_t  rx_fifo_lock_mode:1;
+        uint16_t  tx_fifo_priority_identifier:1;
+    };
+
+    uint16_t  val;
+
+} can_config_t;
+
+typedef union {
+    struct {
+        uint16_t  sleep_interrupt_enable:1;
+        uint16_t  wakeup_interrupt_enable:1;
+        uint16_t  error_interrupt_enable:1;
+        uint16_t  last_error_interrupt_enable:1;
+        uint16_t  bus_off_interrupt_enable:1;
+        uint16_t  error_passive_interrupt_enable:1;
+        uint16_t  fifo_overrun_interrupt_enable:1;
+        uint16_t  fifo_full_interrupt_enable:1;
+        uint16_t  fifo_pending_interrupt_enable:1;
+        uint16_t  fifo_overrun_interrupt_enable:1;
+        uint16_t  fifo_full_interrupt_enable:1;
+        uint16_t  fifo_tx_empty_interrupt_enable:1;
+    };
+
+    uint16_t  val;
+
+} can_global_interrupt_config_t;
+
+typedef union {
+    struct  {
+        uint16_t  fifo_full_interrupt_enable:1;
+        uint16_t  fifo_pending_interrupt_enable:1;
+        uint16_t  fifo_overrun_interrupt_enable:1;
+        uint16_t  rx_fifo;
+    };
+    uint32_t  val;
+} can_rxfifo_interrupt_config_t;
+
+
+
+
+typedef  struct {
     uint32_t  stid;
     bool   ext_id;
     bool  remote_frame;
@@ -54,7 +100,7 @@ typedef  struct can_txmsg{
 
 }can_txmsg_t;
 
-typedef struct can_rxmsg{
+typedef struct {
     uint32_t  stid;
     bool   ext_id;
     bool  remote_frame;
