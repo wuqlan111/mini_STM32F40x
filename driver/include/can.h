@@ -93,8 +93,8 @@ typedef union {
 
 typedef  struct {
     uint32_t  stid;
-    bool   ext_id;
-    bool  remote_frame;
+    // bool   ext_id;
+    // bool  remote_frame;
     uint8_t data_len;
     uint8_t  datas[8];
 
@@ -102,8 +102,8 @@ typedef  struct {
 
 typedef struct {
     uint32_t  stid;
-    bool   ext_id;
-    bool  remote_frame;
+    // bool   ext_id;
+    // bool  remote_frame;
     uint8_t data_len;
     uint8_t  datas[8];
     uint8_t  filter_index;

@@ -2,6 +2,7 @@
 #include  <stdlib.h>
 
 #include  "../include/can.h"
+#include  "util.h"
 
 #define  CAN_MCR_DBF        (1<<16)         // CAN transmission frozen during debug
 #define  CAN_MCR_RESET      (1<<15)         // force a master reset of the bxCAN
@@ -136,263 +137,65 @@
 #define  CAN_FXR2_REG_ADDR(filter)      (CAN_REGS_BASE  +  (filter) * 0x8 + 0x244)
 
 
-
-
-int32_t  enable_CAN_interrupt(uint8_t can_id,  uint32_t int_mask){
-
-    if ( (int_mask & ~CAN_ALL_INT) || can_id > CAN2)
-        return -1;
-    
-    can_controls[can_id]->can_ier |= int_mask;
-    return 0;
-
-}
-
-int32_t  disable_CAN_interrupt( uint8_t can_id, uint32_t int_mask){
-
-    if ((int_mask & ~CAN_ALL_INT) || can_id > CAN2)
-        return -1;
-    
-    can_controls[can_id]->can_ier &= ~int_mask;
-    return 0;
-
-}
-
-
-int32_t  set_fileter_mode(uint8_t bank_id, bool mask_mode){
-
-    if (bank_id >= FILTER_BANK_NUMBER)
-        return -1;
-    
-    can_filters->can_fmr |= CAN_FMR_FINIT;
-    if (mask_mode)
-        can_filters->can_fm1r &= ~(1<<bank_id);
-    else
-        can_filters->can_fm1r |= (1<<bank_id);
-    
-    can_filters->can_fmr &= ~CAN_FMR_FINIT;
-    return 0;
-}
-
-
-
-int32_t  set_fileter_sacle( uint8_t bank_id, bool dual_16bit){
-
-    if (bank_id >= FILTER_BANK_NUMBER )
-        return -1;
-    
-    can_filters->can_fmr |= CAN_FMR_FINIT;
-    if (dual_16bit)
-        can_filters->can_fs1r &= ~(1<<bank_id);
-    else
-        can_filters->can_fs1r |= (1<<bank_id);
-    
-    can_filters->can_fmr &= ~ CAN_FMR_FINIT;
-    
-    return 0;
-}
-
-
-int32_t  set_fileter_fifo(uint8_t bank_id, bool assign_fifo0){
-
-    if (bank_id >= FILTER_BANK_NUMBER)
-        return -1;
-    
-    can_filters->can_fmr |= CAN_FMR_FINIT;
-    if (assign_fifo0)
-        can_filters->can_ffa1r &= ~(1<<bank_id);
-    else
-        can_filters->can_ffa1r |= (1<<bank_id);
-    
-    can_filters->can_fmr &= ~CAN_FMR_FINIT;
-    
-    return 0;
-}
-
-
-int32_t  set_fileter_activation(uint8_t bank_id, bool active){
-
-    if (bank_id >= FILTER_BANK_NUMBER)
-        return -1;
-    
-    can_filters->can_fmr |= CAN_FMR_FINIT;
-    if (active)
-        can_filters->can_fs1r |= (1<<bank_id);
-    else
-        can_filters->can_fs1r &=  ~(1<<bank_id);
-    
-    can_filters->can_fmr &= ~CAN_FMR_FINIT;
-    
-    return 0;
-}
-
-
-
-int32_t  set_fileter_16identifier(uint8_t bank_id, uint16_t identifier, uint8_t id_num){
-
-    if (bank_id >= FILTER_BANK_NUMBER  ||  id_num > 3 || (can_filters->can_fs1r & (1 << bank_id)) 
-        ||  !(can_filters->can_fm1r & (1 << bank_id)))
-        return -1;
-    
-    bool hbyte = id_num & 0x1;
-    uint8_t idx =  id_num>1? (bank_id << 1) + 1:(bank_id << 1);
-
-    can_filters->can_firx[idx] &= ~(0xffff << (hbyte));
-    can_filters->can_firx[idx] |= ( identifier << (hbyte));
-    
-    return 0;
-}
-
-
-int32_t  set_fileter_32identifier(uint8_t bank_id, uint32_t identifier, uint8_t id_num){
-
-    if (bank_id >= FILTER_BANK_NUMBER  ||  id_num > 1 || !(can_filters->can_fs1r & (1 << bank_id)) 
-        ||  !(can_filters->can_fm1r & (1 << bank_id)))
-        return -1;
-    
-    uint8_t idx =  id_num? (bank_id << 1) + 1:(bank_id << 1);
-
-    can_filters->can_firx[idx] =  identifier;
-    
-    return 0;
-}
-
-
-
-
-int32_t  set_fileter_16mask(uint8_t bank_id, uint16_t identifier,  uint16_t mask, uint8_t id_num){
-
-    if (bank_id >= FILTER_BANK_NUMBER  ||  id_num > 1 || (can_filters->can_fs1r & (1 << bank_id)) 
-        ||  (can_filters->can_fm1r & (1 << bank_id)))
-        return -1;
- 
-    uint8_t idx =  id_num? (bank_id << 1) + 1:(bank_id << 1);
-    can_filters->can_firx[idx] = ( mask << 16 ) | identifier;
-    
-    return 0;
-}
-
-
-int32_t  set_fileter_32mask(uint8_t bank_id, uint32_t identifier, uint32_t mask){
-
-    if (bank_id >= FILTER_BANK_NUMBER  || !(can_filters->can_fs1r & (1 << bank_id)) 
-        ||  (can_filters->can_fm1r & (1 << bank_id)))
-        return -1;
-    
-    uint8_t idx =  bank_id << 1;
-
-    can_filters->can_firx[idx] =  identifier;
-    can_filters->can_firx[idx + 1] =  mask;
-    
-    return 0;
-}
-
-
-
-
-int32_t   send_can_msg( uint8_t can_id, uint8_t mailbox_id,  can_txmsg_t * txmsg)
+int32_t  can_global_init(uint32_t  can_id, can_config_t * config)
 {
-
-    if (   can_id > CAN2  || mailbox_id > TX_MAINBOX2 || txmsg->data_len > MAX_DATA_LEN || 
-      !txmsg->ext_id && ( txmsg->stid > 0x7ff) || txmsg->ext_id && ( txmsg->stid> 0x1fffffff))
-        return  -1;
-
-    while (!(can_controls[can_id]->can_tsr & (CAN_TSR_TME0 << mailbox_id)))
-        ;
-    
-    uint32_t  data_h, data_l;
-
-    
-    data_l =  (txmsg->datas[3]<<24) | (txmsg->datas[2]<<16) | (txmsg->datas[1]<<8)|txmsg->datas[0];
-    data_h =  (txmsg->datas[7]<<24) | (txmsg->datas[6]<<16) | (txmsg->datas[5]<<8)|txmsg->datas[4];
-
-
-    can_mailboxs[can_id]->mailboxs[mailbox_id].can_tdlxr = data_l;
-    can_mailboxs[can_id]->mailboxs[mailbox_id].can_tdhxr = data_h;
-
-    if (txmsg->ext_id){
-        can_mailboxs[can_id]->mailboxs[mailbox_id].can_tixr  |= CAN_TIxR_IDE;
-        can_mailboxs[can_id]->mailboxs[mailbox_id].can_tixr  &= ~CAN_TIxR_EXID;
-        can_mailboxs[can_id]->mailboxs[mailbox_id].can_tixr  |= txmsg->stid;
-    }else{
-        can_mailboxs[can_id]->mailboxs[mailbox_id].can_tixr &= ~CAN_TIxR_IDE;
-        can_mailboxs[can_id]->mailboxs[mailbox_id].can_tixr &= ~CAN_TIxR_EXID;
-        can_mailboxs[can_id]->mailboxs[mailbox_id].can_tixr |= ( txmsg->stid << 21);
-    }
-        
-
-    if (txmsg->remote_frame)
-        can_mailboxs[can_id]->mailboxs[mailbox_id].can_tdtxr |= CAN_TIxR_RTR;
-    else
-        can_mailboxs[can_id]->mailboxs[mailbox_id].can_tdtxr &= ~CAN_TIxR_RTR;
-    
-
-    can_mailboxs[can_id]->mailboxs[mailbox_id].can_tdtxr &=  ~CAN_TDTxR_DLC;
-    can_mailboxs[can_id]->mailboxs[mailbox_id].can_tdtxr |=  txmsg->data_len;
-    can_mailboxs[can_id]->mailboxs[mailbox_id].can_tixr |= CAN_TIxR_TXRQ;
-
-
-    while (can_controls[can_id]->can_tsr & (CAN_TSR_RQCP0 << (8 * mailbox_id)))
-                ;
-    
-    uint32_t ret =  can_controls[can_id]->can_tsr & (CAN_TSR_TXOK0 << (8 * mailbox_id))?0:-1;
-
-    can_controls[can_id]->can_tsr |=  (CAN_TSR_TXOK0 << (8 * mailbox_id));   /*clear mailbox trans status */
-
-    return ret;
-
-}
-
-
-int32_t   recv_can_msg( uint8_t can_id, uint8_t fifo_id, can_rxmsg_t  * rxmsg){
-
-    if (fifo_id > RX_FIFO1 || can_id > CAN2)
+    uint32_t  flag, mask;
+    flag  =  mask = 0;
+    if ((can_id > CAN_MAX_ID ) || !config)
         return -1;
-
-    uint8_t  recv_len;
-    uint64_t  recv_data;
-    if ( fifo_id == RX_FIFO0 ){
-        while (!(can_controls[can_id]->can_rf0r & CAN_RF0R_FMP0))
-            ;
-        
-    }else{
-
-        while (!(can_controls[can_id]->can_rf1r & CAN_RF0R_FMP0))
-            ;
-
+    
+    if (config->debug_freeze) {
+        flag |= CAN_MCR_DBF;
     }
 
-    recv_len = can_mailboxs[can_id]->fifos[fifo_id].can_rdtxr &  CAN_RDTxR_DLC;
-    rxmsg->data_len = recv_len;
-    rxmsg->filter_index  =  (can_mailboxs[can_id]->fifos[fifo_id].can_rdtxr & CAN_RDTxR_FMI) >> 8;
-    if (can_mailboxs[can_id]->fifos[fifo_id].can_rixr & CAN_RIxR_IDE){
-        rxmsg->ext_id = true;
-        rxmsg->stid = (can_mailboxs[can_id]->fifos[fifo_id].can_rixr & CAN_RIxR_EXID) >> 3;
-    }else{
-        rxmsg->ext_id = false;
-        rxmsg->stid = (can_mailboxs[can_id]->fifos[fifo_id].can_rixr & CAN_RIxR_STID) >> 21;
+    if (config->time_trigger_mode) {
+        flag |= CAN_MCR_TTCM;
     }
-        
-    if (can_mailboxs[can_id]->fifos[fifo_id].can_rixr & CAN_RIxR_RTR)
-        rxmsg->remote_frame = true;
-    else
-        rxmsg->remote_frame = false;
-    
 
-    recv_data =  (can_mailboxs[can_id]->fifos[fifo_id].can_rdhxr << 32) | 
-            can_mailboxs[can_id]->fifos[fifo_id].can_rdlxr;
-
-    if ( fifo_id == RX_FIFO0 ){
-        can_controls[can_id]->can_rf0r |= CAN_RF0R_RFOM0;   
-    }else{
-        can_controls[can_id]->can_rf1r |= CAN_RF0R_RFOM0;
+    if (config->auto_bus_off) {
+        flag |= CAN_MCR_ABOM;
     }
-    
-    for (uint8_t i = 0; i < recv_len; i++)
-        rxmsg->datas[i] =  (recv_data >> (8 * i) & 0xff);
-    
 
-    return 0;
+    if (config->auto_wakeup) {
+        flag |= CAN_MCR_AWUM;
+    }
+
+    if (!config->auto_retrans) {
+        flag |=  CAN_MCR_NART;
+    }
+
+    if (config->rx_fifo_lock_mode) {
+        flag |= CAN_MCR_RFLM;
+    }
+
+    if (!config->tx_fifo_priority_identifier) {
+        flag |= CAN_MCR_TXFP;
+    }
+
+    mask =  CAN_MCR_DBF | CAN_MCR_TTCM | CAN_MCR_ABOM | CAN_MCR_AWUM 
+                | CAN_MCR_NART | CAN_MCR_RFLM | CAN_MCR_TXFP;
+
+    REG32_UPDATE(CAN_MCR_REG_ADDR(can_id), flag,  mask);
+
+    return  0;
+
+}
+
+
+
+
+int32_t  can_set_global_interrupt(uint32_t  can_id,  can_global_interrupt_config_t * config)
+{
+    uint32_t  flag, mask;
+    flag  =  mask = 0;
+    if ((can_id > CAN_MAX_ID ) || !config)
+        return -1;
+    
+    if (config->sleep_interrupt_enable) {
+        flag |= CAN_MCR_DBF;
+    }
+
+
 
 }
 
@@ -400,5 +203,6 @@ int32_t   recv_can_msg( uint8_t can_id, uint8_t fifo_id, can_rxmsg_t  * rxmsg){
 
 
 
+int32_t  can_set_rxfifo_interrupt(uint32_t  can_id,  can_rxfifo_interrupt_config_t * config);
 
 
