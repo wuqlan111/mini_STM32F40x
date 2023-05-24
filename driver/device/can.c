@@ -131,7 +131,7 @@
 
 
 #define  CAN_FMR_REG_ADDR               (CAN_REGS_BASE + 0x200)
-#define  CAN_FMLR_REG_ADDR              (CAN_REGS_BASE + 0x204)
+#define  CAN_FM1R_REG_ADDR              (CAN_REGS_BASE + 0x204)
 #define  CAN_FS1R_REG_ADDR              (CAN_REGS_BASE + 0x20c)
 #define  CAN_FFA1R_REG_ADDR             (CAN_REGS_BASE + 0x214)
 #define  CAN_FA1R_REG_ADDR              (CAN_REGS_BASE + 0x21c)
@@ -300,10 +300,49 @@ inline  void  enter_or_exit_initialization_mode(uint32_t can_id, uint32_t enter)
 }
 
 
+int32_t  set_filter_bank(uint32_t can_id,  can_filter_config_t * config)
+{
+    if (can_id > CAN_MAX_ID || !config || (config->bank >= FILTER_BANK_NUMBER )) {
+        return  -1;
+    }
+
+    if (config->mask_mode) {
+        REG32_UPDATE(CAN_FM1R_REG_ADDR, 0,  1 << config->bank);
+    } else {
+        REG32_UPDATE(CAN_FM1R_REG_ADDR, 1 << config->bank,  1 << config->bank);
+    }
+
+    if (config->scale_32bit) {
+        REG32_UPDATE(CAN_FM1R_REG_ADDR, 1 << config->bank, 1 << config->bank);
+    } else {
+        REG32_UPDATE(CAN_FM1R_REG_ADDR, 0,  1 << config->bank);
+    }
+
+    if (config->assign_fifo0) {
+        REG32_UPDATE(CAN_FM1R_REG_ADDR, 0,  1 << config->bank);
+    } else {
+        REG32_UPDATE(CAN_FM1R_REG_ADDR, 1 << config->bank,  1 << config->bank);
+    }
+
+    REG32_WRITE(CAN_FXR1_REG_ADDR(config->bank), config->filter0);
+    REG32_WRITE(CAN_FXR2_REG_ADDR(config->bank), config->filter1);
+
+    return  0;
+
+}
 
 
+int32_t  enable_or_disable_filter(uint32_t bank_id, uint32_t  enable)
+{
+    uint32_t  flag = 0;
+    if (bank_id >=  FILTER_BANK_NUMBER) {
+        return  -1;
+    }
 
-
+    flag = enable? 1 << bank_id: 0;
+    REG32_UPDATE(CAN_FA1R_REG_ADDR, flag,  1 << bank_id);
+    return  0;
+}
 
 
 

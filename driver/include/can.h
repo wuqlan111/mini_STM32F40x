@@ -8,7 +8,6 @@
 #define  FILTER_BANK_NUMBER       28
 #define  MAX_DATA_LEN       8
 
-
 enum {
     CAN1 = 0,
     CAN2,
@@ -85,6 +84,19 @@ typedef union {
     uint32_t  val;
 } ATTRIBUTE_ALIGN(4) can_rxfifo_interrupt_config_t;
 
+typedef  struct {
+    uint32_t filter0;
+    uint32_t filter1;
+    uint32_t  bank:6;
+    uint32_t  mask_mode:1;
+    uint32_t  scale_32bit:1;
+    uint32_t  assign_fifo0:1;
+} ATTRIBUTE_ALIGN(4) can_filter_config_t;
+
+
+
+
+
 
 typedef  struct {
     uint32_t  stid;
@@ -111,6 +123,8 @@ int32_t  can_set_rxfifo_interrupt(uint32_t  can_id,  can_rxfifo_interrupt_config
 inline  void  reset_can_master(uint32_t can_id);
 inline  void  enter_or_exit_sleep_mode(uint32_t can_id, uint32_t enter);
 inline  void  enter_or_exit_initialization_mode(uint32_t can_id, uint32_t enter);
+int32_t  set_filter_bank(uint32_t can_id,  can_filter_config_t * config);
+int32_t  enable_or_disable_filter(uint32_t bank_id, uint32_t  enable);
 
 
 #endif
