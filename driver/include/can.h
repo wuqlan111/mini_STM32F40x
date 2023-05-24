@@ -66,6 +66,8 @@ typedef union {
         uint16_t  last_error_interrupt_enable:1;
         uint16_t  bus_off_interrupt_enable:1;
         uint16_t  error_passive_interrupt_enable:1;
+        uint16_t  error_warning_interrupt_enable:1;
+        uint16_t  tx_empty_interrupt_enable:1;
     };
 
     uint16_t  val;
@@ -107,8 +109,9 @@ typedef struct {
 int32_t  can_global_init(uint32_t  can_id, can_config_t * config);
 int32_t  can_set_global_interrupt(uint32_t  can_id,  can_global_interrupt_config_t * config);
 int32_t  can_set_rxfifo_interrupt(uint32_t  can_id,  can_rxfifo_interrupt_config_t * config);
-
-
+inline  void  reset_can_master(uint32_t can_id);
+inline  void  enter_or_exit_sleep_mode(uint32_t can_id, uint32_t enter);
+inline  void  enter_or_exit_initialization_mode(uint32_t can_id, uint32_t enter);
 
 
 #endif

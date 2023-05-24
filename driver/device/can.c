@@ -41,17 +41,19 @@
 #define  CAN_TSR_TXOK0          0x2                 // transmission OK of mailbox0
 #define  CAN_TSR_RQCP0          0x1                 // request completed mailbox0
 
-
-
-
-
 #define  CAN_RF0R_RFOM0        (1<<5)           // release FIFO 0 output mailbox
 #define  CAN_RF0R_FOVR0         (1<<4)          // FIFO 0 overrun
 #define  CAN_RF0R_FULL0         0x8             // FIFO 0 full
 #define  CAN_RF0R_FMP0          0x3             // FIFO 0 message pending
 
-
-
+#define  CAN_IER_SLKIE          (1<<17u)
+#define  CAN_IER_WKUIE          (1<<16u)
+#define  CAN_IER_ERRIE          (1<<15u)
+#define  CAN_IER_LECIE          (1<<11u)
+#define  CAN_IER_BOFIE          (1<<10u)
+#define  CAN_IER_EPVIE          (1<<9u)
+#define  CAN_IER_EWGIE          (1<<8u)
+#define  CAN_IER_TMEIE          (0x1u)
 
 
 #define  CAN_ESR_REC           (0xff<<24)           // receive error counter
@@ -191,11 +193,42 @@ int32_t  can_set_global_interrupt(uint32_t  can_id,  can_global_interrupt_config
     if ((can_id > CAN_MAX_ID ) || !config)
         return -1;
     
-    if (config->error_passive_interrupt_enable) {
-        flag |= CAN_MCR_DBF;
+    if (config->sleep_interrupt_enable) {
+        flag |= CAN_IER_SLKIE;
     }
 
+    if (config->wakeup_interrupt_enable) {
+        flag |= CAN_IER_WKUIE;
+    }
 
+    if (config->error_interrupt_enable) {
+        flag |= CAN_IER_ERRIE;
+    }
+
+    if (config->last_error_interrupt_enable) {
+        flag  |=  CAN_IER_LECIE;
+    }
+
+    if (config->bus_off_interrupt_enable) {
+        flag |=  CAN_IER_BOFIE;
+    }
+
+    if (config->error_passive_interrupt_enable) {
+        flag |= CAN_IER_EPVIE;
+    }
+
+    if (config->error_warning_interrupt_enable) {
+        flag |= CAN_IER_EWGIE;
+    }
+
+    if (config->tx_empty_interrupt_enable) {
+        flag |= CAN_IER_TMEIE;
+    }
+
+    mask = (0x7 << 15) | (0xf << 8) | 0x1;
+
+    REG32_UPDATE(CAN_IER_REG_ADDR(can_id), flag,  mask);
+    return  0;
 
 }
 
@@ -203,6 +236,74 @@ int32_t  can_set_global_interrupt(uint32_t  can_id,  can_global_interrupt_config
 
 
 
-int32_t  can_set_rxfifo_interrupt(uint32_t  can_id,  can_rxfifo_interrupt_config_t * config);
+int32_t  can_set_rxfifo_interrupt(uint32_t  can_id,  can_rxfifo_interrupt_config_t * config)
+{
+    uint32_t  flag, mask;
+    flag  =  mask = 0;
+    if ((can_id > CAN_MAX_ID ) || !config || (config->rx_fifo > FIFO_MAX_ID))
+        return -1;
+
+
+    if (config->fifo_overrun_interrupt_enable) {
+        flag |= 1<<2;
+    }
+
+    if (config->fifo_full_interrupt_enable) {
+        flag  |= 1<<1;
+    }
+
+    if (config->fifo_pending_interrupt_enable) {
+        flag |= 0x1;
+    }
+
+    flag  =  config->rx_fifo  ==  RX_FIFO0? flag << 1: flag << 4;
+    mask  =  config->rx_fifo  ==  RX_FIFO0? 0x7 << 1:  0x7 << 4;
+    REG32_UPDATE(CAN_IER_REG_ADDR(can_id),  flag,  mask);
+
+    return  0;
+
+}
+
+
+inline  void  reset_can_master(uint32_t can_id)
+{
+    if (can_id > CAN_MAX_ID ) {
+        return;
+    }
+    REG32_UPDATE(CAN_MCR_REG_ADDR(can_id), CAN_MCR_RESET,  CAN_MCR_RESET);
+}
+
+
+
+inline  void  enter_or_exit_sleep_mode(uint32_t can_id,  uint32_t  enter)
+{
+    uint32_t  flag = 0;
+    if (can_id > CAN_MAX_ID ) {
+        return;
+    }
+
+    flag  =  enter ? 0x2:  0;
+    REG32_UPDATE(CAN_MCR_REG_ADDR(can_id), flag, 0x2);
+
+}
+
+
+inline  void  enter_or_exit_initialization_mode(uint32_t can_id, uint32_t enter)
+{
+    uint32_t  flag = 0;
+    if (can_id > CAN_MAX_ID ) {
+        return;
+    }
+    flag  =  enter ? 0x1:  0;
+    REG32_UPDATE(CAN_MCR_REG_ADDR(can_id), flag, 0x1);
+
+}
+
+
+
+
+
+
+
 
 
