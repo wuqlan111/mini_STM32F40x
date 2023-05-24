@@ -3,6 +3,7 @@
 #define  STM32_CAN_H
 
 #include  <stdint.h>
+#include  "util.h"
 
 #define  FILTER_BANK_NUMBER       28
 #define  MAX_DATA_LEN       8
@@ -56,7 +57,7 @@ typedef union {
 
     uint16_t  val;
 
-} can_config_t;
+} ATTRIBUTE_ALIGN(4) can_config_t;
 
 typedef union {
     struct {
@@ -71,7 +72,7 @@ typedef union {
     };
 
     uint16_t  val;
-} can_global_interrupt_config_t;
+} ATTRIBUTE_ALIGN(4) can_global_interrupt_config_t;
 
 
 typedef union {
@@ -82,9 +83,7 @@ typedef union {
         uint16_t  rx_fifo;
     };
     uint32_t  val;
-} can_rxfifo_interrupt_config_t;
-
-
+} ATTRIBUTE_ALIGN(4) can_rxfifo_interrupt_config_t;
 
 
 typedef  struct {
@@ -94,7 +93,7 @@ typedef  struct {
     uint8_t data_len;
     uint8_t  datas[8];
 
-}can_txmsg_t;
+} ATTRIBUTE_ALIGN(4) can_txmsg_t;
 
 typedef struct {
     uint32_t  stid;
@@ -104,7 +103,7 @@ typedef struct {
     uint8_t  datas[8];
     uint8_t  filter_index;
 
-}can_rxmsg_t;
+} ATTRIBUTE_ALIGN(4) can_rxmsg_t;
 
 int32_t  can_global_init(uint32_t  can_id, can_config_t * config);
 int32_t  can_set_global_interrupt(uint32_t  can_id,  can_global_interrupt_config_t * config);
