@@ -1,5 +1,6 @@
 
 #include  <stdlib.h>
+#include  <memory.h>
 
 #include  "../include/can.h"
 #include  "util.h"
@@ -343,6 +344,93 @@ int32_t  enable_or_disable_filter(uint32_t bank_id, uint32_t  enable)
     REG32_UPDATE(CAN_FA1R_REG_ADDR, flag,  1 << bank_id);
     return  0;
 }
+
+
+int32_t  send_can_message(uint32_t can_id, uint32_t mailbox_id, can_txmsg_t * msg)
+{
+    uint32_t  flag = 0;
+    if ((can_id > CAN_MAX_ID) || (mailbox_id > MAILBOX_MAX_ID) || !msg  
+            || (msg->data_len > MAX_DATA_LEN)) {
+        return  -1;
+    }
+
+    flag  =  (msg->data[3] << 24) | (msg->data[2] << 16) | (msg->data[1] << 8 )| msg->data[0];
+    REG32_WRITE(CAN_TDLXR_REG_ADDR(can_id, mailbox_id), flag);
+
+    if (msg->data_len > 4) {
+        flag  =  (msg->data[7] << 24) | (msg->data[6] << 16) | (msg->data[5] << 8 )| msg->data[4];
+        REG32_WRITE(CAN_TDHXR_REG_ADDR(can_id, mailbox_id), flag);
+    }
+
+    flag = 0;
+    if (msg->trans_time) {
+        flag = (msg->time_stamp << 16) | (1 << 8) | 0x8;
+    } else {
+        flag = msg->data_len;
+    }
+
+    REG32_WRITE(CAN_TDTXR_REG_ADDR(can_id,  mailbox_id), flag);
+
+    if (msg->stid) {
+        flag = (msg->stid << 21) | 0x1;
+    } else {
+        flag = (msg->stid << 3) | (1 << 2) | 0x1;
+    }
+
+    if (!msg->data_frame) {
+        flag  |= (1<<1);
+    }
+
+    REG32_WRITE(CAN_TIXR_REG_ADDR(can_id, mailbox_id), flag);
+
+    return  0;
+
+}
+
+
+int32_t  read_can_message(uint32_t can_id, uint32_t fifo_id, can_rxmsg_t * msg)
+{
+    uint32_t  flag = 0;
+    if ((can_id > CAN_MAX_ID) || (fifo_id > FIFO_MAX_ID) || !msg ) {
+        return  -1;
+    }
+
+    memset(msg,  0,  sizeof(can_rxmsg_t));
+
+    flag = REG32_READ(CAN_RIXR_REG_ADDR(can_id, fifo_id));
+
+    msg->data_frame = flag & CAN_RIxR_RTR? 0: 1;
+    msg->std_identifier  =  flag &  CAN_RIxR_IDE? 0: 1;
+    msg->stid  =  msg->std_identifier? flag >> 21: flag >> 3;
+
+    flag  =  REG32_READ(CAN_RDTXR_REG_ADDR(can_id, fifo_id));
+    msg->time_stamp  =  flag >> 16;
+    msg->filter_index  =  (flag >> 8) & 0xff;
+    msg->data_len  = flag & 0xf;
+
+    flag = REG32_READ(CAN_RDLXR_REG_ADDR(can_id, fifo_id));
+    msg->data[0]  =  flag  & 0xff;
+    msg->data[1]  =  (flag >> 8) & 0xff;
+    msg->data[2]  =  (flag >> 16) & 0xff;
+    msg->data[3]  =  flag >> 24;
+
+    if (msg->data_len > 4) {
+        flag = REG32_READ(CAN_RDHXR_REG_ADDR(can_id, fifo_id));
+        msg->data[4]  =  flag  & 0xff;
+        msg->data[5]  =  (flag >> 8) & 0xff;
+        msg->data[6]  =  (flag >> 16) & 0xff;
+        msg->data[7]  =  flag >> 24;
+    }
+
+    return  0;
+
+}
+
+
+
+
+
+
 
 
 

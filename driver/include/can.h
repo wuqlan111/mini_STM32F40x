@@ -100,19 +100,23 @@ typedef  struct {
 
 typedef  struct {
     uint32_t  stid;
-    // bool   ext_id;
-    // bool  remote_frame;
-    uint8_t data_len;
-    uint8_t  datas[8];
-
+    uint32_t  std_identifier:1;
+    uint32_t  data_frame:1;
+    uint32_t  data_len: 4;
+    uint32_t  trans_time:1;
+    uint32_t  time_stamp:16;
+    uint8_t   data[8];
 } ATTRIBUTE_ALIGN(4) can_txmsg_t;
 
 typedef struct {
     uint32_t  stid;
-    // bool   ext_id;
-    // bool  remote_frame;
-    uint8_t data_len;
-    uint8_t  datas[8];
+    uint32_t  std_identifier:1;
+    uint32_t  data_frame:1;
+    uint32_t  data_len: 4;
+    uint32_t  filter_index:8;
+    uint32_t  time_stamp:16;
+    uint8_t  data_len;
+    uint8_t  data[8];
     uint8_t  filter_index;
 
 } ATTRIBUTE_ALIGN(4) can_rxmsg_t;
@@ -125,7 +129,8 @@ inline  void  enter_or_exit_sleep_mode(uint32_t can_id, uint32_t enter);
 inline  void  enter_or_exit_initialization_mode(uint32_t can_id, uint32_t enter);
 int32_t  set_filter_bank(uint32_t can_id,  can_filter_config_t * config);
 int32_t  enable_or_disable_filter(uint32_t bank_id, uint32_t  enable);
-
+int32_t  send_can_message(uint32_t can_id, uint32_t mailbox_id, can_txmsg_t * msg);
+int32_t  read_can_message(uint32_t can_id, uint32_t mailbox_id, can_rxmsg_t * msg);
 
 #endif
 
