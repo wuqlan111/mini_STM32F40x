@@ -191,7 +191,7 @@ int32_t  can_set_global_interrupt(uint32_t  can_id,  can_global_interrupt_config
     if ((can_id > CAN_MAX_ID ) || !config)
         return -1;
     
-    if (config->sleep_interrupt_enable) {
+    if (config->error_passive_interrupt_enable) {
         flag |= CAN_MCR_DBF;
     }
 

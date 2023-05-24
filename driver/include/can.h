@@ -66,17 +66,11 @@ typedef union {
         uint16_t  last_error_interrupt_enable:1;
         uint16_t  bus_off_interrupt_enable:1;
         uint16_t  error_passive_interrupt_enable:1;
-        uint16_t  fifo_overrun_interrupt_enable:1;
-        uint16_t  fifo_full_interrupt_enable:1;
-        uint16_t  fifo_pending_interrupt_enable:1;
-        uint16_t  fifo_overrun_interrupt_enable:1;
-        uint16_t  fifo_full_interrupt_enable:1;
-        uint16_t  fifo_tx_empty_interrupt_enable:1;
     };
 
     uint16_t  val;
-
 } can_global_interrupt_config_t;
+
 
 typedef union {
     struct  {
