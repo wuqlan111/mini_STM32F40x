@@ -38,106 +38,105 @@
 #define  DAC_REG_BASE             (0x40007400u)
 #define  DAC_CR_REG_ADDR                  (DAC_REG_BASE)
 #define  DAC_SWTRIGR_REG_ADDR             (DAC_REG_BASE + 0x4)
-#define  DAC_DHR12R1_REG_ADDR             (DAC_REG_BASE + 0x8)
-#define  DAC_DHR12L1_REG_ADDR             (DAC_REG_BASE + 0xc)
-#define  DAC_DHR8R1_REG_ADDR              (DAC_REG_BASE + 0x10)
-#define  DAC_DHR12R2_REG_ADDR             (DAC_REG_BASE + 0x14)
-#define  DAC_DHR12L2_REG_ADDR             (DAC_REG_BASE + 0x18)
-#define  DAC_DHR8R2_REG_ADDR              (DAC_REG_BASE + 0x1c)
+#define  DAC_DHR12RX_REG_ADDR(channel)             (DAC_REG_BASE + 0x8  + (channel) * 12)
+#define  DAC_DHR12LX_REG_ADDR(channel)             (DAC_REG_BASE + 0xc  + (channel) * 12)
+#define  DAC_DHR8RX_REG_ADDR(channel)              (DAC_REG_BASE + 0x10 + (channel) * 12)
 #define  DAC_DHR12RD_REG_ADDR             (DAC_REG_BASE + 0x20)
 #define  DAC_DHR12LD_REG_ADDR             (DAC_REG_BASE + 0x24)
 #define  DAC_DHR8RD_REG_ADDR              (DAC_REG_BASE + 0x28)
-#define  DAC_DOR1_REG_ADDR                (DAC_REG_BASE + 0x2c)
-#define  DAC_DOR2_REG_ADDR                (DAC_REG_BASE + 0x30)
+#define  DAC_DORX_REG_ADDR(channel)       (DAC_REG_BASE + 0x2c + (channel) * 4)
 #define  DAC_SR_REG_ADDR                  (DAC_REG_BASE + 0x34)
 
 
-int32_t DAC_channel_init(uint8_t channel_id, DAC_init_t *  dac_inits){
+int32_t DAC_channel_config(uint32_t channel_id, DAC_channel_config_t *  config)
+{
+    uint32_t  flag, mask;
+    flag = mask = 0;
+    if (channel_id > DAC_MAX_CHANNEL || !config) {
+        return -1;        
+    }
 
-    if (channel_id > DAC_CHANNEL2 || !dac_inits || dac_inits->wave_generation_mode > ENABLE_TRUANGLE_WAVE
-          ||  dac_inits->amplitude_maskbit > MAX_AMPLITUDE_MASKBIT 
-          || dac_inits->channel_trigger > SOFTWARE_TRG_EVENT)
-        return -1;
+    if (config->dma_underrun_interrupt_enable) {
+        flag = 1<<13;
+    }
     
-    if (dac_inits->enable_underrun_int)
-        dac_controls->dac_cr |= (DAC_CR_DMAUDRIE1 << (16 * channel_id));
-    else
-        dac_controls->dac_cr &= ~(DAC_CR_DMAUDRIE1 << (16 * channel_id));
+    if (config->dma_enable) {
+        flag |= ( 1 << 12);
+    }
 
-    if (dac_inits->enable_DMA)
-        dac_controls->dac_cr |= (DAC_CR_DMAEN1 << (16 * channel_id));
-    else
-        dac_controls->dac_cr &= ~(DAC_CR_DMAEN1 << (16 * channel_id));
+    flag |= (config->mask_selector << 8);
+    flag |= (config->wave_generation << 6);
+    flag |= (config->trigger_selector << 3);
 
-    if (dac_inits->enable_trigger){
-        
-        dac_controls->dac_cr |= (DAC_CR_TEN1<< (16 * channel_id));
-        dac_controls->dac_cr &= ~(DAC_CR_TSEL1<< (16 * channel_id));
-        dac_controls->dac_cr |= (dac_inits->channel_trigger<< (16 * channel_id));
+    if (config->trigger_enable) {
+        flag |= (1<<2);
+    }
 
-    }else
-        dac_controls->dac_cr &= ~(DAC_CR_TEN1 << (16 * channel_id));
+    if (config->output_buffer_enable) {
+        flag |= 0x2;
+    }
 
-    if (dac_inits->wave_generation_mode != DISABLE_WAVE_GENERATION){
+    mask = 0x3ffe;
 
-        if (!dac_inits->amplitude_maskbit)
-            return -1;   
-        dac_controls->dac_cr &= ~(DAC_CR_WAVE1 << (16 * channel_id));
-        dac_controls->dac_cr |= (dac_inits->wave_generation_mode << (16 * channel_id));
-        dac_controls->dac_cr &= ~(DAC_CR_MAMP1 << (16 * channel_id));
-        dac_controls->dac_cr |= ((dac_inits->amplitude_maskbit -1)<< (16 * channel_id));
+    if (channel_id == DAC_CHANNEL2) {
+        flag <<= 16;
+        mask <<= 16;
+    }
 
-    }else
-        dac_controls->dac_cr &= ~(DAC_CR_WAVE1 << (16 * channel_id));
+    REG32_UPDATE(DAC_CR_REG_ADDR, flag, mask);
 
-    if (dac_inits->enable_obuffer)
-        dac_controls->dac_cr &= ~(DAC_CR_BOFF1 << (16 * channel_id));
-    else
-        dac_controls->dac_cr |=  (DAC_CR_BOFF1 << (16 * channel_id));
-    
     return 0;
 
 }
 
 
 
-int32_t  enable_DAC_channel(uint8_t channel_id, bool enable){
+int32_t  enable_or_disable_DAC_channel(uint32_t channel_id, uint32_t enable)
+{
+    uint32_t flag, mask;
+    flag = mask = 0;
+    if (channel_id > DAC_MAX_CHANNEL) {
+        return -1;        
+    }
 
-    if (channel_id > DAC_CHANNEL2)
-        return -1;
-    
-    if (enable)
-        dac_controls->dac_cr |= (DAC_CR_EN1 << (16 * channel_id));
-    else
-        dac_controls->dac_cr &= ~(DAC_CR_EN1<< (16 * channel_id));
+    flag = enable? 1: 0;
+    mask = 0x1;
+
+    if (channel_id == DAC_CHANNEL2) {
+        flag <<= 16;
+        mask <<= 16;
+    }
+
+    REG32_UPDATE(DAC_CR_REG_ADDR, flag,  mask);
     
     return 0;
 }
 
 
-int32_t set_channel_data(uint8_t channel_id,  uint16_t data, uint8_t data_align_type){
+int32_t set_channel_data(uint32_t channel_id,  uint32_t data, uint32_t data_align_type)
+{
 
-    if (channel_id > DAC_CHANNEL2 || data > 0xfff  || data_align_type > BIT8_RIGHT_ALIGN)
-            return -1;
-    
-    dac_controls->dac_dhrs[channel_id].dac_dhr12lx &= ~ DAC_DHR12Lx_DACDHR;
-    dac_controls->dac_dhrs[channel_id].dac_dhr12rx &= ~DAC_DHR12Rx_DACDHR;
-    dac_controls->dac_dhrs[channel_id].dac_dhr8rx &=  ~DAC_DHR8Rx_DACDHR;
+    if ( (channel_id > DAC_MAX_CHANNEL) || (data > 0xfff) 
+                || (data_align_type > DAC_MAX_DATA_ALIGN)) {
+        return -1;        
+    }
+
+    if ((data_align_type == BIT8_RIGHT_ALIGN ) && (data > 0xff)) {
+        return -1;
+    }
 
     switch (data_align_type)
     {
     case  BIT12_LEFT_ALIGN:
-        dac_controls->dac_dhrs[channel_id].dac_dhr12lx |= (data<<4);
+        REG32_WRITE(DAC_DHR12LX_REG_ADDR(channel_id),  (data & 0xfff)<<4);
         break;
 
     case BIT12_RIGHT_ALIGN:
-        dac_controls->dac_dhrs[channel_id].dac_dhr12rx |= data;
+        REG32_WRITE(DAC_DHR12RX_REG_ADDR(channel_id),  data & 0xfff);
         break;
 
     case BIT8_RIGHT_ALIGN:
-        if (data > 0xff)
-            return -1;
-        dac_controls->dac_dhrs[channel_id].dac_dhr8rx |= data;
+        REG32_WRITE(DAC_DHR8RX_REG_ADDR(channel_id),  data & 0xff);
         break;
     
     }
@@ -146,44 +145,30 @@ int32_t set_channel_data(uint8_t channel_id,  uint16_t data, uint8_t data_align_
 
 }
 
-int16_t get_channel_outdata(uint8_t channel_id){
+int32_t get_channel_outdata(uint32_t channel_id, uint32_t * data)
+{
+    uint32_t  val = 0;
+    if ( (channel_id > DAC_MAX_CHANNEL)  || !data) {
+        return -1;        
+    }
 
-    if (channel_id > DAC_CHANNEL2 )
-        return -1;
-
-    int16_t ret = dac_controls->dac_dors[channel_id] & 0xfff;
-
-    return ret;
+    *data  =  REG32_READ(DAC_DORX_REG_ADDR(channel_id));
+    return  0;
 
 }
 
 
 
-int32_t set_dualchannel_data(uint8_t channel_id,  uint16_t data, uint8_t data_align_type){
+int32_t set_dualchannel_data(uint32_t channel_id,  uint32_t data, uint32_t data_align_type)
+{
 
-    if (channel_id > DAC_CHANNEL2 || data > 0xfff  || data_align_type > BIT8_RIGHT_ALIGN)
+    if ( (channel_id > DAC_MAX_CHANNEL) || (data > 0xfff)  
+                || (data_align_type > DAC_MAX_DATA_ALIGN) ) {
             return -1;
-    
-    dac_controls->dac_dhr12ld &= ~(DAC_DHR12LD_DACC1DHR << (16 * channel_id));
-    dac_controls->dac_dhr12rd &= ~(DAC_DHR12RD_DACC1DHR << (16 * channel_id));
-    dac_controls->dac_dhr8rd &= ~(DAC_DHR8RD_DACC1DHR << (16 * channel_id));
+    }
 
-    switch (data_align_type)
-    {
-    case  BIT12_LEFT_ALIGN:
-        dac_controls->dac_dhr12ld |= (data << (16 * channel_id + 4));
-        break;
-
-    case BIT12_RIGHT_ALIGN:
-        dac_controls->dac_dhr12rd |= (data << (16 * channel_id));
-        break;
-
-    case BIT8_RIGHT_ALIGN:
-        if (data > 0xff)
-            return -1;
-       dac_controls->dac_dhr8rd |= (data << (8 * channel_id));
-        break;
-    
+    if ((data_align_type == BIT8_RIGHT_ALIGN) && (data  >  0xff)) {
+        return  -1;
     }
 
     return 0;
@@ -191,31 +176,26 @@ int32_t set_dualchannel_data(uint8_t channel_id,  uint16_t data, uint8_t data_al
 }
 
 
-int32_t DAC_software_trigger(uint8_t channel_id, bool trigger){
+int32_t DAC_software_trigger(uint32_t channel_id, uint32_t trigger)
+{
+    uint32_t  flag, mask;
+    if (channel_id > DAC_MAX_CHANNEL) {
+        return -1;        
+    }
 
-    if (channel_id > DAC_CHANNEL2)
-        return -1;
+    flag  =  trigger? 1:  0;
+    mask  = 0x1;
 
-    if (trigger)
-        dac_controls->dac_swtrigr |= (1 << channel_id);
-    else
-        dac_controls->dac_swtrigr &= ~(1 << channel_id);
-    
+    if (channel_id  == DAC_CHANNEL2) {
+        flag <<= 1;
+        mask <<= 1;
+    }
+
+    REG32_UPDATE(DAC_SWTRIGR_REG_ADDR, flag,  mask);
     return 0;
 
 }
 
-
-int32_t DAC_software_dualtrigger(bool trigger){
-
-    if (trigger)
-        dac_controls->dac_swtrigr |= 0x3;
-    else
-        dac_controls->dac_swtrigr &= ~0x3;
-    
-    return 0;
-
-}
 
 
 
