@@ -35,32 +35,21 @@
 #define  DAC_SR_DMAUDR2            (1<<29)                  // DAC channel2 DMA underrun flag
 #define  DAC_SR_DMAUDR1             (1<<13)                 // DAC channel1 DMA underrun flag
 
-#define DAC_REG_BASE             0x40007400u
-
-typedef struct dac_dhr{
-
-    volatile uint32_t dac_dhr12rx;
-    volatile uint32_t dac_dhr12lx;
-    volatile uint32_t dac_dhr8rx;
-
-}dac_dhr_t;
-
-
-typedef struct dac_control{
-    volatile  uint32_t dac_cr;
-    volatile  uint32_t dac_swtrigr;
-    dac_dhr_t  dac_dhrs[DAC_CHANNEL_NUMBER];
-    volatile  uint32_t  dac_dhr12rd;
-    volatile  uint32_t  dac_dhr12ld;
-    volatile  uint32_t  dac_dhr8rd;
-    volatile  uint32_t  dac_dors[DAC_CHANNEL_NUMBER];
-    volatile  uint32_t  dac_sr;
-
-}dac_control_t;
-
-
-dac_control_t * const dac_controls = (dac_control_t *)DAC_REG_BASE;
-
+#define  DAC_REG_BASE             (0x40007400u)
+#define  DAC_CR_REG_ADDR                  (DAC_REG_BASE)
+#define  DAC_SWTRIGR_REG_ADDR             (DAC_REG_BASE + 0x4)
+#define  DAC_DHR12R1_REG_ADDR             (DAC_REG_BASE + 0x8)
+#define  DAC_DHR12L1_REG_ADDR             (DAC_REG_BASE + 0xc)
+#define  DAC_DHR8R1_REG_ADDR              (DAC_REG_BASE + 0x10)
+#define  DAC_DHR12R2_REG_ADDR             (DAC_REG_BASE + 0x14)
+#define  DAC_DHR12L2_REG_ADDR             (DAC_REG_BASE + 0x18)
+#define  DAC_DHR8R2_REG_ADDR              (DAC_REG_BASE + 0x1c)
+#define  DAC_DHR12RD_REG_ADDR             (DAC_REG_BASE + 0x20)
+#define  DAC_DHR12LD_REG_ADDR             (DAC_REG_BASE + 0x24)
+#define  DAC_DHR8RD_REG_ADDR              (DAC_REG_BASE + 0x28)
+#define  DAC_DOR1_REG_ADDR                (DAC_REG_BASE + 0x2c)
+#define  DAC_DOR2_REG_ADDR                (DAC_REG_BASE + 0x30)
+#define  DAC_SR_REG_ADDR                  (DAC_REG_BASE + 0x34)
 
 
 int32_t DAC_channel_init(uint8_t channel_id, DAC_init_t *  dac_inits){
