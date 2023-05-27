@@ -6,6 +6,11 @@
         "*.h": "c",
         "limits": "c",
         "new": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "bit": "c",
+        "cstddef": "c",
+        "string": "c",
+        "memory": "c",
+        "functional": "c"
     }
 }
