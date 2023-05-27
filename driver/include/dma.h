@@ -54,9 +54,6 @@ typedef struct {
     uint32_t  memory0:1;
     uint32_t  double_buffer_mode:1;
     uint32_t  priority:2;
-    
-
-
 }DMA_stream_config_t;
 
 
