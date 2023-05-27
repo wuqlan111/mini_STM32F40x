@@ -54,7 +54,30 @@ typedef struct {
     uint32_t  memory0:1;
     uint32_t  double_buffer_mode:1;
     uint32_t  priority:2;
-}DMA_stream_config_t;
+    uint32_t  peripheral_incr_fixed_word:1;
+    uint32_t  memory_data_size:2;
+    uint32_t  peripheral_data_size:2;
+    uint32_t  memory_incr_fixed:1;
+    uint32_t  memory_incr_fixed:1;
+    uint32_t  circular_mode:1;
+    uint32_t  data_transfer_direction:2;
+    uint32_t  peripheral_flow_controller:1;
+    uint32_t  transfer_complete_interrupt_enable:1;
+    uint32_t  half_transfer_interrupt_enable:1;
+    uint32_t  transfer_error_interrupt_enable:1;
+    uint32_t  direct_error_interrupt_enable:1;
+}ATTRIBUTE_ALIGN(4)  DMA_stream_config_t;
+
+typedef struct {
+    uint32_t  fifo_error_interrupt_enable:1;
+    uint32_t  direct_mode_disable:1;
+    uint32_t  fifo_threshold:2;
+}ATTRIBUTE_ALIGN(4)  DMA_fifo_config_t;
+
+
+int32_t  DMA_steam_config(uint32_t dma_id, uint32_t  steam_id, DMA_stream_config_t * config);
+int32_t  DMA_fifo_config(uint32_t dma_id, uint32_t  steam_id, DMA_stream_config_t * config);
+
 
 
 

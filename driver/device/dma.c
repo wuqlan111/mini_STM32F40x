@@ -64,112 +64,36 @@
 #define  DMA_SXFCR_REG_ADDR(dma, stream)       (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (steam) + 0x14u)
 
 
-int32_t  get_stream_interrupt(uint8_t stream_idx){
+int32_t  DMA_steam_config(uint32_t dma_id, uint32_t  steam_id, DMA_stream_config_t * config)
+{
 
-    int32_t  int_status = 0, reg_value;
+    uint32_t  flag, mask;
+    flag = mask = 0;
+    if ( (dma_id > DMA_MAX_ID) || (steam_id >= DMA_STREAM_NUMBER) || !config) {
+        return  -1;
+    }
 
-    if (stream_idx > MAX_DMA_STREAM_ID)
-        return -1;
-    
-    reg_value = stream_idx > 3?dma_interrupt_control->dma_hisr:dma_interrupt_control->dma_lisr;
-
-    switch (stream_idx & 0x4)
-    {
-    case   0:
-        int_status = reg_value & 0x3f;
-        break;
-    
-    case   1:
-        int_status = (reg_value >> 6) & 0x3f;
-        break;
-
-    case   2:
-        int_status = (reg_value >> 16) & 0x3f;
-        break;
-
-
-    case   3:
-        int_status = (reg_value >> 22) & 0x3f;
-        break;
+    if ( (config->memory_data_size > DMA_DATA_MAX_SIZE) || 
+                (config->peripheral_data_size > DMA_DATA_MAX_SIZE)) {
+        return  -1;
 
     }
 
-    return  int_status;
-
-
-}
-
-
-
-int32_t  clear_stream_interrupt(uint8_t stream_idx,  uint32_t int_mask){
-
-    int32_t  int_clear = 0, reg_value;
-
-    if (stream_idx > MAX_DMA_STREAM_ID  ||   (int_mask & ~DMA_ALLC_INT))
-        return -1;
-    
-
-    switch (stream_idx & 0x4){
-
-    case   0:
-        int_clear = int_mask;
-        break;
-    
-    case   1:
-        int_clear = int_mask << 6;
-        break;
-
-    case   2:
-        int_clear = int_mask << 16;
-        break;
-
-    case   3:
-        int_clear = int_mask << 22;
-        break;
-
+    if (config->data_transfer_direction >  DMA_TRANSFER_MAX_DIRECTION) {
+        return  -1;
     }
 
-
-    if (stream_idx > 3)
-        dma_interrupt_control->dma_lifcr |= int_clear;
-    else
-        dma_interrupt_control->dma_hifcr |= int_clear;
-
-    return  0;
-
-}
-
-
-
-
-inline int32_t  enable_stream_interrupt( uint8_t stream_idx,  uint32_t  int_mask){
-
-    if (stream_idx > MAX_DMA_STREAM_ID  ||  (int_mask & ~DMA_ALL_INTERRUPTE))
-        return -1;
-
-
-    dma_all_stream[stream_idx]->dma_sxcr |= (int_mask & 0xf);
     
-    dma_all_stream[stream_idx]->dma_sxfcr |= (int_mask & 0xf0);
 
-    return 0;
+
+
 
 }
 
 
-inline int32_t  disable_stream_interrupt( uint8_t stream_idx,  uint32_t int_mask){
-
-    if (stream_idx > MAX_DMA_STREAM_ID  ||  (int_mask & ~DMA_ALL_INTERRUPTE))
-        return -1;
 
 
-    dma_all_stream[stream_idx]->dma_sxcr &= ~(int_mask & 0xf);
-    
-    dma_all_stream[stream_idx]->dma_sxfcr &= ~(int_mask & 0xf0);
 
-    return 0;
-
-}
 
 
 
