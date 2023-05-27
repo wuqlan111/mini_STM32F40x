@@ -56,20 +56,20 @@
 #define  DMA_LIFCR_REG_ADDR(dma)               (DMA_REG_BASE_ADDR + (dma) * DMA_REGS_STEP + 0x8u)
 #define  DMA_HIFCR_REG_ADDR(dma)               (DMA_REG_BASE_ADDR + (dma) * DMA_REGS_STEP + 0xCu)
 #define  DMA_STREAM_REGS_BASE_ADDR(dma)        (DMA_REG_BASE_ADDR + (dma) * DMA_REGS_STEP + 0x10u)
-#define  DMA_SXCR_REG_ADDR(dma, stream)        (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (steam))
-#define  DMA_SXNDTR_REG_ADDR(dma, stream)      (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (steam) + 0x4u)
-#define  DMA_SXPAR_REG_ADDR(dma, stream)       (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (steam) + 0x8u)
-#define  DMA_SXM0AR_REG_ADDR(dma, stream)      (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (steam) + 0xCu)
-#define  DMA_SXM1AR_REG_ADDR(dma, stream)      (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (steam) + 0x10u)
-#define  DMA_SXFCR_REG_ADDR(dma, stream)       (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (steam) + 0x14u)
+#define  DMA_SXCR_REG_ADDR(dma, stream)        (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (stream))
+#define  DMA_SXNDTR_REG_ADDR(dma, stream)      (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (stream) + 0x4u)
+#define  DMA_SXPAR_REG_ADDR(dma, stream)       (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (stream) + 0x8u)
+#define  DMA_SXM0AR_REG_ADDR(dma, stream)      (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (stream) + 0xCu)
+#define  DMA_SXM1AR_REG_ADDR(dma, stream)      (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (stream) + 0x10u)
+#define  DMA_SXFCR_REG_ADDR(dma, stream)       (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (stream) + 0x14u)
 
 
-int32_t  DMA_steam_config(uint32_t dma_id, uint32_t  steam_id, DMA_stream_config_t * config)
+int32_t  DMA_steam_config(uint32_t dma_id, uint32_t  stream_id, DMA_stream_config_t * config)
 {
 
     uint32_t  flag, mask;
     flag = mask = 0;
-    if ( (dma_id > DMA_MAX_ID) || (steam_id >= DMA_STREAM_NUMBER) || !config) {
+    if ( (dma_id > DMA_MAX_ID) || (stream_id >= DMA_STREAM_NUMBER) || !config) {
         return  -1;
     }
 
@@ -83,15 +83,101 @@ int32_t  DMA_steam_config(uint32_t dma_id, uint32_t  steam_id, DMA_stream_config
         return  -1;
     }
 
-    
+    flag  |=  config->channel << 25;
+    flag  |=  config->memory_burst << 23;
+    flag  |=  config->peripheral_burst  << 21;
+    flag  |=  config->priority << 16;
+    flag  |=  config->memory_data_size  << 13;
+    flag  |=  config->peripheral_data_size  << 13;
+    flag  |=  config->data_transfer_direction << 6;
+
+    if (!config->memory0) {
+        flag  |=  1<<19;
+    }
+
+    if (config->double_buffer_mode) {
+        flag |=  1<<18;
+    }
+
+    if (config->memory_incr_fixed) {
+        flag |= 1<<10;
+    }    
+
+    if (config->peripheral_incr_fixed) {
+        flag  |= 1<<15;
+    }
+
+    if (config->circular_mode) {
+        flag  |=  1<<8;
+    }
+
+    if (config->peripheral_flow_controller) {
+        flag |= 1<<5;
+    }
+
+    if (config->transfer_complete_interrupt_enable) {
+        flag |= 1<<4;
+    }
+
+    if (config->half_transfer_interrupt_enable) {
+        flag  |=  1<<3;
+    }
+
+    if (config->transfer_error_interrupt_enable) {
+        flag |=  1<<2;
+    }
+
+    if (config->direct_error_interrupt_enable) {
+        flag |=  0x2;
+    }
+
+    mask  =  0xfeffffe;
+
+    REG32_UPDATE(DMA_SXCR_REG_ADDR(dma_id, stream_id),  flag,  mask);
+    return  0;
+}
 
 
 
+int32_t  DMA_fifo_config(uint32_t dma_id, uint32_t  stream_id, DMA_fifo_config_t * config)
+{
+    uint32_t  flag, mask;
+    flag = mask = 0;
+    if ( (dma_id > DMA_MAX_ID) || (stream_id >= DMA_STREAM_NUMBER) || !config) {
+        return  -1;
+    }
+
+    flag  |= config->fifo_threshold;
+
+    if (config->fifo_error_interrupt_enable) {
+        flag |= 1<<7;
+    }
+
+    if (config->direct_mode_disable) {
+        flag |=  1<<2;
+    }
+
+    mask = 0x87;
+
+    REG32_UPDATE(DMA_SXFCR_REG_ADDR(dma_id, stream_id), flag, mask);
+    return 0;
 
 }
 
 
 
+int32_t  enable_or_disable_DMA_stream(uint32_t dma_id, uint32_t  stream_id, uint32_t enable)
+{
+    uint32_t  flag = 0;
+    if ( (dma_id > DMA_MAX_ID) || (stream_id >= DMA_STREAM_NUMBER)) {
+        return  -1;
+    }
+
+    flag = enable? 0x1: 0;
+    REG32_UPDATE(DMA_SXCR_REG_ADDR(dma_id, stream_id), flag,  0x1);
+    return  0;
+
+}
 
 
 
