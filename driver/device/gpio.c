@@ -8,314 +8,128 @@
 #define ALTERNATE_PORT_MASK     0xf
 #define MAX_PORT_ID         0xf
 
-
-typedef struct gpio_reg{
-
-    uint32_t  gpio_mode;
-    uint32_t  gpio_otype;
-    uint32_t  gpio_ospeed;
-    uint32_t  gpio_pupd;
-    uint32_t  gpio_input;
-    uint32_t  gpio_output;
-    uint32_t  gpio_bset;
-    uint32_t  gpio_lock;
-    uint32_t  gpio_afrl;
-    uint32_t  gpio_afrh;
-
-}gpio_reg_t;
+#define  GPIO_PORT_REG_STEP                          (0x400u)
+#define  GPIO_PORT_REGS_BASE_ADDR                    (0x40020000u)
+#define  GPIOX_MODER_REG_ADDR(port)                  (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP)
+#define  GPIOX_OTYPER_REG_ADDR(port)                 (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP + 0x4)
+#define  GPIOX_OSPEEDR_REG_ADDR(port)                (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP + 0x8)
+#define  GPIOX_PUPDR_REG_ADDR(port)                  (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP + 0xC)
+#define  GPIOX_IDR_REG_ADDR(port)                    (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP + 0x10)
+#define  GPIOX_ODR_REG_ADDR(port)                    (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP + 0x14)
+#define  GPIOX_BSRR_REG_ADDR(port)                   (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP + 0x18)
+#define  GPIOX_LCKR_REG_ADDR(port)                   (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP + 0x1C)
+#define  GPIOX_AFRL_REG_ADDR(port)                   (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP + 0x20)
+#define  GPIOX_AFRH_REG_ADDR(port)                   (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP + 0x24)
 
 
-gpio_reg_t  *  gpio_ports[GPIO_PORT_NUMBER];
+static  int32_t  lock_or_unlock_port_config(uint32_t  port, uint32_t bit_id, uint32_t  lock)
+{
+    uint32_t  flag, mask;
+    flag  =  mask  =  1<< 16;
 
+    while (flag & mask) {
+        flag  =  1 << 16;
+        REG32_UPDATE(GPIOX_LCKR_REG_ADDR(port), flag, mask);
 
+        flag = 0;
+        REG32_UPDATE(GPIOX_LCKR_REG_ADDR(port), flag, mask);
 
+        flag  =  1<< 16;
+        REG32_UPDATE(GPIOX_LCKR_REG_ADDR(port), flag, mask);
 
-static int32_t  register_gpio_port(gpio_register_t *  new_port){
+        flag = REG32_READ(GPIOX_LCKR_REG_ADDR(port));
+    }
 
-    uint32_t  reg_base = (uint32_t)new_port->gpio_regs, port_idx = new_port->port;
+    flag  =  lock? 1 << bit_id: 0;
+    mask  =  1 << bit_id;
+    REG32_UPDATE(GPIOX_LCKR_REG_ADDR(port), flag, mask);
 
-    if(port_idx >= GPIO_PORT_NUMBER  ||  gpio_ports[port_idx] || reg_base & 0x3 )
-        return -1;
-
-    gpio_ports[port_idx] =  (gpio_reg_t *)new_port->gpio_regs;
-
-    return 0;
-
-}
-
-
-static  int32_t get_port_mode(uint32_t port,  uint32_t port_af){
-
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER)
-            return -1;
-
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-
-    uint32_t reg_val =  ((gpio_reg->gpio_mode)>>(port_af + 1)) & 0x3;
-
-    return reg_val;
-
-}
-
-
-static int32_t set_port_mode(uint32_t port,  uint32_t port_af, uint32_t mode){
-
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER || mode > PORT_ANALOG_MODE)
-            return -1;
-
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-
-    uint32_t reg_val =  gpio_reg->gpio_mode;
-
-    reg_val &=  ~(0x3<<port_af);
-    reg_val |= (mode << port_af);
-
-    gpio_reg->gpio_mode = reg_val;
-
-    return 0;
+    return  0;
 
 }
 
 
 
 
-static int32_t get_port_otype(uint32_t port,  uint32_t port_af){
 
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER)
-            return -1;
 
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
 
-    uint32_t reg_val =  ((gpio_reg->gpio_otype)>>port_af ) & 0x1;
 
-    return reg_val;
+int32_t  GPIO_port_bit_config(uint32_t port, uint32_t  bit_id,  GPIO_port_bit_config_t * config)
+{
+    uint32_t  flag,  mask;
+    flag = mask = 0;
+    if ( (port > GPIO_MAX_PORT) || !config || (bit_id >= GPIO_PORT_BIT_NUMBER)) {
+        return  -1;
+    }
+
+    if (config->pull_mode > GPIO_PORT_MAX_PULL) {
+        return  -1;
+    }
+
+    flag = config->io_mode <<  (2 * bit_id);
+    mask = 0x3 << (2 * bit_id);
+    REG32_UPDATE(GPIOX_MODER_REG_ADDR(port), flag, mask);
+
+    flag = config->open_drain? 1 << bit_id: 0;
+    mask = 1<<bit_id;
+    REG32_UPDATE(GPIOX_OTYPER_REG_ADDR(port), flag, mask);
+
+    flag  = config->speed << (2 * bit_id);
+    mask = 0x3 << (2 * bit_id);
+    REG32_UPDATE(GPIOX_OSPEEDR_REG_ADDR(port), flag, mask);
+
+    flag = config->pull_mode << (2 * bit_id);
+    mask = 0x3 << (2 * bit_id);
+    REG32_UPDATE(GPIOX_PUPDR_REG_ADDR(port), flag, mask);
+
+    if (bit_id > 7) {
+        flag  =  config->alternate_function << (2 * (bit_id - 8));
+        mask  =  0xf << (2 * (bit_id - 8));
+        REG32_UPDATE(GPIOX_AFRH_REG_ADDR(port),  flag, mask);
+    } else {
+        flag  =  config->alternate_function << (2 * bit_id);
+        mask  =  0xf << (2 * bit_id);
+        REG32_UPDATE(GPIOX_AFRL_REG_ADDR(port),  flag, mask);
+    }
+
+    lock_or_unlock_port_config(port, bit_id, config->config_lock);
+
+    return  0;
 
 }
 
 
-static int32_t set_port_otype(uint32_t port,  uint32_t port_af, uint32_t otype){
+int32_t  get_GPIO_port_data(uint32_t  port,  uint32_t * data)
+{
+    if ( (port > GPIO_MAX_PORT) || !data) {
+        return  -1;
+    }
 
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER || otype > 1)
-            return -1;
-
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-
-    uint32_t reg_val =  gpio_reg->gpio_otype;
-
-    reg_val &=  ~(0x1<<port_af);
-    reg_val |= (otype << port_af);
-
-    gpio_reg->gpio_mode = reg_val;
-
-    return 0;
-
-}
-
-
-
-static int32_t get_port_pupd(uint32_t port,  uint32_t port_af){
-
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER)
-            return -1;
-
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-
-    uint32_t reg_val =  ((gpio_reg->gpio_otype)>>port_af ) & 0x1;
-
-    return reg_val;
-
-}
-
-
-static int32_t set_port_pupd(uint32_t port,  uint32_t port_af, uint32_t pupd){
-
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER || pupd > PORT_PULL_RESERVED)
-        return -1;
-
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-
-    uint32_t reg_val =  gpio_reg->gpio_pupd;
-
-    reg_val &=  ~(0x3<<port_af);
-    reg_val |= (pupd << port_af);
-
-    gpio_reg->gpio_mode = reg_val;
-
-    return 0;
+    *data  =  REG32_READ(GPIOX_IDR_REG_ADDR(port));
+    return  0;
 
 }
 
 
 
+int32_t  set_GPIO_port_data(uint32_t  port, uint32_t bit_set, uint32_t bit_reset, uint32_t data)
+{
+    uint32_t  flag = 0;
+    if ( (port >  GPIO_MAX_PORT) || (bit_reset > 0xffff) || 
+                    (bit_set > 0xffff) || (data > 0xffff) ) {
+        return  -1;
 
-static int32_t get_port_input(uint32_t port,  uint32_t port_af){
+    }
 
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER )
-        return -1;
+    flag = bit_reset << 16 | bit_set;
+    REG32_WRITE(GPIOX_BSRR_REG_ADDR(port),  flag);
+    REG32_UPDATE(GPIOX_ODR_REG_ADDR(port),  data,  0xffff);
 
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-
-    uint32_t reg_val =  ((gpio_reg->gpio_input) >> port_af) & 0x1;
-
-    return reg_val;
-
+    return  0;
 }
 
 
-static int32_t get_port_output(uint32_t port,  uint32_t port_af){
-
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER )
-        return -1;
-
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-
-    uint32_t reg_val =  ((gpio_reg->gpio_output) >> port_af) & 0x1;
-
-    return reg_val;
-
-}
-
-
-static int32_t set_port_output(uint32_t port,  uint32_t port_af,  uint32_t data){
-
-    uint32_t reg_val;
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER )
-        return -1;
-
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-    reg_val =  gpio_reg->gpio_output;
-
-    reg_val &=  ~(1<<port_af);
-    reg_val |=  (data << port_af);
-    gpio_reg->gpio_output = reg_val;
-
-    return 0;
-
-}
-
-
-static int32_t set_config_lock(uint32_t port,  uint32_t port_af){
-
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER )
-        return -1;
-
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-
-    uint32_t reg_val = gpio_reg->gpio_lock;
-
-    reg_val |= ( 1 << 16 | 1 << port_af);
-    gpio_reg->gpio_lock =  reg_val;
-
-    reg_val =  gpio_reg->gpio_lock;
-    reg_val &= ~(1<<16);
-    gpio_reg->gpio_lock = reg_val;
-
-    reg_val = gpio_reg->gpio_lock;
-    reg_val |= (1<<16);
-
-
-    reg_val = gpio_reg->gpio_lock;
-
-    return  reg_val & (1 << 16)?0:-1;
-
-}
-
-
-
-
-static int32_t get_pin_port(uint32_t port,  uint32_t pin){
-
-    uint32_t reg_val;
-
-    if (port >= GPIO_PORT_NUMBER || pin >= IO_PINS_NUMBER)
-        return -1;
-
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-    reg_val =  (pin < 7)?gpio_reg->gpio_afrl:gpio_reg->gpio_afrh;
-
-    reg_val >>= (pin & 0x7);
-
-    reg_val &= 0xf;
-
-    return reg_val;
-
-}
-
-
-
-static int32_t set_pin_port(uint32_t port,  uint32_t port_af,  uint32_t pin){
-
-    uint32_t reg_val;
-
-    if (port >= GPIO_PORT_NUMBER || port_af >= GPIO_PORT_AF_NUMBER || pin >= IO_PINS_NUMBER)
-        return -1;
-
-    gpio_reg_t * gpio_reg =  gpio_ports[port];
-
-    reg_val = pin < 7? gpio_reg->gpio_afrl: gpio_reg->gpio_afrh;
-    reg_val &= ~(0xf<<(pin & 0x7));
-    reg_val |=  (port_af << (pin & 0x7));
-
-    if (pin < 7)
-        gpio_reg->gpio_afrl = reg_val;
-    else
-        gpio_reg->gpio_afrh = reg_val;
-
-    return 0;
-}
-
-
-
-
-
-
-
-int32_t  get_pin_input(uint32_t port,  uint32_t pin){
-
-    int32_t port_af =  get_pin_data(port, pin);
-
-    if (port_af <  0)
-        return -1;
-    
-
-    uint32_t reg_val = get_port_input(port, port_af);
-
-    return reg_val;
-
-}
-
-
-
-int32_t get_pin_output(uint32_t port,  uint32_t pin){
-
-
-    int32_t port_af =  get_pin_data(port, pin);
-
-    if (port_af <  0)
-        return -1;
-    
-
-    uint32_t reg_val = get_port_output(port, port_af);
-
-    return reg_val;
-
-
-}
-
-int32_t set_pin_output(uint32_t port,  uint32_t pin, uint32_t data){
-
-
-    int32_t port_af =  get_pin_data(port, pin);
-
-    if (port_af <  0)
-        return -1;
-    
-
-    uint32_t reg_val = set_port_output(port, port_af, data);
-
-    return reg_val;
-
-}
 
 
 

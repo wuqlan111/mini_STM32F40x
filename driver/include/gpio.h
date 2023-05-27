@@ -4,16 +4,13 @@
 
 #include  <stdlib.h>
 #include  <stdint.h>
+#include  "util.h"
 
-
-#define OUTPUT_PUSH_PULL      0
-#define OUTPUT_OPEN_DRIAN     1
-
-#define  IO_PINS_NUMBER       16
+#define  GPIO_PORT_BIT_NUMBER     16
 #define  GPIO_PORT_AF_NUMBER      16
 
 
-enum  gpio_port{
+enum  {
     GPIO_PORTA = 0,
     GPIO_PORTB,
     GPIO_PORTC,
@@ -23,55 +20,55 @@ enum  gpio_port{
     GPIO_PORTG,
     GPIO_PORTH,
     GPIO_PORTI,
-    GPIO_PORT_NUMBER
+    GPIO_PORTJ,
+    GPIO_PORTK,
+    GPIO_MAX_PORT  =  GPIO_PORTK,
 };
 
 
-enum port_mode{
+enum {
 
-    PORT_INPUT_MODE = 0,
-    PORT_OUTPUT_MODE,
-    PORT_ALTERNATE_MODE,
-    PORT_ANALOG_MODE
-
-};
-
-
-enum output_speed{
-
-    OUTPUT_LOW_SPEED = 0,
-    OUTPUT_LMEDIUM_SPEED,
-    OUTPUT_HIGH_SPEED,
-    OUTPUT_HIGHEST_SPEED
-
-};
-
-enum pull_type{
-
-    PORT_NO_PULL = 0,
-    PORT_PULL_UP,
-    PORT_PULL_DOWN,
-    PORT_PULL_RESERVED
+    GPIO_PORT_INPUT_MODE = 0,
+    GPIO_PORT_OUTPUT_MODE,
+    GPIO_PORT_ALTERNATE_MODE,
+    GPIO_PORT_ANALOG_MODE,
+    GPIO_PORT_MAX_MODE  = GPIO_PORT_ANALOG_MODE,
 
 };
 
 
-typedef struct gpio_register{
+enum {
 
-    uint32_t port;
-    void * gpio_regs;
+    GPIO_OUTPUT_LOW_SPEED = 0,
+    GPIO_OUTPUT_LMEDIUM_SPEED,
+    GPIO_OUTPUT_HIGH_SPEED,
+    GPIO_OUTPUT_HIGHEST_SPEED,
+    GPIO_OUTPUT_MAX_SPEED = GPIO_OUTPUT_HIGHEST_SPEED,
 
-}gpio_register_t;
+};
+
+enum {
+
+    GPIO_PORT_NO_PULL = 0,
+    GPIO_PORT_PULL_UP,
+    GPIO_PORT_PULL_DOWN,
+    GPIO_PORT_MAX_PULL =  GPIO_PORT_PULL_DOWN,
+
+};
 
 
+typedef  struct {
+    uint32_t  io_mode:2;
+    uint32_t  open_drain:1;
+    uint32_t  speed:2;
+    uint32_t  pull_mode:2;
+    uint32_t  config_lock:1;
+    uint32_t  alternate_function:4;
+}ATTRIBUTE_ALIGN(4) GPIO_port_bit_config_t;
 
-
-int32_t  get_pin_input(uint32_t port,  uint32_t pin);
-int32_t get_pin_output(uint32_t port,  uint32_t pin);
-int32_t set_pin_output(uint32_t port,  uint32_t pin, uint32_t data);
-
-
-
+int32_t  GPIO_port_bit_config(uint32_t port, uint32_t  bit_id,  GPIO_port_bit_config_t * config);
+int32_t  get_GPIO_port_data(uint32_t  port,  uint32_t * data);
+int32_t  set_GPIO_port_data(uint32_t  port, uint32_t bit_set, uint32_t bit_reset, uint32_t data);
 
 
 #endif
