@@ -141,6 +141,16 @@
 #define  RTC_BKPXR_REG_ADDR(bkp)           (RTC_REGS_BASE_ADDR + 0x50 + (bkp) * 0x4)
 
 
+
+static  void  RTC_enter_or_quit_initialization(uint32_t  enter)
+{
+    uint32_t  flag = enter? 0x80: 0;
+    uint32_t  wait_flag  =  enter? 0x40: 0;
+    REG32_UPDATE(RTC_ISR_REG_ADDR, flag, 0x80);
+    REG32_WAIT(RTC_ISR_REG_ADDR,  wait_flag,  0x40);
+}
+
+
 int32_t  RTC_init_config(RTC_config_t * config)
 {
     uint32_t  flag,  mask;
@@ -148,6 +158,8 @@ int32_t  RTC_init_config(RTC_config_t * config)
     if (!config) {
         return  -1;
     }
+
+    RTC_enter_or_quit_initialization(1);
 
     if (config->calibration_output_enable) {
         flag |= 1 << 23;
@@ -220,14 +232,12 @@ int32_t  RTC_init_config(RTC_config_t * config)
 
 
     REG32_UPDATE(RTC_CR_REG_ADDR, flag,  mask);
+
+    RTC_enter_or_quit_initialization(0);
+
     return  0;
 
 }
-
-
-
-
-
 
 
 

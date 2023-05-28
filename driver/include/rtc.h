@@ -66,6 +66,5 @@ int32_t  RTC_init_config(RTC_config_t * config);
 
 
 
-
 #endif
 

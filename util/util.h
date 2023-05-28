@@ -22,6 +22,13 @@ static inline void REG##width##_UPDATE(uint32_t  addr, uint##width##_t val, uint
     tmp |= (val & mask);                            \
     * p = val;                                      \
 }                                                   \
+static inline void REG##width##_WAIT(uint32_t  addr, uint##width##_t val, uint##width##_t mask)    \
+{                                                       \
+    volatile uint##width##_t *  p = ( volatile uint##width##_t *)addr;        \
+    while ( ((*p) & mask) != (val & mask) )   ;             \
+}
+
+
 
 
 REGISTER_OPS(8, uint8_t)
