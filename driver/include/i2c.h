@@ -57,10 +57,16 @@ typedef  struct {
 
 typedef struct {
     uint32_t  slave_address_10bit:1;
-    uint32_t  address:10;
+    uint32_t  address1:10;
+    uint32_t  address2:10;
+    uint32_t  dual_address_mode:1;
 } ATTRIBUTE_ALIGN(4) I2C_address_t;
 
 
+int32_t  I2C_dev_config(uint32_t  i2c_dev, I2C_config_t * config);
+int32_t  I2C_start_or_stop_generation(uint32_t i2c_dev, uint32_t start);
+int32_t  enable_or_disable_I2C(uint32_t i2c_dev, uint32_t enable);
+int32_t  set_I2C_slave_address(uint32_t  i2c_dev, I2C_address_t * config);
 
 
 
