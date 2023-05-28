@@ -95,25 +95,6 @@
 
 
 
-
-static i2c_reg_t * i2c_devs[I2C_DEV_NUMBER];
-
-int32_t slave_send_data(uint32_t  i2c_slave, uint8_t data){
-
-    if (i2c_slave >= I2C_DEV_NUMBER)
-        return -1;
-
-    i2c_reg_t * i2c_dev =  i2c_devs[i2c_slave];
-    i2c_dev->i2c_dr = data;
-
-    
-
-
-
-}
-
-
-
 int32_t set_master_frequency(uint32_t  i2c_master, uint32_t clk_freq, bool duty, bool fm_mode)
 {
 
