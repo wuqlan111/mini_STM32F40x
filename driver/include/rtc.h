@@ -37,14 +37,13 @@ enum {
 typedef struct {
     uint32_t  calibration_output_enable:1;
     uint32_t  output_selection:2;
-    uint32_t  output_polarity:1;
+    uint32_t  alarm_output_low:1;
     uint32_t  calibration_output_1HZ:1;
-    uint32_t  backup:1;
     uint32_t  timestamp_interrupt_enable:1;
     uint32_t  wakeup_interrupt_enable:1;
     uint32_t  alarmB_interrupt_enable:1;
     uint32_t  alarmA_interrupt_enable:1;
-    uint32_t  time_stamp_enable:1;
+    uint32_t  timestamp_enable:1;
     uint32_t  wakeup_timer_enable:1;
     uint32_t  alarmB_enable:1;
     uint32_t  alarmA_enable:1;
@@ -53,7 +52,7 @@ typedef struct {
     uint32_t  bypass_shadow_register:1;
     uint32_t  reference_clock_enable:1;
     uint32_t  timestamp_event_active_fall:1;
-    uint32_t  wakeup_clock_selection:2;
+    uint32_t  wakeup_clock_selection:3;
 } ATTRIBUTE_ALIGN(4)  RTC_config_t;
 
 

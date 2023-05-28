@@ -143,16 +143,84 @@
 
 int32_t  RTC_init_config(RTC_config_t * config)
 {
+    uint32_t  flag,  mask;
+    flag = mask = 0;
     if (!config) {
         return  -1;
     }
 
+    if (config->calibration_output_enable) {
+        flag |= 1 << 23;
+    }
+
+    flag |=  config->output_selection << 21;
+
+    if (config->alarm_output_low) {
+        flag |=  1 << 20;
+    }
+
+    if (config->calibration_output_1HZ) {
+        flag |=  1 << 19;
+    }
+
+    if ( config->timestamp_interrupt_enable) {
+        flag |= 1 << 15;
+    }
+
+    if (config->wakeup_interrupt_enable) {
+        flag |= 1 << 14;
+    }
+
+    if (config->alarmB_interrupt_enable) {
+        flag |= 1 << 13;
+    }
+
+    if (config->alarmA_interrupt_enable) {
+        flag |= 1 << 12;
+    }
+
+    if (config->timestamp_enable) {
+        flag |= 1 << 11;
+    }
+
+    if (config->wakeup_timer_enable) {
+        flag |= 1 << 10;
+    }
+
+    if (config->alarmB_enable) {
+        flag |= 1 << 9;
+    }
+
+    if (config->alarmA_enable) {
+        flag |= 1 << 8;
+    }
+
+    if (config->digital_calibration_enable) {
+        flag  |= 1 << 7;
+    }
+
+    if (config->PM_AM_format) {
+        flag |=  1 << 6;
+    }
+
+    if (config->bypass_shadow_register) {
+        flag |= 1 << 5;
+    }
+
+    if (config->reference_clock_enable) {
+        flag |= 1 << 4;
+    }
+
+    if (config->timestamp_event_active_fall) {
+        flag |= 1 << 3;
+    }
+
+    flag  |=  config->wakeup_clock_selection;
+    mask  =   0xf8ffff;
 
 
-
-
-
-
+    REG32_UPDATE(RTC_CR_REG_ADDR, flag,  mask);
+    return  0;
 
 }
 
