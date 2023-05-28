@@ -92,7 +92,6 @@
 
 #define  RTC_SHIFTR_ADD1S           (1<<31u)                // add one second
 #define  RTC_SHIFTR_SUBFS           0x7fff                  // subtract a fraction of a second
-#define  RTC_SHIFTR_
 
 
 #define  RTC_TSTR_PM            (1<<22)                     // PM hour format
@@ -158,8 +157,6 @@ int32_t  RTC_init_config(RTC_config_t * config)
     if (!config) {
         return  -1;
     }
-
-    RTC_enter_or_quit_initialization(1);
 
     if (config->calibration_output_enable) {
         flag |= 1 << 23;
@@ -230,17 +227,18 @@ int32_t  RTC_init_config(RTC_config_t * config)
     flag  |=  config->wakeup_clock_selection;
     mask  =   0xf8ffff;
 
-
     REG32_UPDATE(RTC_CR_REG_ADDR, flag,  mask);
-
-    RTC_enter_or_quit_initialization(0);
 
     return  0;
 
 }
 
 
-
+void  enable_or_disbale_RTC_backup(uint32_t  enable)
+{
+    uint32_t  flag = enable? (1 << 18): 0;
+    REG32_UPDATE(RTC_CR_REG_ADDR, flag,  1 << 18);
+}
 
 
 

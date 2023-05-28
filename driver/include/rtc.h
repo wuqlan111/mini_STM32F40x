@@ -58,7 +58,7 @@ typedef struct {
 
 
 int32_t  RTC_init_config(RTC_config_t * config);
-
+void  enable_or_disbale_RTC_backup(uint32_t  enable);
 
 
 
