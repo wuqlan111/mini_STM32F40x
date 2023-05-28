@@ -141,7 +141,20 @@
 #define  RTC_BKPXR_REG_ADDR(bkp)           (RTC_REGS_BASE_ADDR + 0x50 + (bkp) * 0x4)
 
 
+int32_t  RTC_init_config(RTC_config_t * config)
+{
+    if (!config) {
+        return  -1;
+    }
 
+
+
+
+
+
+
+
+}
 
 
 
