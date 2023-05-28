@@ -119,9 +119,26 @@
 #define  RTC_CALR_CALM                 0x1ff                 // calibration minus
 
 
-
-
-
+#define  RTC_REGS_BASE_ADDR                (0x40002800u)
+#define  RTC_TR_REG_ADDR                   (RTC_REGS_BASE_ADDR)
+#define  RTC_DR_REG_ADDR                   (RTC_REGS_BASE_ADDR + 0x4)
+#define  RTC_CR_REG_ADDR                   (RTC_REGS_BASE_ADDR + 0x8)
+#define  RTC_ISR_REG_ADDR                  (RTC_REGS_BASE_ADDR + 0xC)
+#define  RTC_PRER_REG_ADDR                 (RTC_REGS_BASE_ADDR + 0x10)
+#define  RTC_WUTR_REG_ADDR                 (RTC_REGS_BASE_ADDR + 0x14)
+#define  RTC_CALIBR_REG_ADDR               (RTC_REGS_BASE_ADDR + 0x18)
+#define  RTC_ALRMAR_REG_ADDR               (RTC_REGS_BASE_ADDR + 0x1C)
+#define  RTC_ALRMBR_REG_ADDR               (RTC_REGS_BASE_ADDR + 0x20)
+#define  RTC_WPR_REG_ADDR                  (RTC_REGS_BASE_ADDR + 0x24)
+#define  RTC_SSR_REG_ADDR                  (RTC_REGS_BASE_ADDR + 0x28)
+#define  RTC_SHIFTR_REG_ADDR               (RTC_REGS_BASE_ADDR + 0x2C)
+#define  RTC_TSTR_REG_ADDR                 (RTC_REGS_BASE_ADDR + 0x30)
+#define  RTC_TSSSR_REG_ADDR                (RTC_REGS_BASE_ADDR + 0x38)
+#define  RTC_CALR_REG_ADDR                 (RTC_REGS_BASE_ADDR + 0x3C)
+#define  RTC_TAFCR_REG_ADDR                (RTC_REGS_BASE_ADDR + 0x40)
+#define  RTC_ALRMASSR_REG_ADDR             (RTC_REGS_BASE_ADDR + 0x44)
+#define  RTC_ALRMBSSR_REG_ADDR             (RTC_REGS_BASE_ADDR + 0x48)
+#define  RTC_BKPXR_REG_ADDR(bkp)           (RTC_REGS_BASE_ADDR + 0x50 + (bkp) * 0x4)
 
 
 
