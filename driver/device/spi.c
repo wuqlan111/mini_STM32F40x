@@ -61,8 +61,15 @@ const  uint32_t  SPI_REGS_BASE_ADDR[] = { 0x40013000, 0x40003800,  0x40003C00, 0
 const  uint32_t  I2S_REGS_BASE_ADDR[] =  {0x40003400, 0x40003800, 0x40003C00,  0x40004000};
 
 
-#define  SPI_CR1_REG_ADDR(spi)       (SPI__REGS_BASE_ADDR[spi])
-#define  SPI_
+#define  SPI_CR1_REG_ADDR(spi)              (SPI__REGS_BASE_ADDR[spi])
+#define  SPI_CR2_REG_ADDR(spi)              (SPI_REGS_BASE_ADDR[spi] + 0x4)
+#define  SPI_SR_REG_ADDR(spi)               (SPI_REGS_BASE_ADDR[spi] + 0x8)
+#define  SPI_DR_REG_ADDR(spi)               (SPI_REGS_BASE_ADDR[spi] + 0xC)
+#define  SPI_CRCPR_REG_ADDR(spi)            (SPI_REGS_BASE_ADDR[spi] + 0x10)
+#define  SPI_RXCRCR_REG_ADDR(spi)           (SPI_REGS_BASE_ADDR[spi] + 0x14)
+#define  SPI_TXCRCR_REG_ADDR(spi)           (SPI_REGS_BASE_ADDR[spi] + 0x18)
+#define  SPI_I2SCFGR_REG_ADDR(spi)          (SPI_REGS_BASE_ADDR[spi] + 0x1C)
+#define  SPI_I2SPR_REG_ADDR(spi)            (SPI_REGS_BASE_ADDR[spi] + 0x20)
 
 
 

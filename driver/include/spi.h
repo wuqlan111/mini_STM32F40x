@@ -20,9 +20,9 @@ enum  {
 enum  {
     I2S1  =  0,
     I2S2,
-    I2S2,
     I2S3,
-    I2S_MAX_ID  =  I2S3,
+    I2S4,
+    I2S_MAX_ID  =  I2S4,
 };
 
 
