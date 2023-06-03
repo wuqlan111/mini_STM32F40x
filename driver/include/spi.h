@@ -52,11 +52,34 @@ enum {
 
 
 typedef  struct {
-
-
-
-
+    uint32_t   bidirectional_mode:1;
+    uint32_t   bidirectional_mode_output_enable:1;
+    uint32_t   hardware_crc_enable:1;
+    uint32_t   no_crc_phase:1;
+    uint32_t   bit16_data_frame:1;
+    uint32_t   receive_only:1;
+    uint32_t   software_slave_management_enable:1;
+    uint32_t   lsb_transmitted_first:1;
+    uint32_t   baud_rate_control:1;
+    uint32_t   master_configuration:1;
+    uint32_t   clock_high_idle:1;
+    uint32_t   second_clock_data_capture_edge:1;
+    uint32_t   SPI_TI_mode:1;
+    uint32_t   SS_output_enable:1;
+    uint32_t   tx_buffer_DMA_enable:1;
+    uint32_t   rx_buffer_DMA_enable:1;
 } ATTRIBUTE_ALIGN(4) SPI_config_t;
+
+
+typedef  struct {
+    uint32_t  tx_buffer_empty_interrupt:1;
+    uint32_t  rx_buffer_not_empty_interrupt:1;
+    uint32_t  error_interrupt_enable:1;
+}ATTRIBUTE_ALIGN(4) SPI_I2S_interrupt_mask_t;
+
+
+
+
 
 
 
