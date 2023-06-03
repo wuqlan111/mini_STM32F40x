@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+
 #include "sdio.h"
 
 
@@ -72,3 +73,36 @@
 
 
 #define  SDIO_FIFOCNT_FIFOCOUNT              0xffffff                   // number of words to be written to or read from the FIFO
+
+
+#define  SDIO_REGS_BASE_ADDR              (0x40012C00u)
+
+#define  SDIO_POWER_REG_ADDR              (SDIO_REGS_BASE_ADDR)
+#define  SDIO_CLKCR_REG_ADDR              (SDIO_REGS_BASE_ADDR + 0x4)
+#define  SDIO_ARG_REG_ADDR                (SDIO_REGS_BASE_ADDR + 0x8)
+#define  SDIO_CMD_REG_ADDR                (SDIO_REGS_BASE_ADDR + 0xC)
+#define  SDIO_RESPCMD_REG_ADDR            (SDIO_REGS_BASE_ADDR + 0x10)
+#define  SDIO_RESPX_REG_ADDR(resp)        (SDIO_REGS_BASE_ADDR + 0x14 + (resp) * 0x4)
+#define  SDIO_DTIMER_REG_ADDR             (SDIO_REGS_BASE_ADDR + 0x24)
+#define  SDIO_DLEN_REG_ADDR               (SDIO_REGS_BASE_ADDR + 0x28)
+#define  SDIO_DCTRL_REG_ADDR              (SDIO_REGS_BASE_ADDR + 0x2C)
+#define  SDIO_DCOUNT_REG_ADDR             (SDIO_REGS_BASE_ADDR + 0x30)
+#define  SDIO_STA_REG_ADDR                (SDIO_REGS_BASE_ADDR + 0x34)
+#define  SDIO_ICR_REG_ADDR                (SDIO_REGS_BASE_ADDR + 0x38)
+#define  SDIO_MASK_REG_ADDR               (SDIO_REGS_BASE_ADDR + 0x3C)
+#define  SDIO_FIFOCNT_REG_ADDR            (SDIO_REGS_BASE_ADDR + 0x48)
+#define  SDIO_FIFO_REG_ADDR               (SDIO_REGS_BASE_ADDR + 0x80)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
