@@ -64,10 +64,10 @@ typedef  struct {
     uint32_t   master_configuration:1;
     uint32_t   clock_high_idle:1;
     uint32_t   second_clock_data_capture_edge:1;
-    uint32_t   SPI_TI_mode:1;
-    uint32_t   SS_output_enable:1;
-    uint32_t   tx_buffer_DMA_enable:1;
-    uint32_t   rx_buffer_DMA_enable:1;
+    uint32_t   spi_ti_mode:1;
+    uint32_t   ss_output_enable:1;
+    uint32_t   tx_buffer_dma_enable:1;
+    uint32_t   rx_buffer_dma_enable:1;
 } ATTRIBUTE_ALIGN(4) SPI_config_t;
 
 
@@ -78,7 +78,19 @@ typedef  struct {
 }ATTRIBUTE_ALIGN(4) SPI_I2S_interrupt_mask_t;
 
 
-
+typedef  struct {
+    uint32_t   tx_buffer_dma_enable:1;
+    uint32_t   rx_buffer_dma_enable:1;
+    uint32_t   i2s_configuration_mode:2;
+    uint32_t   long_frame_synchronization:1;
+    uint32_t   i2s_standard_selection:2;
+    uint32_t   steady_state_clock_high:1;
+    uint32_t   data_length:2;
+    uint32_t   channel_bit32_length:1;
+    uint32_t   master_clock_output_enable:1;
+    uint32_t   odd_factor_prescale:1;
+    uint32_t   i2s_linear_prescaler:8;
+} ATTRIBUTE_ALIGN(4) I2S_config_t;
 
 
 
