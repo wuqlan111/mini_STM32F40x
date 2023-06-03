@@ -60,7 +60,7 @@ typedef  struct {
     uint32_t   receive_only:1;
     uint32_t   software_slave_management_enable:1;
     uint32_t   lsb_transmitted_first:1;
-    uint32_t   baud_rate_control:1;
+    uint32_t   baud_rate_control:3;
     uint32_t   master_configuration:1;
     uint32_t   clock_high_idle:1;
     uint32_t   second_clock_data_capture_edge:1;
@@ -94,10 +94,11 @@ typedef  struct {
 
 
 
+int32_t   global_SPI_config(uint32_t  spi_id, SPI_config_t * config);
+int32_t   SPI_interrupt_mask(uint32_t  spi_id,  SPI_I2S_interrupt_mask_t * config);
 
-
-
-
+int32_t   global_I2S_config(uint32_t  i2s_id, I2S_config_t * config);
+int32_t   I2S_interrupt_mask(uint32_t  i2s_id,  SPI_I2S_interrupt_mask_t * config);
 
 
 
