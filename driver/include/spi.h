@@ -51,7 +51,12 @@ enum {
 };
 
 
+typedef  struct {
 
+
+
+
+} ATTRIBUTE_ALIGN(4) SPI_config_t;
 
 
 
