@@ -67,6 +67,12 @@ typedef struct {
 } ATTRIBUTE_ALIGN(4) SDIO_interrupt_mask_t;
 
 
+int32_t  global_SDIO_config(SDIO_config_t * config);
+int32_t  global_SDIO_interrupt_config(SDIO_interrupt_mask_t * config);
+
+
+
+
 
 
 #endif
