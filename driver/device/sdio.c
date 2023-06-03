@@ -96,13 +96,89 @@
 
 
 
+int32_t  global_SDIO_config(SDIO_config_t * config)
+{
+    uint32_t  flag, mask;
+    flag = mask = 0;
+    if (!config || (config->wide_bus_mode > SDIO_MAX_BUS_MODE)) {
+        return  -1;
+    }
+
+    if (config->hw_flow_control_enable) {
+        flag  |=  1 << 14;
+    }
+
+    if (config->output_clock_fall_edge) {
+        flag  |=  1 << 13;
+    }
+
+    flag |= config->wide_bus_mode << 11;
+
+    if (config->output_clock_bypass_divider) {
+        flag |=  1 << 10;
+    }
+
+    if (!config->output_clock_always) {
+        flag |= 1 << 9;
+    }
+
+    if (config->output_clock_enable) {
+        flag |=  1  << 8;
+    }
+
+    flag |=  config->output_clock_divide;
+    mask  =  0x7fff;
+
+    REG32_UPDATE(SDIO_CLKCR_REG_ADDR, flag,  mask);
+
+    REG32_WRITE(SDIO_DTIMER_REG_ADDR, config->data_timeout_period);
+
+    return  0;
+
+}
 
 
 
 
+int32_t  global_SDIO_interrupt_config(SDIO_interrupt_mask_t * config)
+{
+    uint32_t  flag,  mask;
+    flag =  mask  =  0;
+    if (!config) {
+        return  -1;
+    }
+
+    if (config->ceata_completion_interrupt) {
+        flag |=  1 << 23;
+    }
+
+    if (config->sdio_mode_interrupt) {
+        flag |=  1 << 22;
+    }
+
+    if (config->rx_fifo_avalible_interrupt) {
+        flag |=  1 << 21;
+    }
+
+    if (config->tx_fifo_avalible_interrupt) {
+        flag |=  1 << 20;
+    }
+
+    if (config->rx_fifo_full_interrupt) {
+        flag |=  1 << 19;
+    }
+
+    if (config->tx_fifo_full_interrupt) {
+        flag |=  1 << 18;
+    }
 
 
 
+    mask  =  0xffffff;
+    REG32_UPDATE(SDIO_MASK_REG_ADDR,  flag,  mask);
+    return  0;
+
+}
 
 
 

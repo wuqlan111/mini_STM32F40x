@@ -16,6 +16,7 @@ enum {
     SDIO_DEFAULT_BUS_MODE  =  0,
     SDIO_4BIT_BUS_MODE,
     SDIO_8BIT_BUS_MODE,
+    SDIO_MAX_BUS_MODE  =  SDIO_8BIT_BUS_MODE,
 };
 
 
@@ -42,8 +43,8 @@ typedef struct {
 typedef struct {
     uint32_t  ceata_completion_interrupt:1;
     uint32_t  sdio_mode_interrupt:1;
-    uint32_t  rx_FIFO_interrupt:1;
-    uint32_t  tx_FIFO_interrupt:1;
+    uint32_t  rx_fifo_avalible_interrupt:1;
+    uint32_t  tx_fifo_avalible_interrupt:1;
     uint32_t  rx_fifo_empty_interrupt:1;
     uint32_t  tx_fifo_empty_interrupt:1;
     uint32_t  rx_fifo_full_interrupt:1;
