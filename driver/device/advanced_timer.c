@@ -1,10 +1,8 @@
 
-#ifndef  STM32_ADVANCED_TIMER_H
-#define  STM32_ADVANCED_TIMER_H
+#include  <stdlib.h>
 
-#include  <stdint.h>
-#include  "util.h"
-
+#include  "arm_timer.h"
+#include  "advanced_timer.h"
 
 
 
@@ -17,4 +15,5 @@
 
 
 
-#endif
+
+
