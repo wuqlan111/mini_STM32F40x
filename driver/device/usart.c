@@ -70,10 +70,85 @@
 #define  USART_GTPR_GT                      0xff00                      // guard time value
 #define  USART_GTPR_PSC                     0xff                        // prescaler value
 
+static  uint32_t  usart_regs_base_addr[] = {0x40011000,  0x40004400,  0x40004800,  0x40004C00,  
+                    0x40005000, 0x40011400,  0x40007800,  0x40007C00 };
+
+
+#define USART_SR_REG_ADDR(usart)                     (usart_regs_base_addr[usart])
+#define USART_DR_REG_ADDR(usart)                     (usart_regs_base_addr[usart] + 0x4)
+#define USART_BRR_REG_ADDR(usart)                    (usart_regs_base_addr[usart] + 0x8)
+#define USART_CR1_REG_ADDR(usart)                    (usart_regs_base_addr[usart] + 0xC)
+#define USART_CR2_REG_ADDR(usart)                    (usart_regs_base_addr[usart] + 0x10)
+#define USART_CR3_REG_ADDR(usart)                    (usart_regs_base_addr[usart] + 0x14)
+#define USART_GTPR_REG_ADDR(usart)                   (usart_regs_base_addr[usart] + 0x18)
+
+
+
+int32_t  global_USART_config(uint32_t  usart_id,  USART_config_t  * config)
+{
+    if ( (usart_id > USART_MAX_ID ) ||  !config) {
+        return  -1;
+    }
 
 
 
 
+    return  0;
+
+}
+
+
+
+
+
+int32_t  global_USART_interrupt(uint32_t  usart_id,  USART_interrupt_config_t * config)
+{
+    uint32_t  flag,  mask;
+    flag = mask = 0;
+    if ( (usart_id > USART_MAX_ID ) ||  !config) {
+        return  -1;
+    }
+
+    if (config->pe_interrupt_enable) {
+        flag = 1 << 8;
+    }
+
+    if (config->txe_interrupt_enable) {
+        flag |= 1 << 7;
+    }
+
+    if (config->complete_interrupt_enable) {
+        flag |= 1 << 6;
+    }
+
+    if (config->rxne_interrupt_enable) {
+        flag  |=  1 << 5;
+    }
+
+    if (config->idle_interrupt_enable) {
+        flag |=  1 << 4;
+    }
+
+    mask =  0x1f0;
+
+    REG32_UPDATE(USART_CR1_REG_ADDR(usart_id),  flag,  mask);
+
+    if (config->cts_interrupt_enable) {
+        flag  =  1 << 10;
+    }
+
+    if (config->error_interrupt_enable) {
+        flag  |=  0x1;
+    }
+
+    mask  =  ( 1<< 10) | 0x1;
+
+    REG32_UPDATE(USART_CR3_REG_ADDR(usart_id), flag,  mask);
+
+    return  0;
+
+
+}
 
 
 
