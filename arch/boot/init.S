@@ -1,12 +1,12 @@
 	
-	.section  .main.stack, "w" 
-main_sp:  .space  0x1000
+	.syntax	unified
+	.arch	armv7-m
 
-	.section  .process.stack, "w" 
-process_sp:  .space  0x1000
-
-	section  .exception.table, "r"
-expr_vector_table:  .word _main_sp
+	.section  .exception.table, "a",%progbits
+	.align  2	
+	.global  expr_vector_table
+expr_vector_table:
+	.word MAIN_STACK_TOP
 	.word reset_handler
 	.word NMI_handler
 	.word hard_fault_handler
@@ -23,30 +23,58 @@ expr_vector_table:  .word _main_sp
 	.word pendsv_handler
 	.word systick_handler
 extern_vector:	.space  0x1000
-	.global  main_sp
-	.global  process_sp
-	.global  expr_vector_table
+	.size	expr_vector_table, . - expr_vector_table
+
 
 	.macro  SAVE_CONTEXT
 			push   {r4-r11, lr}
-			mrs		r0, control
-			mrs		r1,   xpsr
-			push   {r0, r1}
+			mrs	   r0, control
+			push   {r0}
+			mrs   r0,   primask
+			push   {r0}
+			mrs   r0,   basepri
+			push   {r0}
+			mrs   r0,   faultmask
+			push   {r0}
+			mov    r0,    sp
+			push   {r0}
+			sub   r1,  sp, #0x20
+			mov   sp,   r1
 	.endm
 
 	.macro  RESUME_CONTEXT
-			pop {r0, r1}
-			msr  control, r0,
-			msr  xpsr, r1
-			push {r4-r11, lr}
+			add  r0,  sp, #0x20
+			mov  sp,    r0
+			pop  {r0}
+			mov  sp,   r0
+			pop  {r0}
+			msr  faultmask,  r0
+			pop  {r0}
+			msr  basepri, r0
+			pop  {r0}
+			msr  primask, r0
+			pop  {r0}
+			msr  control, r0
+			pop  {r4-r11, lr}
 	.endm
 
 	.macro  RETURN_FROM_EXCEPTION
 		bx  lr
 	.endm
 
-	.extern  do_reset
+
+	.macro	def_irq_handler	handler_name
+			.align	1
+			.thumb_func
+			.type	\handler_name, %function
+			.size	\handler_name, . - \handler_name
+			\handler_name:
+	.endm
+
+
+	.extern  arch_init
 	.extern  do_NMI
+	.extern  do_hard_fault
 	.extern	 do_mem_fault
 	.extern  do_bus_fault
 	.extern  do_usage_fault
@@ -55,56 +83,75 @@ extern_vector:	.space  0x1000
 	.extern  do_pendsv
 	.extern  do_systick
 
-
-@ #define BUILD_EXCEPTION(name, fn)	\
-@ 	.func  (name)	\
-@ 		SAVE_CONTEXT;		\
-@ 		bl  (fn);	\
-@ 		RESUME_CONTEXT;		\
-@ 		RETURN_FROM_EXCEPTION;		\
-@ 	.endfunc
-
-
-
-
-	.section  .start.init, "x"
+	.text
+	.thumb
+	.thumb_func
 	.align   2
-	.func  reset_handler
-		b  do_reset
-	.endfunc
+	.global  reset_handler
+	.type	reset_handler, %function
+reset_handler:
+		@ set process stack
+		ldr    r0,   =PROCESS_STACK_TOP
+		msr    psp,  r0
+		b   arch_init
 
-
-	.func  NMI_handler
+    def_irq_handler  NMI_handler
 		SAVE_CONTEXT
 		bl  do_NMI
 		RESUME_CONTEXT
 		RETURN_FROM_EXCEPTION
-    .endfunc
 
 
-	.func  memory_fault_handler
+    def_irq_handler  hard_fault_handler
+		SAVE_CONTEXT
+		bl  do_hard_fault
+		RESUME_CONTEXT
+		RETURN_FROM_EXCEPTION
+
+    def_irq_handler  memory_fault_handler
 		SAVE_CONTEXT
 		bl  do_mem_fault
 		RESUME_CONTEXT
 		RETURN_FROM_EXCEPTION
-    .endfunc
 
 
-	.func  bus_fault_handler
+
+    def_irq_handler  bus_fault_handler
 		SAVE_CONTEXT
 		bl  do_bus_fault
 		RESUME_CONTEXT
 		RETURN_FROM_EXCEPTION
-	.endfunc
 
 
-	.func  usage_fault_handler
-					SAVE_CONTEXT
-                    bl  do_usage_fault
-					RESUME_CONTEXT
-					RETURN_FROM_EXCEPTION
-	.endfunc
+    def_irq_handler  usage_fault_handler
+		SAVE_CONTEXT
+		bl  do_usage_fault
+		RESUME_CONTEXT
+		RETURN_FROM_EXCEPTION
 
+    def_irq_handler  svcall_handler
+		SAVE_CONTEXT
+		bl  do_svcall
+		RESUME_CONTEXT
+		RETURN_FROM_EXCEPTION
+
+    def_irq_handler  debug_handler
+		SAVE_CONTEXT
+		bl  .
+		RESUME_CONTEXT
+		RETURN_FROM_EXCEPTION
+
+    def_irq_handler  pendsv_handler
+		SAVE_CONTEXT
+		bl  .
+		RESUME_CONTEXT
+		RETURN_FROM_EXCEPTION
+
+    def_irq_handler  systick_handler
+		SAVE_CONTEXT
+		bl  do_systick
+		RESUME_CONTEXT
+		RETURN_FROM_EXCEPTION
 
 
 	

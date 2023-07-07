@@ -13,14 +13,13 @@
 
 static  inline  uint32_t  save_and_disable_irq(void)
 {
-    uint32_t  ret =  0;
-    ret = read_xpsr(PRIMASK_REG);
+    uint32_t  ret = READ_XPSR(PRIMASK_REG);
     return ret;
 }
 
 static  inline  void restore_and_enable_irq(uint32_t flag)
 {
-    write_xpsr(PRIMASK_REG, flag);
+    WRITE_XPSR(PRIMASK_REG, flag);
 }
 
 

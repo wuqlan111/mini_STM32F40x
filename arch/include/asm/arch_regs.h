@@ -23,15 +23,15 @@
 
 
 //read  special  register
-#define   READ_XPSR(name)    {       \
+#define   READ_XPSR(name)    ({       \
                     uint32_t val = 0;    \
-                    __asm__ volatile("\tmrs\t" name ", %0":"=r"(val)::"=r"(val));       \
-                    val;                \
-                }
+                   __asm__ volatile("mrs  %0, xpsr":"=r"(val)::);  \
+                   val;                \
+                } )
 //write  special  register
 #define   WRITE_XPSR(name, value)   {       \
                     uint32_t  val  = (value);       \
-                    __asm__ volatile("\tmsr %0, "(name)::"=r"(val):"=r"(val));  \
+                   __asm__ volatile("\tmsr %0, " name ::"r"(val):); \
                 }
 
 //update  special  register
@@ -44,10 +44,10 @@
                 }
 
 
-#define  CLEAR_PRIMASK()     (__asm__ volatile("\tcpsie i":::))
-#define  SET_PRIMASK()       (__asm__ volatile("\tcpsid i":::))
-#define  CLEAR_FAULTMASK()   (__asm__ volatile("\tcpsie f":::))
-#define  SET_FAULTMASK()     (__asm__ volatile("\tcpsid f":::))
+#define  CLEAR_PRIMASK()     __asm__ volatile("\tcpsie i":::)
+#define  SET_PRIMASK()       __asm__ volatile("\tcpsid i":::)
+#define  CLEAR_FAULTMASK()   __asm__ volatile("\tcpsie f":::)
+#define  SET_FAULTMASK()     __asm__ volatile("\tcpsid f":::)
 
 
 #define  SCS_BASE_ADDR       (0xE000E000u)
@@ -102,7 +102,7 @@
 #define  SCB_SHPR1_REG_ADDR                 (SCB_BASE_ADDR + 0x18)
 #define  SCB_SHPR2_REG_ADDR                 (SCB_BASE_ADDR + 0x1C)
 #define  SCB_SHPR3_REG_ADDR                 (SCB_BASE_ADDR + 0x20)
-#define  SCB_SHPRR_REG_ADDR                 (SCB_BASE_ADDR + 0x24)
+#define  SCB_SHCSR_REG_ADDR                 (SCB_BASE_ADDR + 0x24)
 #define  SCB_CFSR_REG_ADDR                  (SCB_BASE_ADDR + 0x28)
 #define  SCB_HFSR_REG_ADDR                  (SCB_BASE_ADDR + 0x2C)
 #define  SCB_DFSR_REG_ADDR                  (SCB_BASE_ADDR + 0x30)

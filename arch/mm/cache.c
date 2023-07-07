@@ -1,10 +1,10 @@
 
 #include  <stdint.h>
 #include  <memory.h>
-#include  <math.h>
 
 #include  "arch_regs.h"
 #include  "cache.h"
+#include  "math_util.h"
 
 #define  MAX_CACHE_WRITE_BACK      (2048)
 #define  CTR_CWG_BIT       (24)
@@ -130,9 +130,19 @@ void  invalidate_dcache_by_set(uint32_t level, uint32_t set, uint32_t way)
     if((level  > 7 ) || get_cache_info(level, &info))
         return;
 
-    uint32_t  associaty  =  log2(info.cache_associativity);
-    uint32_t  line       =  log2(info.line_size);
-    uint16_t  sets       =  log2(info.set_number);
+    uint32_t  associaty, line, sets;
+    associaty   =  line   =  sets  =  0;
+    if (math_clog2(info.cache_associativity, &associaty)) {
+        return;
+    }
+    
+    if (math_clog2(info.line_size,  &line)) {
+        return;
+    }
+    
+    if (math_clog2(info.set_number,  &sets)) {
+        return;
+    }
 
     if ( (set > info.set_number) || (way > info.cache_associativity) )
         return;
@@ -164,9 +174,19 @@ void  clean_dcache_by_set(uint32_t level, uint32_t set, uint32_t way)
     if((level  > 7 ) || get_cache_info(level, &info))
         return;
 
-    uint32_t  associaty  =  log2(info.cache_associativity);
-    uint32_t  line       =  log2(info.line_size);
-    uint16_t  sets       =  log2(info.set_number);
+    uint32_t  associaty, line, sets;
+    associaty   =  line   =  sets  =  0;
+    if (math_clog2(info.cache_associativity, &associaty)) {
+        return;
+    }
+    
+    if (math_clog2(info.line_size,  &line)) {
+        return;
+    }
+    
+    if (math_clog2(info.set_number,  &sets)) {
+        return;
+    }
 
     if ( (set > info.set_number) || (way > info.cache_associativity) )
         return;
@@ -193,9 +213,19 @@ void  clean_invalidate_dcache_by_set(uint32_t level, uint32_t set, uint32_t way)
     if((level  > 7 ) || get_cache_info(level, &info))
         return;
 
-    uint32_t  associaty  =  log2(info.cache_associativity);
-    uint32_t  line       =  log2(info.line_size);
-    uint16_t  sets       =  log2(info.set_number);
+    uint32_t  associaty, line, sets;
+    associaty   =  line   =  sets  =  0;
+    if (math_clog2(info.cache_associativity, &associaty)) {
+        return;
+    }
+    
+    if (math_clog2(info.line_size,  &line)) {
+        return;
+    }
+    
+    if (math_clog2(info.set_number,  &sets)) {
+        return;
+    }
 
     if ( (set > info.set_number) || (way > info.cache_associativity) )
         return;
