@@ -245,7 +245,7 @@
               <MiscControls>-mthumb -g -ffunction-sections   -fdata-sections -fno-common -std=gnu99  -specs=nosys.specs -ggdb -fno-exceptions  -fno-builtin -fno-strict-aliasing  -gdwarf-2</MiscControls>
               <Define>DEBUG</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\include\asm;..\..\lib\include</IncludePath>
+              <IncludePath>..\..\include\asm;..\..\lib\include;..\..\..\driver\include;..\..\..\util</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -378,6 +378,91 @@
               <FileType>5</FileType>
               <FilePath>..\..\include\asm\arch_config.h</FilePath>
             </File>
+            <File>
+              <FileName>ADC.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\ADC.h</FilePath>
+            </File>
+            <File>
+              <FileName>advanced_timer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\advanced_timer.h</FilePath>
+            </File>
+            <File>
+              <FileName>arm_timer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\arm_timer.h</FilePath>
+            </File>
+            <File>
+              <FileName>can.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\can.h</FilePath>
+            </File>
+            <File>
+              <FileName>crc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\crc.h</FilePath>
+            </File>
+            <File>
+              <FileName>DAC.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\DAC.h</FilePath>
+            </File>
+            <File>
+              <FileName>dma.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\dma.h</FilePath>
+            </File>
+            <File>
+              <FileName>flexible_memory_controller.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\flexible_memory_controller.h</FilePath>
+            </File>
+            <File>
+              <FileName>gpio.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\gpio.h</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\i2c.h</FilePath>
+            </File>
+            <File>
+              <FileName>random_number_generator.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\random_number_generator.h</FilePath>
+            </File>
+            <File>
+              <FileName>rtc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\rtc.h</FilePath>
+            </File>
+            <File>
+              <FileName>sdio.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\sdio.h</FilePath>
+            </File>
+            <File>
+              <FileName>spi.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\spi.h</FilePath>
+            </File>
+            <File>
+              <FileName>timer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\timer.h</FilePath>
+            </File>
+            <File>
+              <FileName>usart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\usart.h</FilePath>
+            </File>
+            <File>
+              <FileName>watchdog.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\watchdog.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -485,6 +570,104 @@
         </Group>
         <Group>
           <GroupName>target</GroupName>
+        </Group>
+        <Group>
+          <GroupName>driver</GroupName>
+          <Files>
+            <File>
+              <FileName>ADC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\ADC.c</FilePath>
+            </File>
+            <File>
+              <FileName>advanced_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\advanced_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>can.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\can.c</FilePath>
+            </File>
+            <File>
+              <FileName>crc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\crc.c</FilePath>
+            </File>
+            <File>
+              <FileName>DAC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\DAC.c</FilePath>
+            </File>
+            <File>
+              <FileName>dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\dma.c</FilePath>
+            </File>
+            <File>
+              <FileName>flexible_memory_controller.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\flexible_memory_controller.c</FilePath>
+            </File>
+            <File>
+              <FileName>gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>random_number_generator.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\random_number_generator.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>sdio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\sdio.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>watchdog.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\watchdog.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>util</GroupName>
+          <Files>
+            <File>
+              <FileName>util.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\util\util.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>driver_test</GroupName>
         </Group>
       </Groups>
     </Target>

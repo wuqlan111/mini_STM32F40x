@@ -115,10 +115,7 @@ typedef struct {
     uint32_t  data_len: 4;
     uint32_t  filter_index:8;
     uint32_t  time_stamp:16;
-    uint8_t  data_len;
     uint8_t  data[8];
-    uint8_t  filter_index;
-
 } ATTRIBUTE_ALIGN(4) can_rxmsg_t;
 
 int32_t  can_global_init(uint32_t  can_id, can_config_t * config);
