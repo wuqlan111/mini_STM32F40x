@@ -6,6 +6,8 @@
 
 #include  "util.h"
 
+#define   USART_MAX_TIMEOUT              (0x10000u)
+
 typedef  enum {
     USART1 = 0,
     USART2,
@@ -54,7 +56,7 @@ typedef  struct {
     uint8_t  * rx_buffer;
     uint32_t  rx_sz;
     uint8_t  * tx_buffer;
-    uint32_t  tx_size;
+    uint32_t  tx_sz;
 } ATTRIBUTE_ALIGN(4) usart_buffer_cfg_t;
 
 
@@ -62,6 +64,13 @@ typedef struct {
     usart_user_cfg_t  user_cfg;
     usart_buffer_cfg_t  buffer_cfg;
 } ATTRIBUTE_ALIGN(4) usart_cfg_t;
+
+
+/* brief - 
+ * param
+ * 
+ */
+int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg);
 
 
 

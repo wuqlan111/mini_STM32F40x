@@ -9,7 +9,11 @@
                         }                   \
                     }
 
-
+#define  CHECK_PARAM_NULL(param)     {        \
+                        if ((param) == (NULL)) {      \
+                            return  -1;       \
+                        }                   \
+                    }
 
 
 

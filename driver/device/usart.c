@@ -71,9 +71,6 @@
 #define  USART_GTPR_GT                      0xff00                      // guard time value
 #define  USART_GTPR_PSC                     0xff                        // prescaler value
 
-static  uint32_t  usart_regs_base_addr[] = {0x40011000,  0x40004400,  0x40004800,  0x40004C00,  
-                    0x40005000, 0x40011400,  0x40007800,  0x40007C00 };
-
 
 #define USART_SR_REG_ADDR(usart)                     (usart_regs_base_addr[usart])
 #define USART_DR_REG_ADDR(usart)                     (usart_regs_base_addr[usart] + 0x4)
@@ -84,10 +81,71 @@ static  uint32_t  usart_regs_base_addr[] = {0x40011000,  0x40004400,  0x40004800
 #define USART_GTPR_REG_ADDR(usart)                   (usart_regs_base_addr[usart] + 0x18)
 
 
+typedef  struct {
+    uint32_t  timeout;
+    uint8_t  * rx_buffer;
+    uint32_t  rx_sz;
+    uint8_t  * tx_buffer;
+    uint32_t  tx_size;
+} ATTRIBUTE_PACKED usart_internal_cfg_t;
+
+static  usart_internal_cfg_t  usart_dev_cfg[USART_MAX_ID + 1] = {0};
+
+static  uint32_t  usart_regs_base_addr[] = {0x40011000,  0x40004400,  0x40004800,  0x40004C00,  
+                    0x40005000, 0x40011400,  0x40007800,  0x40007C00 };
+
+
+static  int32_t  check_usart_user_cfg(usart_user_cfg_t * user_cfg)
+{
+    CHECK_PARAM_NULL(user_cfg);
+
+    CHECK_PARAM_VALUE(user_cfg->data_len,   USART_MAX_DATA_LEN);
+    CHECK_PARAM_VALUE(user_cfg->parity,     USART_MAX_PARITY);
+    CHECK_PARAM_VALUE(user_cfg->stop_bits,  USART_MAX_STOP_BIT);
+    CHECK_PARAM_VALUE(user_cfg->timeout,    USART_MAX_TIMEOUT);
+
+    return  0;
+
+}
+
+
+static  int32_t  check_usart_buffer_cfg(usart_buffer_cfg_t * buffer_cfg)
+{
+    CHECK_PARAM_NULL(buffer_cfg);
+
+    if ((!buffer_cfg->rx_buffer && buffer_cfg->rx_sz) || 
+                        (buffer_cfg->rx_buffer && !buffer_cfg->rx_sz)) {
+        return  -1;
+    }
+
+    if ((!buffer_cfg->tx_buffer && buffer_cfg->tx_sz) || 
+                        (buffer_cfg->tx_buffer && !buffer_cfg->tx_sz)) {
+        return  -1;
+    }
+
+    return  0;
+
+}
 
 
 
+int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
+{
+    CHECK_PARAM_VALUE(usart, USART_MAX_ID);
+    CHECK_PARAM_NULL(cfg);
 
+    if (check_usart_user_cfg((&cfg->user_cfg))) {
+        return  -1;
+    }
+
+    if (check_usart_buffer_cfg(&cfg->buffer_cfg)) {
+        return  -1;
+    }
+
+    
+
+
+}
 
 
 
