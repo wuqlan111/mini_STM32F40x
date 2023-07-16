@@ -86,7 +86,7 @@ typedef  struct {
     uint8_t  * rx_buffer;
     uint32_t  rx_sz;
     uint8_t  * tx_buffer;
-    uint32_t  tx_size;
+    uint32_t  tx_sz;
 } ATTRIBUTE_PACKED usart_internal_cfg_t;
 
 static  usart_internal_cfg_t  usart_dev_cfg[USART_MAX_ID + 1] = {0};
@@ -103,6 +103,8 @@ static  int32_t  check_usart_user_cfg(usart_user_cfg_t * user_cfg)
     CHECK_PARAM_VALUE(user_cfg->parity,     USART_MAX_PARITY);
     CHECK_PARAM_VALUE(user_cfg->stop_bits,  USART_MAX_STOP_BIT);
     CHECK_PARAM_VALUE(user_cfg->timeout,    USART_MAX_TIMEOUT);
+
+
 
     return  0;
 
@@ -128,9 +130,10 @@ static  int32_t  check_usart_buffer_cfg(usart_buffer_cfg_t * buffer_cfg)
 }
 
 
-
 int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
 {
+    uint32_t  flag, mask;
+    flag  =  mask  =  0;
     CHECK_PARAM_VALUE(usart, USART_MAX_ID);
     CHECK_PARAM_NULL(cfg);
 
@@ -142,8 +145,139 @@ int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
         return  -1;
     }
 
-    
+    if (cfg->user_cfg.parity == USART_PARITY_EVEN) {
+        flag  =  USART_CR1_PCE;
+    } else if (cfg->user_cfg.parity == USART_PARITY_ODD) {
+        flag  =  USART_CR1_PCE | USART_CR1_PS;
+    }
 
+    if (cfg->user_cfg.data_len ==  USART_DATA_9) {
+        flag |=  USART_CR1_M;
+    }
+
+    REG32_WRITE(USART_CR1_REG_ADDR(usart),  flag);
+
+    switch (cfg->user_cfg.stop_bits) {
+        case  USART_STOP_0_5:
+            flag  =  1 << 12;
+            break;
+        
+        case  USART_STOP_1_0:
+            flag  = 0;
+            break;
+
+        case  USART_STOP_1_5:
+            flag  = 3 << 12;
+            break;
+
+        case  USART_STOP_2_0:
+            flag  =  2  << 12;
+            break;
+    }
+
+    REG32_WRITE(USART_CR2_REG_ADDR(usart),  flag);
+
+    REG32_WRITE(USART_CR3_REG_ADDR(usart),  0);
+
+
+    usart_dev_cfg[usart].rx_buffer   =  cfg->buffer_cfg.rx_buffer;
+    usart_dev_cfg[usart].rx_sz       =  cfg->buffer_cfg.rx_sz;
+    usart_dev_cfg[usart].tx_buffer   =  cfg->buffer_cfg.tx_buffer;
+    usart_dev_cfg[usart].tx_sz       =  cfg->buffer_cfg.tx_sz;
+    usart_dev_cfg[usart].timeout     =  cfg->user_cfg.timeout;
+
+    return   0;
+
+}
+
+static  void  wait_usart_sr_flag(usart_dev_e  usart,  uint32_t  flag,  uint32_t * is_timeout)
+{
+    uint32_t  timeout  =  usart_dev_cfg[usart].timeout;
+    uint32_t  tmp  =  0;
+
+    *is_timeout  =  1;
+
+    while (timeout) {
+        tmp  =   REG32_READ(USART_SR_REG_ADDR(usart));
+        if (tmp & flag) {
+            *is_timeout  =  0;
+            break;
+        }
+        timeout--;
+    }
+
+}
+
+
+
+static  int32_t  usart_poll_send(usart_dev_e  usart,  uint32_t  len)
+{
+    uint32_t  flag, mask,  is_timeout;
+    int32_t   ret =  0;
+    uint8_t * tx_data   =   usart_dev_cfg->tx_buffer;
+    flag = mask  =  is_timeout = 0;
+
+    flag  =  mask  =  USART_CR1_UE | USART_CR1_TE;
+
+    REG32_UPDATE(USART_CR1_REG_ADDR(usart),  flag, mask);
+
+
+    for (int32_t i  =  0;  i < len; i++) {
+        wait_usart_sr_flag(usart,  USART_SR_TXE, &is_timeout);
+
+        if (is_timeout) {
+            return  -1;
+        }
+
+        REG32_WRITE(USART_DR_REG_ADDR(usart),  tx_data[i]);
+
+    }
+
+    wait_usart_sr_flag(usart,  USART_SR_TC, &is_timeout);
+
+    if (is_timeout) {
+        ret =  -1;
+    }
+
+    REG32_UPDATE(USART_CR1_REG_ADDR(usart),  0, mask);
+
+    return   ret;
+
+}
+
+
+
+static  int32_t  usart_poll_recv(usart_dev_e  usart,  uint32_t  len,  uint32_t * recv_len)
+{
+    uint32_t  flag, mask,  is_timeout;
+    int32_t   ret =  0;
+    uint8_t * rx_data   =   usart_dev_cfg->rx_buffer;
+    flag = mask  =  is_timeout = 0;
+
+    flag  =  mask  =  USART_CR1_UE | USART_CR1_RE;
+
+    REG32_UPDATE(USART_CR1_REG_ADDR(usart),  flag, mask);
+
+
+    for (int32_t i  =  0;  i < len; i++) {
+        wait_usart_sr_flag(usart,  USART_SR_RXNE, &is_timeout);
+
+        if (is_timeout) {
+            *recv_len  =  i;
+            break;
+        }
+
+        rx_data[i]  =  REG32_READ(USART_DR_REG_ADDR(usart)) & 0xff;
+
+    }
+
+    if (!is_timeout) {
+        *recv_len  =  len;
+    }
+
+    REG32_UPDATE(USART_CR1_REG_ADDR(usart),  0, mask);
+
+    return   ret;
 
 }
 
@@ -151,14 +285,43 @@ int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
 
 
 
+int32_t   usart_send_data(usart_dev_e  usart,  uint32_t  len)
+{
+    int32_t  ret  =  0;
+    CHECK_PARAM_VALUE(usart,  USART_MAX_ID);
+
+    if (!len || (len > usart_dev_cfg[usart].tx_sz)) {
+        return  -1;
+    }
+
+    CHECK_PARAM_NULL(usart_dev_cfg[usart].tx_buffer);
+
+    ret =  usart_poll_send(usart,  len);
+
+    return  ret;
+
+}
 
 
 
+int32_t   usart_recv_data(usart_dev_e  usart,  uint32_t  len, uint32_t * recv_len)
+{
 
+    int32_t  ret  =  0;
+    CHECK_PARAM_VALUE(usart,  USART_MAX_ID);
+    CHECK_PARAM_NULL(recv_len);
 
+    if (!len || (len > usart_dev_cfg[usart].rx_sz)) {
+        return  -1;
+    }
 
+    CHECK_PARAM_NULL(usart_dev_cfg[usart].rx_buffer);
 
+    ret =  usart_poll_recv(usart,  len,  recv_len);
 
+    return  ret;
+
+}
 
 
 

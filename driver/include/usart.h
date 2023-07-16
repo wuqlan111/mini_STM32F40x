@@ -74,7 +74,11 @@ int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg);
 
 
 
+int32_t   usart_send_data(usart_dev_e  usart,  uint32_t  len);
 
+
+
+int32_t   usart_recv_data(usart_dev_e  usart,  uint32_t  len, uint32_t * recv_len);
 
 
 
