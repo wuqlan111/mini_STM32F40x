@@ -42,8 +42,26 @@ typedef enum {
 
 
 typedef  struct {
-    
-} usart_user_cfg_t;
+    uint32_t  data_len:2;
+    uint32_t  parity:2;
+    uint32_t  stop_bits:2;
+    uint32_t  baud_rate;
+    uint32_t  timeout;
+} ATTRIBUTE_ALIGN(4) usart_user_cfg_t;
+
+
+typedef  struct {
+    uint8_t  * rx_buffer;
+    uint32_t  rx_sz;
+    uint8_t  * tx_buffer;
+    uint32_t  tx_size;
+} ATTRIBUTE_ALIGN(4) usart_buffer_cfg_t;
+
+
+typedef struct {
+    usart_user_cfg_t  user_cfg;
+    usart_buffer_cfg_t  buffer_cfg;
+} ATTRIBUTE_ALIGN(4) usart_cfg_t;
 
 
 
@@ -51,9 +69,6 @@ typedef  struct {
 
 
 
-int32_t  global_USART_config(uint32_t  usart_id,  USART_config_t  * config);
-
-int32_t  global_USART_interrupt(uint32_t  usart_id,  USART_interrupt_config_t * config);
 
 #endif
 
