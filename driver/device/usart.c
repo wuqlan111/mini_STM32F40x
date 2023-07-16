@@ -3,6 +3,7 @@
 #include  <stdbool.h>
 
 #include  "../include/usart.h"
+#include  "../include/driver_util.h"
 
 
 #define  USART_SR_CTS              (1<<9)           // the CTS status line change
