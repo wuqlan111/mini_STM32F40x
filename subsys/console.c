@@ -13,9 +13,8 @@
 #define   CONSOLE_USART_TIMEOUT           (0x100u)
 
 
-uint8_t   console_tx_buffer[CONSOLE_USART_BUFFER] = {0};
-uint8_t   console_rx_buffer[CONSOLE_USART_BUFFER] = {0};
-
+static  uint8_t   console_tx_buffer[CONSOLE_USART_BUFFER] = {0};
+static  uint8_t   console_rx_buffer[CONSOLE_USART_BUFFER] = {0};
 
 
 int32_t  console_init(void)
@@ -46,6 +45,7 @@ int32_t  console_fmt_out(char * fmt, ...)
 {
 
     int32_t  ret = 0;
+    int32_t  len =  0;
 
     if (!fmt) {
         return -1;        
@@ -53,12 +53,17 @@ int32_t  console_fmt_out(char * fmt, ...)
 
     va_list args;
     va_start(args, fmt);
-    vsprintf(console_tx_buffer,  fmt, args);
+    len = vsprintf(console_tx_buffer,  fmt, args);
     va_end(args);
 
+    if (ret <= 0) {
+        return  -1;
+    }
 
+    console_tx_buffer[len] = '\r';
+    console_tx_buffer[len + 1]  =  '\n';
 
-
+    ret  =  usart_send_data(CONSOLE_USART_ID,  len + 2);
 
     return  ret;
 
@@ -66,11 +71,24 @@ int32_t  console_fmt_out(char * fmt, ...)
 
 
 
+int32_t  console_recv_data(uint8_t * buf, uint32_t len,  uint32_t * recv_len)
+{
+    int32_t   ret  =   0;
 
+    if (!buf || !recv_len || !len ) {
+        return  -1;
+    }
 
+    *recv_len  = 0;
+    ret   =  usart_recv_data(CONSOLE_USART_ID,  len,  recv_len);
 
+    if (!ret) {
+        memcpy(buf,   console_rx_buffer,  *recv_len );
+    }
 
+    return  ret;
 
+}
 
 
 
