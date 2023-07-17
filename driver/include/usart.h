@@ -21,7 +21,8 @@ typedef  enum {
 } usart_dev_e;
 
 typedef enum {
-    USART_DATA_8 = 0,
+    USART_DATA_7 = 0,
+    USART_DATA_8,
     USART_DATA_9,
     USART_MAX_DATA_LEN  =  USART_DATA_9,
 } usart_data_len_e;
