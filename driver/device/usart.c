@@ -136,6 +136,12 @@ static  int32_t  check_usart_buffer_cfg(usart_buffer_cfg_t * buffer_cfg)
 }
 
 
+static  int32_t   set_usart_baud_rate(usart_dev_e  usart,  uint32_t  baud_rate)
+{
+    
+}
+
+
 int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
 {
     uint32_t  flag, mask;
@@ -155,6 +161,10 @@ int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
         flag  =  USART_CR1_PCE;
     } else if (cfg->user_cfg.parity == USART_PARITY_ODD) {
         flag  =  USART_CR1_PCE | USART_CR1_PS;
+    }
+
+    if ((cfg->user_cfg.data_len  ==  USART_DATA_8) && (flag & USART_CR1_PCE)) {
+        flag |=  USART_CR1_M;
     }
 
     if (cfg->user_cfg.data_len ==  USART_DATA_9) {
