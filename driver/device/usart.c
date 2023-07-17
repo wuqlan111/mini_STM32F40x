@@ -104,7 +104,13 @@ static  int32_t  check_usart_user_cfg(usart_user_cfg_t * user_cfg)
     CHECK_PARAM_VALUE(user_cfg->stop_bits,  USART_MAX_STOP_BIT);
     CHECK_PARAM_VALUE(user_cfg->timeout,    USART_MAX_TIMEOUT);
 
+    if ((user_cfg->data_len == USART_DATA_7) && (user_cfg->parity == USART_PARITY_NONE)) {
+        return   -1;
+    }
 
+    if ((user_cfg->data_len == USART_DATA_9) && (user_cfg->parity != USART_PARITY_NONE)) {
+        return   -1;
+    }
 
     return  0;
 
