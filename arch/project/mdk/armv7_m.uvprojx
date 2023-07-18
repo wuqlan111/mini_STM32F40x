@@ -245,7 +245,7 @@
               <MiscControls>-mthumb -g -ffunction-sections   -fdata-sections -fno-common -std=gnu99  -specs=nosys.specs -ggdb -fno-exceptions  -fno-builtin -fno-strict-aliasing  -gdwarf-2</MiscControls>
               <Define>DEBUG</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\include\asm;..\..\lib\include;..\..\..\driver\include;..\..\..\util</IncludePath>
+              <IncludePath>..\..\include\asm;..\..\lib\include;..\..\..\driver\include;..\..\..\util;..\..\..\subsys\include</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -668,6 +668,21 @@
         </Group>
         <Group>
           <GroupName>driver_test</GroupName>
+        </Group>
+        <Group>
+          <GroupName>subsys</GroupName>
+          <Files>
+            <File>
+              <FileName>console.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\subsys\console.c</FilePath>
+            </File>
+            <File>
+              <FileName>console.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\subsys\include\console.h</FilePath>
+            </File>
+          </Files>
         </Group>
       </Groups>
     </Target>
