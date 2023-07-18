@@ -53,3 +53,4 @@ dkms.conf
 DebugConfig
 objs
 arch/project/mdk/armv7_m.uvguix.w123
+arch/project/mdk/EventRecorderStub.scvd
