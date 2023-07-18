@@ -15,7 +15,7 @@ void   arch_init(void)
 {
 
     reset_init_exceptions();
-    arch_systick_init();
+    // arch_systick_init();
 
     main();
 

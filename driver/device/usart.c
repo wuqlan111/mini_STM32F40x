@@ -80,6 +80,9 @@
 #define USART_CR3_REG_ADDR(usart)                    (usart_regs_base_addr[usart] + 0x14)
 #define USART_GTPR_REG_ADDR(usart)                   (usart_regs_base_addr[usart] + 0x18)
 
+#define  USART_PCLK1_HZ     
+
+
 
 typedef  struct {
     uint32_t  timeout;
@@ -93,6 +96,8 @@ static  usart_internal_cfg_t  usart_dev_cfg[USART_MAX_ID + 1] = {0};
 
 static  uint32_t  usart_regs_base_addr[] = {0x40011000,  0x40004400,  0x40004800,  0x40004C00,  
                     0x40005000, 0x40011400,  0x40007800,  0x40007C00 };
+
+static  uint32_t  usart_clk_hz[]  =  {0,0};
 
 
 static  int32_t  check_usart_user_cfg(usart_user_cfg_t * user_cfg)
@@ -139,6 +144,8 @@ static  int32_t  check_usart_buffer_cfg(usart_buffer_cfg_t * buffer_cfg)
 static  int32_t   set_usart_baud_rate(usart_dev_e  usart,  uint32_t  baud_rate)
 {
     
+
+    return  0;
 }
 
 
