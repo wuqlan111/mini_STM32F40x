@@ -1,5 +1,5 @@
-#ifndef  STM32_RCC_H
-#define  STM32_RCC_H
+#ifndef  SYSTEM_RCC_H
+#define  SYSTEM_RCC_H
 
 #include  <stdint.h>
 
