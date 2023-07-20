@@ -95,6 +95,7 @@ typedef  enum {
 
 typedef  enum {
     RCC_RESET_OP =  0,
+    RCC_UNRESET_OP,
     RCC_CLK_ENABLE,
     RCC_CLK_DISABLE,
     RCC_CLK_ENABLE_LOWER_POWER,
