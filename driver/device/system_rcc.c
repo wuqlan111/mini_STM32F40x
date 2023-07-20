@@ -116,13 +116,174 @@ static  int32_t  set_ahb1_module_op(rcc_module_e  module,  rcc_module_op_e  op)
 
 
 
+static  int32_t  set_ahb2_module_op(rcc_module_e  module,  rcc_module_op_e  op)
+{
+    uint32_t  flag,   mask, shift;
+    flag  =  mask   =  shift  =  0;
+
+    if (module <= RCC_MODULE_AHB1_MAX) {
+        return  -1;
+    }
+
+    CHECK_PARAM_VALUE(module, RCC_MODULE_AHB2_MAX );
+    CHECK_PARAM_VALUE(op,   RCC_MODULE_MAX_OP);
+
+
+    switch (op) {
+        case  RCC_RESET_OP:
+        case  RCC_CLK_ENABLE:
+        case  RCC_CLK_ENABLE_LOWER_POWER:
+            flag  =   1;
+        case  RCC_UNRESET_OP:
+        case  RCC_CLK_DISABLE:
+        case  RCC_CLK_DISABLE_LOWER_POWER:
+            mask  =   1;
+
+            if (module  < RCC_MODULE_CRYP) {
+                shift  =  module - RCC_MODULE_CRYP;
+            } else {
+                shift  =  module - RCC_MODULE_CRYP + 4;
+            }
+
+            flag  <<= shift;
+            mask  <<= shift;
+    }
+
+
+    switch (op) {
+        case  RCC_RESET_OP:
+        case  RCC_UNRESET_OP:
+            REG32_UPDATE(RCC_AHBXRSTR_REG_ADDR(RCC_AHB2_CLK), flag,  mask);
+            break;
+
+        case  RCC_CLK_ENABLE:
+        case  RCC_CLK_DISABLE:
+            REG32_UPDATE(RCC_AHBXENR_REG_ADDR(RCC_AHB2_CLK), flag,  mask);
+            break;
+        
+        default:
+            REG32_UPDATE(RCC_AHBXLPENR_REG_ADDR(RCC_AHB2_CLK), flag,  mask);
+            
+    }
+
+    return   0;
+
+}
+
+
+static  int32_t  set_ahb3_module_op(rcc_module_e  module,  rcc_module_op_e  op)
+{
+    uint32_t  flag,   mask, shift;
+    flag  =  mask   =  shift  =  0;
+
+    if (module <= RCC_MODULE_AHB2_MAX) {
+        return  -1;
+    }
+
+    CHECK_PARAM_VALUE(module, RCC_MODULE_AHB3_MAX );
+    CHECK_PARAM_VALUE(op,   RCC_MODULE_MAX_OP);
+
+
+    switch (op) {
+        case  RCC_RESET_OP:
+        case  RCC_CLK_ENABLE:
+        case  RCC_CLK_ENABLE_LOWER_POWER:
+            flag  =   1;
+        case  RCC_UNRESET_OP:
+        case  RCC_CLK_DISABLE:
+        case  RCC_CLK_DISABLE_LOWER_POWER:
+            mask  =   1;
+            shift  =   0;
+
+            flag  <<= shift;
+            mask  <<= shift;
+    }
+
+
+    switch (op) {
+        case  RCC_RESET_OP:
+        case  RCC_UNRESET_OP:
+            REG32_UPDATE(RCC_AHBXRSTR_REG_ADDR(RCC_AHB3_CLK), flag,  mask);
+            break;
+
+        case  RCC_CLK_ENABLE:
+        case  RCC_CLK_DISABLE:
+            REG32_UPDATE(RCC_AHBXENR_REG_ADDR(RCC_AHB3_CLK), flag,  mask);
+            break;
+        
+        default:
+            REG32_UPDATE(RCC_AHBXLPENR_REG_ADDR(RCC_AHB3_CLK), flag,  mask);
+            
+    }
+
+    return   0;
+
+}
 
 
 
 
+static  int32_t  set_apb1_module_op(rcc_module_e  module,  rcc_module_op_e  op)
+{
+    uint32_t  flag,   mask, shift;
+    flag  =  mask   =  shift  =  0;
+
+    if (module <= RCC_MODULE_AHB3_MAX) {
+        return  -1;
+    }
+
+    CHECK_PARAM_VALUE(module, RCC_MODULE_APB1_MAX );
+    CHECK_PARAM_VALUE(op,   RCC_MODULE_MAX_OP);
 
 
+    switch (op) {
+        case  RCC_RESET_OP:
+        case  RCC_CLK_ENABLE:
+        case  RCC_CLK_ENABLE_LOWER_POWER:
+            flag  =   1;
+        case  RCC_UNRESET_OP:
+        case  RCC_CLK_DISABLE:
+        case  RCC_CLK_DISABLE_LOWER_POWER:
+            mask  =   1;
 
+            if (module  < RCC_MODULE_WWDG) {
+                shift  =  module - RCC_MODULE_TIM2;
+            } else if (module  < RCC_MODULE_SPI2) {
+                shift  =  module - RCC_MODULE_WWDG + 11;
+            } else if (module  < RCC_MODULE_USART2) {
+                shift  =  module - RCC_MODULE_SPI2 + 14;
+            } else if (module  < RCC_MODULE_CAN1) {
+                shift  =  module - RCC_MODULE_USART2 + 17;
+            } else if (module  < RCC_MODULE_PWR) {
+                shift  =  module - RCC_MODULE_CAN1 + 25;
+            } else {
+                shift  =  module - RCC_MODULE_PWR + 28;
+            }
+
+            flag  <<= shift;
+            mask  <<= shift;
+    }
+
+
+    switch (op) {
+        case  RCC_RESET_OP:
+        case  RCC_UNRESET_OP:
+            REG32_UPDATE(RCC_APBXRSTR_REG_ADDR(RCC_APB1_CLK), flag,  mask);
+            break;
+
+        case  RCC_CLK_ENABLE:
+        case  RCC_CLK_DISABLE:
+            REG32_UPDATE(RCC_APBXENR_REG_ADDR(RCC_APB1_CLK), flag,  mask);
+            break;
+        
+        default:
+            REG32_UPDATE(RCC_APBXLPENR_REG_ADDR(RCC_APB1_CLK), flag,  mask);
+            
+    }
+
+    return   0;
+
+}
 
 
 
