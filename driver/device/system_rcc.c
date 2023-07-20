@@ -25,10 +25,33 @@
 #define  RCC_PLLI2SCFGR_REG_ADDR        (RCC_REGISTER_BASE_ADDR + 0x84)
 
 
+static  int32_t  set_ahb1_module_op(rcc_module_e  module,  rcc_module_op_e  op)
+{
+    uint32_t  flag,   mask;
+    flag  =  mask  =  0;
+    if (module > RCC_MODULE_AHB1_MAX ) {
+        return   -1;
+    }
+
+    switch (op)
+    {
+
+        
+
+
+        case  RCC_CLK_ENABLE:
+        case  RCC_CLK_DISABLE:
+            if ()
+            break;
+    
+    default:
+        break;
+    }
 
 
 
-// int32_t  set_ahb1_module
+
+}
 
 
 
