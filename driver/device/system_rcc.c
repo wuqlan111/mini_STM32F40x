@@ -286,25 +286,102 @@ static  int32_t  set_apb1_module_op(rcc_module_e  module,  rcc_module_op_e  op)
 }
 
 
+static  int32_t  set_apb2_module_op(rcc_module_e  module,  rcc_module_op_e  op)
+{
+    uint32_t  flag,   mask, shift;
+    flag  =  mask   =  shift  =  0;
 
+    if (module <= RCC_MODULE_APB1_MAX) {
+        return  -1;
+    }
 
+    CHECK_PARAM_VALUE(module, RCC_MODULE_APB1_MAX );
+    CHECK_PARAM_VALUE(op,   RCC_MODULE_MAX_OP);
+
+    switch (op) {
+        case  RCC_RESET_OP:
+            flag  =   1;
+        case  RCC_UNRESET_OP:
+            mask  =   1;
+            break;
+
+        case  RCC_CLK_ENABLE:
+        case  RCC_CLK_ENABLE_LOWER_POWER:
+            if (module == RCC_MODULE_ADC) {
+                flag  =  0x7;
+            } else {
+                flag  =  1;
+            }
+
+        case  RCC_CLK_DISABLE:
+        case  RCC_CLK_DISABLE_LOWER_POWER:
+
+            if (module == RCC_MODULE_ADC) {
+                mask  =  0x7;
+            } else {
+                mask  =  1;
+            }
+    }
+
+    if (module  < RCC_MODULE_USART1) {
+        shift  =  module - RCC_MODULE_TIM1;
+    } else if (module < RCC_MODULE_ADC) {
+        shift  =  module - RCC_MODULE_USART1 + 4;
+    } else if (module < RCC_MODULE_SDIO) {
+        shift  =  module - RCC_MODULE_ADC + 8;
+    } else if (module < RCC_MODULE_SYSCFG) {
+        shift  =  module - RCC_MODULE_SDIO + 11;
+    } else if (module < RCC_MODULE_TIM9) {
+        shift  =  module - RCC_MODULE_SYSCFG + 14;
+    } else {
+        shift  =  module - RCC_MODULE_TIM9 + 16;
+    }
+
+    flag  <<=   shift;
+    mask  <<=   shift;
+
+    switch (op) {
+        case  RCC_RESET_OP:
+        case  RCC_UNRESET_OP:
+            REG32_UPDATE(RCC_APBXRSTR_REG_ADDR(RCC_APB2_CLK), flag,  mask);
+            break;
+
+        case  RCC_CLK_ENABLE:
+        case  RCC_CLK_DISABLE:
+            REG32_UPDATE(RCC_APBXENR_REG_ADDR(RCC_APB2_CLK), flag,  mask);
+            break;
+        
+        default:
+            REG32_UPDATE(RCC_APBXLPENR_REG_ADDR(RCC_APB2_CLK), flag,  mask);
+            
+    }
+
+    return   0;
+
+}
 
 
 
 
 int32_t  rcc_module_set_op(rcc_module_e  module,  rcc_module_op_e  op)
 {
-
+    int32_t  ret  =  0;
     CHECK_PARAM_VALUE(module,  RCC_MODULE_MAX);
     CHECK_PARAM_VALUE(op,      RCC_MODULE_MAX_OP);
 
+    if (module <= RCC_MODULE_AHB1_MAX) {
+        ret  =  set_ahb1_module_op(module, op);
+    } else if (module <=  RCC_MODULE_AHB2_MAX) {
+        ret  =  set_ahb2_module_op(module, op);
+    } else if (module <=  RCC_MODULE_AHB3_MAX) {
+        ret  =  set_ahb3_module_op(module, op);
+    } else if (module <=  RCC_MODULE_APB1_MAX) {
+        ret  =  set_apb1_module_op(module, op);
+    } else {
+        ret  =  set_apb2_module_op(module, op);
+    }
 
-
-
-
-
-
-    return  0;
+    return  ret;
 }
 
 
