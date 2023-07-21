@@ -80,6 +80,10 @@
 #define  RCC_PLLI2SCFGR_REG_ADDR        (RCC_REGISTER_BASE_ADDR + 0x84)
 
 
+#define   RCC_HSI_CLK_FREQUENCY            16         // 16MHz     
+#define   RCC_HSE_CLK_FREQUENCY            8          // 8MHz
+
+
 static  int32_t  set_ahb1_module_op(rcc_module_e  module,  rcc_module_op_e  op)
 {
     uint32_t  flag,   mask, shift;
@@ -441,7 +445,106 @@ int32_t  rcc_module_set_op(rcc_module_e  module,  rcc_module_op_e  op)
 
 
 
+int32_t  rcc_set_clk_state(rcc_system_clk_e clk_type, uint32_t  enable)
+{
+    uint32_t  shift, reg;
+    shift  =  reg  =  0;
 
+    CHECK_PARAM_VALUE(clk_type,  RCC_MAX_CLK);
+
+
+    switch (clk_type) {
+        case  RCC_HSI_CLK:
+            shift  =  0;
+            break;
+        case  RCC_HSE_CLK:
+            shift  =  16;
+            break;
+        case  RCC_PLL_CLK:
+            shift  =  24;
+            break;
+        case  RCC_PLLI2S_CLK:
+            shift  =  26;
+            break;
+        case  RCC_LSE_CLK:
+        case  RCC_LSI_CLK:
+            shift  =  0;
+    }
+
+    uint32_t  flag  =  enable? 1<<shift: 0;
+    uint32_t  mask  =  1 << shift;
+
+    if (clk_type  <= RCC_PLLI2S_CLK) {
+        reg  =  RCC_CFGR_REG_ADDR;
+    } else if (clk_type  ==  RCC_LSE_CLK) {
+        reg  =  RCC_BDCR_REG_ADDR;
+    } else {
+        reg  =  RCC_CSR_REG_ADDR;
+    }
+
+    REG32_UPDATE(reg,  flag,  mask);
+
+    REG32_WAIT(reg,  flag << 1,  mask << 1);
+
+    return  0;
+
+}
+
+int32_t  rcc_set_clk_bypass_oscillator(rcc_system_clk_e clk_type, uint32_t  bypass)
+{
+    uint32_t  reg, shift;
+    reg = shift  =  0;
+
+    if ( (clk_type !=  RCC_HSE_CLK) && (clk_type != RCC_LSE_CLK)) {
+        return  -1;
+    }
+
+    if (clk_type == RCC_HSE_CLK) {
+        reg  =  RCC_CFGR_REG_ADDR;
+        shift  = 18;
+    } else {
+        reg  =  RCC_BDCR_REG_ADDR;
+        shift  =  2;
+    }
+
+    uint32_t  flag  =  bypass? 1 << shift:  0;
+    uint32_t  mask  =  1 << shift;
+
+    REG32_UPDATE(reg,  flag,  mask); 
+
+    return   0;
+
+}
+
+
+
+
+int32_t  rcc_switch_system_clk_source(rcc_system_clk_select_e  clk_type)
+{
+    uint32_t  flag,  mask;
+    flag  =  mask  =  0;
+    CHECK_PARAM_VALUE(clk_type,  RCC_SYSTEM_CLK_MAX);
+
+    switch (clk_type) {
+        case RCC_SYSTEM_CLK_HSE:
+            flag  =  1;
+            break;
+        case RCC_SYSTEM_CLK_PLL:
+            flag  =  2;
+    }
+
+    mask  =  0x3;
+
+    REG32_UPDATE(RCC_CFGR_REG_ADDR,  flag,  mask);
+
+    flag  <<=  2;
+    mask  <<=  2;
+
+    REG32_WAIT(RCC_CFGR_REG_ADDR,  flag,  mask);
+
+    return   0;
+
+}
 
 
 

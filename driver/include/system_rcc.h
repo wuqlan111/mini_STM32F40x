@@ -105,11 +105,38 @@ typedef  enum {
 
 
 
+typedef enum {
+    RCC_SYSTEM_CLK_HSI  =  0,
+    RCC_SYSTEM_CLK_HSE,
+    RCC_SYSTEM_CLK_PLL,
+    RCC_SYSTEM_CLK_MAX   =  RCC_SYSTEM_CLK_PLL,
+} rcc_system_clk_select_e;
+
+
+typedef enum {
+    RCC_HSI_CLK   =   0,
+    RCC_HSE_CLK,
+    RCC_PLL_CLK,
+    RCC_PLLI2S_CLK,
+    RCC_LSE_CLK,
+    RCC_LSI_CLK,
+    RCC_MAX_CLK =  RCC_LSI_CLK,
+} rcc_system_clk_e;
+
+
+
+
+
 int32_t  rcc_module_set_op(rcc_module_e  module,  rcc_module_op_e  op);
 
 
+int32_t  rcc_set_clk_state(rcc_system_clk_e clk_type,  uint32_t  enable);
+
+int32_t  rcc_set_clk_bypass_oscillator(rcc_system_clk_e clk_type, uint32_t  bypass);
 
 
+
+int32_t  rcc_switch_system_clk_source(rcc_system_clk_select_e  clk_type);
 
 
 
