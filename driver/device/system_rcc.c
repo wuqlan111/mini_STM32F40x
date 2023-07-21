@@ -7,6 +7,42 @@
 #include  "util.h"
 
 
+#define  RCC_CR_PLLI2SRDY             (1<<27u)
+#define  RCC_CR_PLLI2SON              (1<<26u)
+#define  RCC_CR_PLLRDY                (1<<25u)
+#define  RCC_CR_PLLON                 (1<<24u)
+#define  RCC_CR_CSSON                 (1<<19u)
+#define  RCC_CR_HSEBYP                (1<<18u)
+#define  RCC_CR_HSERDY                (1<<17u)
+#define  RCC_CR_HSEON                 (1<<16u)
+#define  RCC_CR_HSICAL                (0xff00u)
+#define  RCC_CR_HSITRIM               (0xf8u)
+#define  RCC_CR_HSIRDY                (0x2u)
+#define  RCC_CR_HSION                 (0x1u)
+
+#define  RCC_PLLCR_PLLQ               (0xf<<24u)
+#define  RCC_PLLCR_PLLSRC             (1<<22u)
+#define  RCC_PLLCR_PLLP               (0x3<<16u)
+#define  RCC_PLLCR_PLLN               (0x1ff<<6u)
+#define  RCC_PLLCR_PLLM               (0x3fu)
+
+
+
+#define  RCC_CFGR_MCO2               (0x3<<30u)
+#define  RCC_CFGR_MCO2PRE            (0x7<<27u)
+#define  RCC_CFGR_MCO1PRE            (0x7<<24u)
+#define  RCC_CFGR_I2SSRC             (1<<23u)
+#define  RCC_CFGR_MCO1               (0x3<<21u)
+#define  RCC_CFGR_RTCPRE             (0x1f<<16u)
+#define  RCC_CFGR_PPRE2              (0x7<<13u)
+#define  RCC_CFGR_PPRE1              (0x7<<10u)
+#define  RCC_CFGR_HPRE               (0xf0u)
+#define  RCC_CFGR_SWS                (0xcu)
+#define  RCC_CFGR_SW                 (0x3u)
+
+
+
+
 
 #define  RCC_REGISTER_BASE_ADDR              (0x40023800u)
 #define  RCC_CR_REG_ADDR                (RCC_REGISTER_BASE_ADDR)

@@ -11,6 +11,8 @@
         "cstddef": "c",
         "string": "c",
         "memory": "c",
-        "functional": "c"
+        "functional": "c",
+        "random": "c",
+        "typeinfo": "c"
     }
 }
