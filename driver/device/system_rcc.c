@@ -40,6 +40,25 @@
 #define  RCC_CFGR_SWS                (0xcu)
 #define  RCC_CFGR_SW                 (0x3u)
 
+#define  RCC_BDCR_BDRST               (1<<16u)
+#define  RCC_BDCR_RTCEN               (1<<15u)
+#define  RCC_BDCR_RTCSEL              (0x3<<8u)
+#define  RCC_BDCR_LSEBYP              (0x4u)
+#define  RCC_BDCR_LSERDY              (0x2u)
+#define  RCC_BDCR_LSEON               (0x1u)
+
+
+
+#define  RCC_CSR_LPWRRSTF             (1<<31u)
+#define  RCC_CSR_WWDGRSTF             (1<<30u)
+#define  RCC_CSR_IWDGRSTF             (1<<29u)
+#define  RCC_CSR_SFTRSTF              (1<<28u)
+#define  RCC_CSR_PORRSTF              (1<<27u)
+#define  RCC_CSR_PINRSTF              (1<<26u)
+#define  RCC_CSR_BORRSTF              (1<<25u)
+#define  RCC_CSR_RMVF                 (1<<24u)
+#define  RCC_CSR_LSIRDY               (0x2u)
+#define  RCC_CSR_LSION                (0x1u)
 
 
 
