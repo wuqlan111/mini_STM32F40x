@@ -140,13 +140,13 @@ int32_t  rcc_set_clk_bypass_oscillator(rcc_system_clk_e clk_type, uint32_t  bypa
 int32_t  rcc_switch_system_clk_source(rcc_system_clk_select_e  clk_type);
 
 
-int32_t  rcc_set_pll_clk_frequency(double freq);
+
 int32_t  rcc_get_pll_clk_frequency(double * freq);
 
-int32_t  rcc_set_ahb_clk_frequency(double  freq);
+int32_t  rcc_get_system_clk_frequency(double  * freq);
+
 int32_t  rcc_get_ahb_clk_frequency(double * freq);
 
-int32_t  rcc_set_apb_clk_frequency(double  freq,  uint32_t  is_apb1);
 int32_t  rcc_get_apb_clk_frequency(double * freq,  uint32_t is_apb1);
 
 
