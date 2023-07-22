@@ -635,14 +635,20 @@ static  int32_t  rcc_set_vco_output_clk(double  freq)
 
     uint32_t  plln  =  (uint32_t)(freq / vco_input_clk);
     CHECK_PARAM_VALUE(plln,  RCC_PLLCFGR_MIN_PLLN);
-    if (vco_input_clk < RCC_PLLCFGR_MIN_PLLN) {
+    if (plln < RCC_PLLCFGR_MIN_PLLN) {
         return  -1;
     }
 
-    flag  =   plln << 6;
-    mask  =   RCC_PLLCFGR_PLLN;
+    uint32_t  pllq  =  (uint32_t)(freq / RCC_USB_OTG_FREQUENCY);
+    CHECK_PARAM_VALUE(pllq,  RCC_PLLCFGR_MIN_PLLQ);
+    if (pllq < RCC_PLLCFGR_MIN_PLLQ) {
+        return  -1;
+    }
 
-    REG32_UPDATE(RCC_PLLCFGR_PLLN, flag,  mask);
+    flag  =   (plln << 6)  |  (pllq << 24);
+    mask  =   RCC_PLLCFGR_PLLN  |  RCC_PLLCFGR_PLLQ;
+
+    REG32_UPDATE(RCC_PLLCFGR_REG_ADDR, flag,  mask);
 
     return   0;
 
