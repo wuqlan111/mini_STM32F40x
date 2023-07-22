@@ -14,10 +14,12 @@ int  main(void)
     
     console_init();
 
-    console_fmt_out("hello world! \r\n");
+    while(1) {
 
+        for (int32_t i  =  0; i < 12000; i++);
 
-    while(1) ;
+        console_fmt_out("hello world! \r\n");
+    };
 
     return  0;
 }
