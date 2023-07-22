@@ -7,6 +7,7 @@
 
 #define  RCC_MODULE(module)  RCC_MODULE_##module
 
+
 typedef  enum {
     RCC_AHB1_CLK = 0,
     RCC_AHB2_CLK,
@@ -139,7 +140,7 @@ int32_t  rcc_set_clk_bypass_oscillator(rcc_system_clk_e clk_type, uint32_t  bypa
 int32_t  rcc_switch_system_clk_source(rcc_system_clk_select_e  clk_type);
 
 
-
+int32_t  rcc_set_pll_clk_frequency(uint32_t  freq);
 
 
 

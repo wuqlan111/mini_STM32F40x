@@ -20,11 +20,11 @@
 #define  RCC_CR_HSIRDY                (0x2u)
 #define  RCC_CR_HSION                 (0x1u)
 
-#define  RCC_PLLCR_PLLQ               (0xf<<24u)
-#define  RCC_PLLCR_PLLSRC             (1<<22u)
-#define  RCC_PLLCR_PLLP               (0x3<<16u)
-#define  RCC_PLLCR_PLLN               (0x1ff<<6u)
-#define  RCC_PLLCR_PLLM               (0x3fu)
+#define  RCC_PLLCFGR_PLLQ               (0xf<<24u)
+#define  RCC_PLLCFGR_PLLSRC             (1<<22u)
+#define  RCC_PLLCFGR_PLLP               (0x3<<16u)
+#define  RCC_PLLCFGR_PLLN               (0x1ff<<6u)
+#define  RCC_PLLCFGR_PLLM               (0x3fu)
 
 
 
@@ -65,7 +65,7 @@
 
 #define  RCC_REGISTER_BASE_ADDR              (0x40023800u)
 #define  RCC_CR_REG_ADDR                (RCC_REGISTER_BASE_ADDR)
-#define  RCC_PLLCR_REG_ADDR             (RCC_REGISTER_BASE_ADDR + 0x4)
+#define  RCC_PLLCFGR_REG_ADDR             (RCC_REGISTER_BASE_ADDR + 0x4)
 #define  RCC_CFGR_REG_ADDR              (RCC_REGISTER_BASE_ADDR + 0x8)
 #define  RCC_CIR_REG_ADDR               (RCC_REGISTER_BASE_ADDR + 0xc)
 #define  RCC_AHBXRSTR_REG_ADDR(ahb)     (RCC_REGISTER_BASE_ADDR + 0x10 + ((ahb) - RCC_AHB1_CLK) * 4)
@@ -82,6 +82,20 @@
 
 #define   RCC_HSI_CLK_FREQUENCY            16         // 16MHz     
 #define   RCC_HSE_CLK_FREQUENCY            8          // 8MHz
+#define   RCC_USB_OTG_FREQUENCY            48         // 48MHz
+#define   RCC_VCO_MAX_INPUT_FREQUENCY                 2         // 2MHz
+#define   RCC_VCO_MIN_INPUT_FREQUENCY                 1         // 2MHz
+#define   RCC_VCO_MAX_OUTPUT_FREQUENCY                432         // 432MHz
+#define   RCC_VCO_MIN_OUTPUT_FREQUENCY                100         // 100MHz
+#define   RCC_PLL_MAX_FREQUENCY                    168         // 168MHz
+#define   RCC_PLLCFGR_MIN_PLLQ                      2
+#define   RCC_PLLCFGR_MAX_PLLQ                      15
+#define   RCC_PLLCFGR_MIN_PLLN                      50
+#define   RCC_PLLCFGR_MAX_PLLN                      432
+#define   RCC_PLLCFGR_MIN_PLLM                      2
+#define   RCC_PLLCFGR_MAX_PLLM                      63
+
+
 
 
 static  int32_t  set_ahb1_module_op(rcc_module_e  module,  rcc_module_op_e  op)
@@ -545,6 +559,68 @@ int32_t  rcc_switch_system_clk_source(rcc_system_clk_select_e  clk_type)
     return   0;
 
 }
+
+
+
+int32_t  rcc_set_pll_clk_frequency(uint32_t  freq)
+{
+    uint32_t  flag,  mask;
+    flag = mask  =  0;
+
+    CHECK_PARAM_VALUE(freq,  RCC_PLL_MAX_FREQUENCY);
+
+    flag  = REG32_READ(RCC_CFGR_REG_ADDR);
+
+    uint32_t  pll_input_clk  =   0;
+    if (flag | RCC_PLLCFGR_PLLSRC) {
+        pll_input_clk  =  RCC_HSE_CLK_FREQUENCY;
+    } else {
+        pll_input_clk  =  RCC_HSI_CLK_FREQUENCY;
+    }
+
+    uint32_t  pllm  = pll_input_clk / RCC_VCO_MAX_INPUT_FREQUENCY;
+
+    CHECK_PARAM_VALUE(pllm,  RCC_PLLCFGR_MAX_PLLM);
+    if (pllm < RCC_PLLCFGR_MIN_PLLM) {
+        return  -1;
+    }
+
+    uint32_t  plln  =  (flag & RCC_PLLCFGR_PLLN) >> 6;
+    if (plln < RCC_PLLCFGR_MIN_PLLN) {
+        return  -1;
+    }
+
+    CHECK_PARAM_VALUE(plln,  RCC_PLLCFGR_MAX_PLLN);
+
+    uint32_t vco_out_clk =  RCC_VCO_MAX_INPUT_FREQUENCY * plln;
+
+    if (vco_out_clk < RCC_VCO_MIN_OUTPUT_FREQUENCY) {
+        return  -1;
+    }
+
+    CHECK_PARAM_VALUE(vco_out_clk,  RCC_VCO_MAX_OUTPUT_FREQUENCY);
+
+    uint32_t  factor  =   vco_out_clk / freq;
+
+    CHECK_PARAM_VALUE(factor, 8);
+    if ( (factor  <  2) || (factor & 0x1) ) {
+        return  -1;
+    }
+
+    uint32_t  pllp    =   (factor >> 1) - 1;
+
+    flag   =  pllp << 16;
+
+    REG32_UPDATE(RCC_PLLCFGR_REG_ADDR,  flag,  RCC_PLLCFGR_PLLP); 
+
+    return   0;
+
+}
+
+
+
+
+
 
 
 
