@@ -141,7 +141,7 @@ int32_t  rcc_switch_system_clk_source(rcc_system_clk_select_e  clk_type);
 
 
 int32_t  rcc_set_pll_clk_frequency(double freq);
-
+int32_t  rcc_get_pll_clk_frequency(double * freq);
 
 
 

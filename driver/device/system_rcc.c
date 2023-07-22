@@ -711,6 +711,47 @@ int32_t  rcc_set_pll_clk_frequency(double  freq)
 }
 
 
+int32_t  rcc_get_pll_clk_frequency(double * freq)
+{
+    uint32_t  flag,  mask;
+    flag  =  mask  =  0;
+
+    CHECK_PARAM_NULL(freq);
+
+    double vco_out_clk =  0;
+    if (rcc_get_vco_output_clk(&vco_out_clk)) {
+        return  -1;
+    }
+
+    CHECK_PARAM_VALUE(vco_out_clk,  RCC_VCO_MAX_OUTPUT_FREQUENCY);
+    if (vco_out_clk < RCC_VCO_MIN_OUTPUT_FREQUENCY) {
+        return  -1;
+    }
+
+    flag  =  REG32_READ(RCC_PLLCFGR_REG_ADDR);
+
+    uint32_t  pllp  = (flag & RCC_PLLCFGR_PLLP) >> 16;
+    uint32_t  factor  =  (pllp + 1) << 1;
+
+    *freq   =  vco_out_clk / factor;
+
+    CHECK_PARAM_VALUE(*freq, RCC_PLL_MAX_FREQUENCY);
+
+    return   0;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
