@@ -5,7 +5,7 @@
 #include  "../include/system_rcc.h"
 #include  "../include/driver_util.h"
 #include  "util.h"
-
+#include  "math_util.h"
 
 #define  RCC_CR_PLLI2SRDY             (1<<27u)
 #define  RCC_CR_PLLI2SON              (1<<26u)
@@ -744,14 +744,196 @@ int32_t  rcc_get_pll_clk_frequency(double * freq)
 }
 
 
+int32_t  rcc_get_system_clk_frequency(double  * freq)
+{
+    uint32_t  flag,  mask;
+    int32_t   ret  =  0;
+    flag  = mask  =  0;
+
+    *freq =  0;
+    CHECK_PARAM_NULL(freq);
+
+    flag = REG32_READ(RCC_CFGR_REG_ADDR);
+
+    uint32_t  system_clk_type  =  (flag & RCC_CFGR_SWS) >> 2;
+    double  pll_clk = 0;
+
+    if (system_clk_type ==  RCC_SYSTEM_CLK_HSE) {
+        *freq   =  RCC_HSE_CLK_FREQUENCY;
+    } else if (system_clk_type == RCC_SYSTEM_CLK_HSI) {
+        *freq  =  RCC_HSI_CLK_FREQUENCY;
+    } else {
+        if (rcc_get_pll_clk_frequency(freq)) {
+            ret =  -1;
+        }
+    }
+
+    return  ret;
+
+}
 
 
 
 
+int32_t  rcc_set_ahb_clk_frequency(double  freq)
+{
+    uint32_t  flag,  mask;
+    double  system_clk = 0;
+    flag = mask  = 0;
+
+    if (freq < 25) {
+        return  -1;
+    }
+
+    if (rcc_get_system_clk_frequency(&system_clk)) {
+        return   -1;
+    }
+
+    uint32_t  factor = (uint32_t)(system_clk / freq);
+
+    if (factor > 512) {
+        return  -1;
+    }
+
+    if (factor >= 2) {
+        uint32_t hpre =  0;
+
+        if (math_clog2(factor,  &hpre)) {
+            return -1;
+        }
+
+        if (factor > 16) {
+            hpre  -= 2;
+        } else {
+            hpre --;
+        }
+
+        flag  =  (1 << 7) | (hpre << 4);
+
+    }
+
+    mask   =   RCC_CFGR_HPRE;
+
+    REG32_UPDATE(RCC_CFGR_HPRE,  flag,  mask);
+
+    return  0;
+
+}
+
+
+int32_t  rcc_get_ahb_clk_frequency(double * freq)
+{
+    uint32_t  flag,  mask;
+    double  system_clk = 0;
+    flag = mask  = 0;
+
+    CHECK_PARAM_NULL(freq);
+
+    if (rcc_get_system_clk_frequency(&system_clk)) {
+        return   -1;
+    }
+
+    flag = REG32_READ(RCC_CFGR_REG_ADDR);
+    uint32_t  hpre =  (flag & RCC_CFGR_HPRE) >> 4;
+
+    uint32_t  factor_vld  =  hpre & 0x8? 1:  0;
+    uint32_t  factor  =   0;
+
+    if ( (hpre & 0x7) > 3) {
+        factor  =  1 << ((hpre & 0x7) + 2);
+    } else {
+        factor  =  1 << ((hpre & 0x7) + 1);
+    }
+
+    if (factor_vld) {
+        *freq   =   system_clk / factor;
+    } else {
+        *freq   =   system_clk;
+    }
+
+    return  0;
+
+}
 
 
 
 
+int32_t  rcc_set_apb_clk_frequency(double  freq,  uint32_t  is_apb1)
+{
+    uint32_t  flag,  mask;
+    uint32_t  apb_max =  is_apb1? 42: 84;
+    uint32_t  shift   =  is_apb1? 10: 13;
+    double  ahb_clk = 0;
+    flag = mask  = 0;
+
+    if (freq > apb_max) {
+        return  -1;
+    }
+
+    if (rcc_get_ahb_clk_frequency(&ahb_clk)) {
+        return   -1;
+    }
+
+    uint32_t  factor = (uint32_t)(ahb_clk / freq);
+
+    if (factor > 16) {
+        return  -1;
+    }
+
+    if (factor >= 2) {
+        uint32_t apre =  0;
+
+        if (math_clog2(factor,  &apre)) {
+            return -1;
+        }
+
+        apre--;
+
+        flag = apre << shift ;
+        flag |=  1 << (shift+2);
+
+    }
+
+    mask   =   0x7 << shift;
+
+    REG32_UPDATE(RCC_CFGR_HPRE,  flag,  mask);
+
+    return  0;
+
+}
+
+
+
+int32_t  rcc_get_apb_clk_frequency(double * freq,  uint32_t is_apb1)
+{
+    uint32_t  flag,  mask;
+    uint32_t  shift  =   is_apb1? 10: 13;
+    double  ahb_clk = 0;
+    flag = mask  = 0;
+
+    CHECK_PARAM_NULL(freq);
+
+    if (rcc_get_ahb_clk_frequency(&ahb_clk)) {
+        return   -1;
+    }
+
+    flag = REG32_READ(RCC_CFGR_REG_ADDR);
+
+    uint32_t  apre =  (flag  >> shift ) & 0x7;
+
+    uint32_t  factor_vld  =  apre & 0x4? 1:  0;
+    uint32_t  bits  =  apre & 0x3;
+    uint32_t  factor  =   1 << (bits + 1);
+
+    if (factor_vld) {
+        *freq   =   ahb_clk / factor;
+    } else {
+        *freq   =   ahb_clk;
+    }
+
+    return  0;
+
+}
 
 
 
