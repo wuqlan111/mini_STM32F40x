@@ -125,6 +125,15 @@ typedef enum {
 } rcc_system_clk_e;
 
 
+typedef struct {
+    double  system_clk;
+    double  ahb_clk;
+    double  apb1_clk;
+    double  apb2_clk;
+    uint32_t  hse_bypass_oscillator;
+    uint32_t  hse_enable;
+} ATTRIBUTE_ALIGN(4) rcc_system_clk_init_t;
+
 
 
 

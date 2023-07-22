@@ -938,5 +938,60 @@ int32_t  rcc_get_apb_clk_frequency(double * freq,  uint32_t is_apb1)
 
 
 
+int32_t  system_clk_init(rcc_system_clk_init_t * rcc_cfg)
+{
+    int32_t  ret  =  0;
+
+    CHECK_PARAM_NULL(rcc_cfg);
+
+    /*init hse clk*/
+    if (rcc_set_clk_bypass_oscillator(RCC_HSE_CLK,  rcc_cfg->hse_bypass_oscillator)) {
+        return  -1;
+    }
+
+    if (rcc_set_clk_state(RCC_HSE_CLK, rcc_cfg->hse_enable)) {
+        return  -1;
+    }
+
+    /*init pll*/
+    if (rcc_set_vco_input_clk(RCC_VCO_MAX_INPUT_FREQUENCY,  rcc_cfg->hse_enable)) {
+        return  -1;
+    }    
+
+    if (rcc_set_vco_output_clk(RCC_VCO_MIN_OUTPUT_FREQUENCY)) {
+        return  -1;
+    }
+
+    if (rcc_set_pll_clk_frequency(rcc_cfg->system_clk)) {
+        return  -1;
+    }
+
+    if (rcc_set_clk_state(RCC_PLL_CLK,  1) ) {
+        return  -1;
+    }
+
+    /*select system clk*/
+    if (rcc_switch_system_clk_source(RCC_SYSTEM_CLK_PLL)) {
+        return  -1;
+    }    
+
+    /*init ahb clk*/
+    if (rcc_set_ahb_clk_frequency(rcc_cfg->ahb_clk)) {
+        return  -1;
+    }
+
+    if (rcc_set_apb_clk_frequency(rcc_cfg->apb1_clk,  1)) {
+        return  -1;
+    }
+
+    if (rcc_set_apb_clk_frequency(rcc_cfg->apb2_clk,  0)) {
+        return  -1;
+    }
+
+
+    return  0;
+
+
+}
 
 
