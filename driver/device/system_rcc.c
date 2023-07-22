@@ -572,7 +572,7 @@ static  int32_t  rcc_set_vco_input_clk(double  freq,  uint32_t is_hse)
 
     uint32_t pll_input_lck =  is_hse? RCC_HSE_CLK_FREQUENCY: RCC_HSI_CLK_FREQUENCY;
 
-    uint32_t  factor =  (uint32_t)(freq / pll_input_lck);
+    uint32_t  factor =  (uint32_t)(pll_input_lck / freq);
     CHECK_PARAM_VALUE(factor,  RCC_PLLCFGR_MAX_PLLM);
     if (factor < RCC_PLLCFGR_MIN_PLLM) {
         return  -1;
@@ -582,7 +582,7 @@ static  int32_t  rcc_set_vco_input_clk(double  freq,  uint32_t is_hse)
     flag  |=  factor;
     mask  =  RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM;
 
-    REG32_UPDATE(RCC_PLLCFGR_PLLSRC,    flag,  mask);
+    REG32_UPDATE(RCC_PLLCFGR_REG_ADDR,    flag,  mask);
 
     return   0;
 
@@ -609,6 +609,11 @@ static  int32_t  rcc_get_vco_input_clk(double * freq)
 
     *freq  =  ((double)pll_input_lck) / pllm;
 
+    CHECK_PARAM_VALUE(*freq,  RCC_VCO_MAX_INPUT_FREQUENCY);
+    if ( *freq < RCC_VCO_MIN_INPUT_FREQUENCY) {
+        return  -1;
+    }
+
     return   0;
 
 }
@@ -618,7 +623,7 @@ static  int32_t  rcc_set_vco_output_clk(double  freq)
 {
     uint32_t  flag,  mask;
     flag = mask  =  0;
-    CHECK_PARAM_VALUE(freq,  RCC_VCO_MIN_OUTPUT_FREQUENCY);
+    CHECK_PARAM_VALUE(freq,  RCC_VCO_MAX_OUTPUT_FREQUENCY);
     if (freq  < RCC_VCO_MIN_OUTPUT_FREQUENCY) {
         return  -1;
     }
@@ -628,19 +633,14 @@ static  int32_t  rcc_set_vco_output_clk(double  freq)
         return  -1;
     }
 
-    CHECK_PARAM_VALUE(vco_input_clk,  RCC_VCO_MAX_INPUT_FREQUENCY);
-    if (vco_input_clk < RCC_VCO_MIN_INPUT_FREQUENCY) {
-        return  -1;
-    }
-
     uint32_t  plln  =  (uint32_t)(freq / vco_input_clk);
-    CHECK_PARAM_VALUE(plln,  RCC_PLLCFGR_MIN_PLLN);
+    CHECK_PARAM_VALUE(plln,  RCC_PLLCFGR_MAX_PLLN);
     if (plln < RCC_PLLCFGR_MIN_PLLN) {
         return  -1;
     }
 
     uint32_t  pllq  =  (uint32_t)(freq / RCC_USB_OTG_FREQUENCY);
-    CHECK_PARAM_VALUE(pllq,  RCC_PLLCFGR_MIN_PLLQ);
+    CHECK_PARAM_VALUE(pllq,  RCC_PLLCFGR_MAX_PLLQ);
     if (pllq < RCC_PLLCFGR_MIN_PLLQ) {
         return  -1;
     }
@@ -677,6 +677,11 @@ static  int32_t  rcc_get_vco_output_clk(double * freq)
 
     *freq  =  vco_input_freq * plln;
 
+    CHECK_PARAM_VALUE(*freq,  RCC_VCO_MAX_OUTPUT_FREQUENCY);
+    if (*freq < RCC_VCO_MIN_OUTPUT_FREQUENCY) {
+        return  -1;
+    }
+
     return   0;
 
 }
@@ -695,10 +700,6 @@ int32_t  rcc_set_pll_clk_frequency(double  freq)
         return  -1;
     }
 
-    CHECK_PARAM_VALUE(vco_out_clk,  RCC_VCO_MAX_OUTPUT_FREQUENCY);
-    if (vco_out_clk < RCC_VCO_MIN_OUTPUT_FREQUENCY) {
-        return  -1;
-    }
 
     uint32_t  factor  =   (uint32_t)(vco_out_clk / freq);
     CHECK_PARAM_VALUE(factor, 8);
@@ -726,11 +727,6 @@ int32_t  rcc_get_pll_clk_frequency(double * freq)
 
     double vco_out_clk =  0;
     if (rcc_get_vco_output_clk(&vco_out_clk)) {
-        return  -1;
-    }
-
-    CHECK_PARAM_VALUE(vco_out_clk,  RCC_VCO_MAX_OUTPUT_FREQUENCY);
-    if (vco_out_clk < RCC_VCO_MIN_OUTPUT_FREQUENCY) {
         return  -1;
     }
 
