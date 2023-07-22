@@ -2,6 +2,7 @@
 #include  <stdlib.h>
 #include  <stdbool.h>
 
+#include  "../include/system_rcc.h"
 #include  "../include/usart.h"
 #include  "../include/driver_util.h"
 
@@ -141,9 +142,67 @@ static  int32_t  check_usart_buffer_cfg(usart_buffer_cfg_t * buffer_cfg)
 }
 
 
-static  int32_t   set_usart_baud_rate(usart_dev_e  usart,  uint32_t  baud_rate)
+static  int32_t   set_usart_baud_rate(usart_dev_e  usart,  uint32_t  baud_rate,  uint32_t stand_usart)
 {
-    
+    double apb_freq  =  0;
+    uint32_t  flag,   oversample_by8,  is_apb1;
+    flag  =  oversample_by8  = is_apb1 = 0;
+
+    CHECK_PARAM_VALUE(usart,  USART_MAX_ID);
+    if (!baud_rate) {
+        return  -1;
+    }
+
+
+    if ((usart == USART1) || (usart == USART6)) {
+        is_apb1  =  0;
+    } else {
+        is_apb1  =  1;
+    }
+
+    flag  = REG32_READ(USART_CR1_REG_ADDR(usart));
+
+    oversample_by8  = flag & USART_CR1_OVER8? 1:  0;
+
+    if (rcc_get_apb_clk_frequency(&apb_freq,  is_apb1)) {
+        return  -1;
+    }
+
+    apb_freq  *=  1000000;
+
+    double  factor =  0;
+
+    if (stand_usart) {
+        uint32_t shift  =  oversample_by8? 3: 4;
+        factor  =  baud_rate  << shift;
+    } else {
+        factor  =  baud_rate  << 4;
+    }
+
+    double  div =  apb_freq / factor;
+
+    uint32_t  div_mantissa   =  (uint32_t)div;
+    double    tmp_faction  =  (div - div_mantissa) * 16;
+    uint32_t  div_faction   =   (uint32_t) tmp_faction;
+
+
+
+    if (tmp_faction > 15) {
+        div_faction  =  0;
+        div_mantissa  ++;
+    } else {
+        if (tmp_faction != div_faction) {
+            div_faction++;
+        }
+    }
+
+    if (div_mantissa > 0xfff) {
+        return  -1;
+    }
+
+    flag  =  (div_mantissa << 4) | div_faction;
+
+    REG32_WRITE(USART_BRR_REG_ADDR(usart),  flag);
 
     return  0;
 }
@@ -179,6 +238,10 @@ int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
     }
 
     REG32_WRITE(USART_CR1_REG_ADDR(usart),  flag);
+
+    if (set_usart_baud_rate(usart,  cfg->user_cfg.baud_rate,  1)) {
+        return  -1;
+    }
 
     switch (cfg->user_cfg.stop_bits) {
         case  USART_STOP_0_5:
