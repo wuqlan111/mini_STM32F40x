@@ -14,8 +14,8 @@ typedef  enum {
     RCC_AHB3_CLK,
     RCC_APB1_CLK,
     RCC_APB2_CLK,
-    RCC_MAX_CLK  =   RCC_APB2_CLK
-} rcc_clk_type_e;
+    RCC_MAX_BUS_CLK  =   RCC_APB2_CLK
+} rcc_bus_clk_type_e;
 
 
 

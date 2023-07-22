@@ -463,6 +463,11 @@
               <FileType>5</FileType>
               <FilePath>..\..\..\driver\include\watchdog.h</FilePath>
             </File>
+            <File>
+              <FileName>system_rcc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\driver\include\system_rcc.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -653,6 +658,11 @@
               <FileName>watchdog.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\driver\device\watchdog.c</FilePath>
+            </File>
+            <File>
+              <FileName>system_rcc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\driver\device\system_rcc.c</FilePath>
             </File>
           </Files>
         </Group>
