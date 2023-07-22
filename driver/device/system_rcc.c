@@ -561,67 +561,7 @@ int32_t  rcc_switch_system_clk_source(rcc_system_clk_select_e  clk_type)
 }
 
 
-
-int32_t  rcc_set_pll_clk_frequency(double  freq)
-{
-    uint32_t  flag,  mask;
-    flag = mask  =  0;
-
-    CHECK_PARAM_VALUE(freq,  RCC_PLL_MAX_FREQUENCY);
-
-    flag  = REG32_READ(RCC_CFGR_REG_ADDR);
-
-    uint32_t  pll_input_clk  =   0;
-    if (flag | RCC_PLLCFGR_PLLSRC) {
-        pll_input_clk  =  RCC_HSE_CLK_FREQUENCY;
-    } else {
-        pll_input_clk  =  RCC_HSI_CLK_FREQUENCY;
-    }
-
-    uint32_t  pllm  =  flag & RCC_PLLCFGR_PLLM;
-
-    CHECK_PARAM_VALUE(pllm,  RCC_PLLCFGR_MAX_PLLM);
-    if (pllm < RCC_PLLCFGR_MIN_PLLM) {
-        return  -1;
-    }
-
-    double  vco_input_clk =  ((double)pll_input_clk) / pllm;
-    CHECK_PARAM_VALUE(vco_input_clk,  RCC_VCO_MAX_INPUT_FREQUENCY);
-    if (vco_input_clk  < RCC_VCO_MIN_INPUT_FREQUENCY) {
-        return  -1;
-    }
-
-    uint32_t  plln  =  (flag & RCC_PLLCFGR_PLLN) >> 6;
-    if (plln < RCC_PLLCFGR_MIN_PLLN) {
-        return  -1;
-    }
-
-    CHECK_PARAM_VALUE(plln,  RCC_PLLCFGR_MAX_PLLN);
-
-    double vco_out_clk =  vco_input_clk * plln;
-    CHECK_PARAM_VALUE(vco_out_clk,  RCC_VCO_MAX_OUTPUT_FREQUENCY);
-    if (vco_out_clk < RCC_VCO_MIN_OUTPUT_FREQUENCY) {
-        return  -1;
-    }
-
-    uint32_t  factor  =   (uint32_t)(vco_out_clk / freq);
-    CHECK_PARAM_VALUE(factor, 8);
-    if ( (factor  <  2) || (factor & 0x1) ) {
-        return  -1;
-    }
-
-    uint32_t  pllp    =   (factor >> 1) - 1;
-
-    flag   =  pllp << 16;
-
-    REG32_UPDATE(RCC_PLLCFGR_REG_ADDR,  flag,  RCC_PLLCFGR_PLLP); 
-
-    return   0;
-
-}
-
-
-int32_t  rcc_set_vco_input_clk(double  freq,  uint32_t is_hse)
+static  int32_t  rcc_set_vco_input_clk(double  freq,  uint32_t is_hse)
 {
     uint32_t  flag, mask;
     flag = mask =  0;
@@ -649,7 +589,7 @@ int32_t  rcc_set_vco_input_clk(double  freq,  uint32_t is_hse)
 }
 
 
-int32_t  rcc_get_vco_input_clk(double * freq)
+static  int32_t  rcc_get_vco_input_clk(double * freq)
 {
     uint32_t  flag, mask;
     flag = mask =  0;
@@ -662,6 +602,10 @@ int32_t  rcc_get_vco_input_clk(double * freq)
     uint32_t  is_hse  =  flag & RCC_PLLCFGR_PLLSRC? 1:  0;
     uint32_t  pll_input_lck  =  is_hse? RCC_HSE_CLK_FREQUENCY: RCC_HSI_CLK_FREQUENCY;
     uint32_t  pllm   =   flag  &  RCC_PLLCFGR_PLLM;
+    CHECK_PARAM_VALUE(pllm,  RCC_PLLCFGR_MAX_PLLM);
+    if (pllm < RCC_PLLCFGR_MIN_PLLM) {
+        return  -1;
+    }
 
     *freq  =  ((double)pll_input_lck) / pllm;
 
@@ -670,22 +614,99 @@ int32_t  rcc_get_vco_input_clk(double * freq)
 }
 
 
-
-
-int32_t  rcc_set_vco_output_clk(double  freq)
+static  int32_t  rcc_set_vco_output_clk(double  freq)
 {
-    if ()
+    uint32_t  flag,  mask;
+    flag = mask  =  0;
+    CHECK_PARAM_VALUE(freq,  RCC_VCO_MIN_OUTPUT_FREQUENCY);
+    if (freq  < RCC_VCO_MIN_OUTPUT_FREQUENCY) {
+        return  -1;
+    }
+
+    double  vco_input_clk  =  0;
+    if (rcc_get_vco_input_clk(&vco_input_clk)) {
+        return  -1;
+    }
+
+    CHECK_PARAM_VALUE(vco_input_clk,  RCC_VCO_MAX_INPUT_FREQUENCY);
+    if (vco_input_clk < RCC_VCO_MIN_INPUT_FREQUENCY) {
+        return  -1;
+    }
+
+    uint32_t  plln  =  (uint32_t)(freq / vco_input_clk);
+    CHECK_PARAM_VALUE(plln,  RCC_PLLCFGR_MIN_PLLN);
+    if (vco_input_clk < RCC_PLLCFGR_MIN_PLLN) {
+        return  -1;
+    }
+
+    flag  =   plln << 6;
+    mask  =   RCC_PLLCFGR_PLLN;
+
+    REG32_UPDATE(RCC_PLLCFGR_PLLN, flag,  mask);
+
+    return   0;
+
+}
+
+
+static  int32_t  rcc_get_vco_output_clk(double * freq)
+{
+    uint32_t  flag,  mask;
+    flag = mask =  0;
+
+    CHECK_PARAM_NULL(freq);
+
+    double  vco_input_freq =  0;
+    if (rcc_get_vco_input_clk(&vco_input_freq)) {
+        return  -1;
+    }
+
+    flag  =  REG32_READ(RCC_PLLCFGR_REG_ADDR);
+
+    uint32_t  plln  =  (flag & RCC_PLLCFGR_PLLN) >> 6;
+    CHECK_PARAM_VALUE(plln,  RCC_PLLCFGR_MAX_PLLN);
+    if (plln < RCC_PLLCFGR_MIN_PLLN) {
+        return  -1;
+    }
+
+    *freq  =  vco_input_freq * plln;
+
+    return   0;
+
+}
 
 
 
+int32_t  rcc_set_pll_clk_frequency(double  freq)
+{
+    uint32_t  flag,  mask;
+    flag = mask  =  0;
 
+    CHECK_PARAM_VALUE(freq,  RCC_PLL_MAX_FREQUENCY);
 
+    double vco_out_clk =  0;
+    if (rcc_get_vco_output_clk(&vco_out_clk)) {
+        return  -1;
+    }
 
+    CHECK_PARAM_VALUE(vco_out_clk,  RCC_VCO_MAX_OUTPUT_FREQUENCY);
+    if (vco_out_clk < RCC_VCO_MIN_OUTPUT_FREQUENCY) {
+        return  -1;
+    }
 
+    uint32_t  factor  =   (uint32_t)(vco_out_clk / freq);
+    CHECK_PARAM_VALUE(factor, 8);
+    if ( (factor  <  2) || (factor & 0x1) ) {
+        return  -1;
+    }
 
+    uint32_t  pllp    =   (factor >> 1) - 1;
 
+    flag   =  pllp << 16;
 
+    REG32_UPDATE(RCC_PLLCFGR_REG_ADDR,  flag,  RCC_PLLCFGR_PLLP); 
 
+    return   0;
 
 }
 
