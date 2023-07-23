@@ -73,14 +73,14 @@
         <LExpSel>0</LExpSel>
       </OPTXL>
       <OPTFL>
-        <tvExp>1</tvExp>
+        <tvExp>0</tvExp>
         <tvExpOptDlg>0</tvExpOptDlg>
         <IsCurrentTarget>1</IsCurrentTarget>
       </OPTFL>
       <CpuCode>18</CpuCode>
       <DebugOpt>
-        <uSim>1</uSim>
-        <uTrg>0</uTrg>
+        <uSim>0</uSim>
+        <uTrg>1</uTrg>
         <sLdApp>1</sLdApp>
         <sGomain>1</sGomain>
         <sRbreak>1</sRbreak>
@@ -189,34 +189,34 @@
         <Bp>
           <Number>2</Number>
           <Type>0</Type>
-          <LineNumber>106</LineNumber>
+          <LineNumber>247</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134222166</Address>
+          <Address>134239648</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>E:\git_repo\mini_STM32F40x\arch\boot\init.S</Filename>
+          <Filename>E:\git_repo\mini_STM32F40x\driver\device\usart.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\armv7_m\../../boot/init.S\106</Expression>
+          <Expression>\\armv7_m\../../../driver/device/usart.c\247</Expression>
         </Bp>
         <Bp>
           <Number>3</Number>
           <Type>0</Type>
-          <LineNumber>94</LineNumber>
+          <LineNumber>365</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134222808</Address>
+          <Address>134242196</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>E:\git_repo\mini_STM32F40x\arch\boot\init.S</Filename>
+          <Filename>E:\git_repo\mini_STM32F40x\driver\device\system_rcc.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\armv7_m\../../boot/init.S\94</Expression>
+          <Expression>\\armv7_m\../../../driver/device/system_rcc.c\365</Expression>
         </Bp>
         <Bp>
           <Number>4</Number>
@@ -267,7 +267,7 @@
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>1</SubType>
-          <ItemText>sp</ItemText>
+          <ItemText>0x40011000</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
@@ -275,7 +275,7 @@
         <Mm>
           <WinNumber>2</WinNumber>
           <SubType>1</SubType>
-          <ItemText>0xe000ed00</ItemText>
+          <ItemText>0x40023800</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow2>
@@ -299,7 +299,7 @@
         <AscS3>0</AscS3>
         <aSer3>0</aSer3>
         <eProf>0</eProf>
-        <aLa>1</aLa>
+        <aLa>0</aLa>
         <aPa1>0</aPa1>
         <AscS4>0</AscS4>
         <aSer4>0</aSer4>
@@ -353,7 +353,7 @@
 
   <Group>
     <GroupName>include</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

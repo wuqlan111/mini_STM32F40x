@@ -368,7 +368,7 @@ static  int32_t  set_apb2_module_op(rcc_module_e  module,  rcc_module_op_e  op)
         return  -1;
     }
 
-    CHECK_PARAM_VALUE(module, RCC_MODULE_APB1_MAX );
+    CHECK_PARAM_VALUE(module, RCC_MODULE_APB2_MAX );
     CHECK_PARAM_VALUE(op,   RCC_MODULE_MAX_OP);
 
     switch (op) {
