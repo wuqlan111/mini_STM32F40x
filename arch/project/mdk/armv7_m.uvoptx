@@ -157,22 +157,6 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>13</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134227966</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>E:\git_repo\mini_STM32F40x\arch\test\main.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\armv7_m\../../test/main.c\13</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
           <LineNumber>134</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>134222524</Address>
@@ -187,11 +171,27 @@
           <Expression>\\armv7_m\../../boot/init.S\134</Expression>
         </Bp>
         <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>21</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134227996</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>E:\git_repo\mini_STM32F40x\arch\test\main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\armv7_m\../../test/main.c\21</Expression>
+        </Bp>
+        <Bp>
           <Number>2</Number>
           <Type>0</Type>
-          <LineNumber>247</LineNumber>
+          <LineNumber>358</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134239648</Address>
+          <Address>134240308</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -200,23 +200,23 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>E:\git_repo\mini_STM32F40x\driver\device\usart.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\armv7_m\../../../driver/device/usart.c\247</Expression>
+          <Expression>\\armv7_m\../../../driver/device/usart.c\358</Expression>
         </Bp>
         <Bp>
           <Number>3</Number>
           <Type>0</Type>
-          <LineNumber>365</LineNumber>
+          <LineNumber>47</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134242196</Address>
+          <Address>134245772</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>E:\git_repo\mini_STM32F40x\driver\device\system_rcc.c</Filename>
+          <Filename>E:\git_repo\mini_STM32F40x\subsys\console.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\armv7_m\../../../driver/device/system_rcc.c\365</Expression>
+          <Expression>\\armv7_m\../../../subsys/console.c\47</Expression>
         </Bp>
         <Bp>
           <Number>4</Number>
@@ -255,12 +255,12 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>early_log_buffer</ItemText>
+          <ItemText>console_tx_buffer[CONSOLE_USART_BUFFER]</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>early_log</ItemText>
+          <ItemText>console_rx_buffer[CONSOLE_USART_BUFFER]</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
@@ -275,7 +275,7 @@
         <Mm>
           <WinNumber>2</WinNumber>
           <SubType>1</SubType>
-          <ItemText>0x40023800</ItemText>
+          <ItemText>0x40011000</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow2>
@@ -321,6 +321,12 @@
       <pszMrulep></pszMrulep>
       <pSingCmdsp></pSingCmdsp>
       <pMultCmdsp></pMultCmdsp>
+      <SystemViewers>
+        <Entry>
+          <Name>System Viewer\USART1</Name>
+          <WinId>35905</WinId>
+        </Entry>
+      </SystemViewers>
       <DebugDescription>
         <Enable>1</Enable>
         <EnableFlashSeq>0</EnableFlashSeq>

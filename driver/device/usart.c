@@ -28,7 +28,7 @@
 
 
 #define  USART_CR1_OVER8              (1<<15)                   // oversampling mode by 8
-#define  USART_CR1_UE                 (1<<14)                   // USART enable
+#define  USART_CR1_UE                 (1<<13)                   // USART enable
 #define  USART_CR1_M                  (1<<12)                   // 10 bit word length
 #define  USART_CR1_WAKE               (1<<11)                   // wakeup method by address Mark
 #define  USART_CR1_PCE                (1<<10)                   // parity control enable

@@ -4,6 +4,7 @@
 #include  <stdarg.h>
 
 #include  "usart.h"
+#include  "../driver/include/gpio.h"
 #include  "include/console.h"
 
 
@@ -21,6 +22,13 @@ int32_t  console_init(void)
 {
     int32_t   ret  =  0;
     usart_cfg_t  cfg  =  {0};
+
+    GPIO_port_bit_config_t gpio_cfg = {0};
+    gpio_cfg.alternate_function   =  GPIO_PORT_ALTERNATE_MODE;
+    if (GPIO_port_bit_config(GPIO_PORTA,  9,  &gpio_cfg)) {
+        return  -1;
+    }
+
 
     cfg.buffer_cfg.rx_buffer  =  console_rx_buffer;
     cfg.buffer_cfg.rx_sz      =  CONSOLE_USART_BUFFER;
@@ -57,7 +65,7 @@ int32_t  console_fmt_out(char * fmt, ...)
     len = vsprintf(console_tx_buffer,  fmt, args);
     va_end(args);
 
-    if (ret <= 0) {
+    if (len <= 0) {
         return  -1;
     }
 
