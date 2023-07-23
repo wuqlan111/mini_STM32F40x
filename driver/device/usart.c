@@ -208,6 +208,58 @@ static  int32_t   set_usart_baud_rate(usart_dev_e  usart,  uint32_t  baud_rate, 
 }
 
 
+static  int32_t  usart_init_clk(usart_dev_e  usart,  uint32_t  enable)
+{
+    uint32_t  rcc_module =  0;
+    int32_t   ret  =  0;
+    CHECK_PARAM_VALUE(usart, USART_MAX_ID);
+
+    if (usart > USART6) {
+        return  -1;
+    }
+
+    switch (usart)
+    {
+        case  USART1:
+            rcc_module  =  RCC_MODULE_USART1;
+            break;
+        case  USART2:
+            rcc_module  =  RCC_MODULE_USART2;
+            break;
+
+        case  USART3:
+            rcc_module  =  RCC_MODULE_USART3;
+            break;
+
+        case  USART4:
+            rcc_module  =  RCC_MODULE_USART4;
+            break;
+
+        case  USART5:
+            rcc_module  =  RCC_MODULE_USART5;
+            break;
+
+        case  USART6:
+            rcc_module  =  RCC_MODULE_USART6;
+                break;
+    }
+
+    if (rcc_module_set_op(rcc_module,  enable? RCC_CLK_ENABLE: RCC_CLK_DISABLE)) {
+        return  -1;
+    }
+
+
+    ret  =  rcc_module_set_op(rcc_module,  enable? RCC_CLK_ENABLE_LOWER_POWER: 
+                                RCC_CLK_DISABLE_LOWER_POWER);
+
+    return   ret;
+
+}
+
+
+
+
+
 int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
 {
     uint32_t  flag, mask;
@@ -220,6 +272,10 @@ int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
     }
 
     if (check_usart_buffer_cfg(&cfg->buffer_cfg)) {
+        return  -1;
+    }
+
+    if (usart_init_clk(usart,  1)) {
         return  -1;
     }
 

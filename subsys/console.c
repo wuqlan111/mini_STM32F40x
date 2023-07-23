@@ -33,6 +33,7 @@ int32_t  console_init(void)
     cfg.user_cfg.stop_bits    =  USART_STOP_1_0;
     cfg.user_cfg.timeout      =  CONSOLE_USART_TIMEOUT;
 
+
     ret  =   usart_init(CONSOLE_USART_ID,  &cfg);
 
     return  ret;
