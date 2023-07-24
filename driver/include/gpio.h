@@ -58,6 +58,7 @@ enum {
 
 
 typedef  struct {
+    uint32_t  pin:4;
     uint32_t  io_mode:2;
     uint32_t  open_drain:1;
     uint32_t  speed:2;
