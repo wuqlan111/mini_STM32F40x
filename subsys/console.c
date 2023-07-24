@@ -24,15 +24,18 @@ int32_t  console_init(void)
     int32_t   ret  =  0;
     usart_cfg_t  cfg  =  {0};
 
+    /*enable gpio clk*/
+    ret  =  rcc_module_set_op(RCC_MODULE_GPIOA,  RCC_CLK_ENABLE);
+    if (ret) {
+        return   -1;
+    }
+
+
+    /*set usart1 gpio function*/
     GPIO_port_bit_config_t gpio_cfg = {0};
     gpio_cfg.alternate_function   =  GPIO_PORT_ALTERNATE_MODE;
     if (GPIO_port_bit_config(GPIO_PORTA,  9,  &gpio_cfg)) {
         return  -1;
-    }
-
-    ret  =  rcc_module_set_op(RCC_MODULE_GPIOA,  RCC_CLK_ENABLE);
-    if (ret) {
-        return   -1;
     }
 
 
