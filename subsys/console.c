@@ -5,6 +5,7 @@
 
 #include  "usart.h"
 #include  "../driver/include/gpio.h"
+#include  "../driver/include/system_rcc.h"
 #include  "include/console.h"
 
 
@@ -29,6 +30,11 @@ int32_t  console_init(void)
         return  -1;
     }
 
+    ret  =  rcc_module_set_op(RCC_MODULE_GPIOA,  RCC_CLK_ENABLE);
+    if (ret) {
+        return   -1;
+    }
+
 
     cfg.buffer_cfg.rx_buffer  =  console_rx_buffer;
     cfg.buffer_cfg.rx_sz      =  CONSOLE_USART_BUFFER;
@@ -37,7 +43,7 @@ int32_t  console_init(void)
 
     cfg.user_cfg.baud_rate    =  CONSOLE_USART_BAUD_RATE;
     cfg.user_cfg.data_len     =  USART_DATA_8;
-    cfg.user_cfg.parity       =  USART_PARITY_ODD;
+    cfg.user_cfg.parity       =  USART_PARITY_NONE;
     cfg.user_cfg.stop_bits    =  USART_STOP_1_0;
     cfg.user_cfg.timeout      =  CONSOLE_USART_TIMEOUT;
 
