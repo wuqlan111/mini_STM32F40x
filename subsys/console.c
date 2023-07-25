@@ -149,15 +149,21 @@ void  set_system_log_level(uint32_t level)
 
 void   __debug_printf(uint32_t level, char * fmt, ...)
 {
-
+    int32_t  len  =  0;
     if ( (level < log_level)  || !fmt) {
         return;
     }
 
     va_list args;
     va_start(args, fmt);
-    console_fmt_out(fmt, args);
+    len = vsprintf(console_tx_buffer,  fmt, args);
     va_end(args);
+
+    if (len <= 0) {
+        return;
+    }
+
+    usart_send_data(CONSOLE_USART_ID,  len);
 
 }
 
