@@ -42,7 +42,7 @@ int32_t  console_init(void)
         return  -1;
     }
 
-    if (set_GPIO_port_alternate_function(GPIO_PORTA, GPIO_PORT_PIN9,  CONSOLE_USART_ID)) {
+    if (set_GPIO_port_alternate_function(GPIO_PORTA, GPIO_PORT_PIN9,  GPIO_AF_USART1)) {
         return  -1;
     }
 
@@ -56,7 +56,7 @@ int32_t  console_init(void)
         return  -1;
     }
 
-    if (set_GPIO_port_alternate_function(GPIO_PORTA, GPIO_PORT_PIN10,  CONSOLE_USART_ID)) {
+    if (set_GPIO_port_alternate_function(GPIO_PORTA, GPIO_PORT_PIN10,  GPIO_AF_USART1)) {
         return  -1;
     }
 
@@ -73,12 +73,18 @@ int32_t  console_init(void)
 
     cfg.user_cfg.baud_rate    =  CONSOLE_USART_BAUD_RATE;
     cfg.user_cfg.data_len     =  USART_DATA_8;
-    cfg.user_cfg.parity       =  USART_PARITY_NONE;
+    cfg.user_cfg.parity       =  USART_PARITY_ODD;
     cfg.user_cfg.stop_bits    =  USART_STOP_1_0;
     cfg.user_cfg.timeout      =  CONSOLE_USART_TIMEOUT;
+    cfg.user_cfg.rx_enable    =  1;
+    cfg.user_cfg.tx_enable    =  1;
 
 
-    ret  =   usart_init(CONSOLE_USART_ID,  &cfg);
+    if( usart_init(CONSOLE_USART_ID,  &cfg) ) {
+        return  -1;
+    }
+
+    ret  =  enable_or_disable_usart(CONSOLE_USART_ID,  1);
 
     return  ret;
 
