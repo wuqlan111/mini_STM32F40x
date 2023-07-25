@@ -14,11 +14,13 @@ int  main(void)
     
     console_init();
 
+    set_system_log_level(LOG_LEVEL_DEBUG);
+
     while(1) {
 
         for (int32_t i  =  0; i < 12000; i++);
 
-        console_fmt_out("hello world! \r\n");
+        DEBUG_PRINTF_DEBUG("hello world!");
     };
 
     return  0;

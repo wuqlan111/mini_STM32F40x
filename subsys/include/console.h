@@ -25,6 +25,8 @@ int32_t  console_recv_data(uint8_t * buf, uint32_t len,  uint32_t * recv_len);
 
 void   __debug_printf(uint32_t level, char * fmt, ...);
 
+void  set_system_log_level(uint32_t level);
+
 
 #define  DEBUG_PRINTF_DEBUG(fmt, ...)     __debug_printf(LOG_LEVEL_DEBUG, "[DEBUG]%s:%u - " fmt "\r\n",  \
                                                 __FILE__, __LINE__, ##__VA_ARGS__)
