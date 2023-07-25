@@ -61,7 +61,7 @@ int32_t  console_init(void)
     }
 
     /*enable usart1 clk*/
-    ret  =  rcc_module_set_op(RCC_MODULE_USART1,  RCC_CLK_ENABLE);
+    ret  =  usart_init_clk(CONSOLE_USART_ID,  1);
     if (ret) {
         return   -1;
     }

@@ -84,6 +84,10 @@ int32_t   usart_send_data(usart_dev_e  usart,  uint32_t  len);
 int32_t   usart_recv_data(usart_dev_e  usart,  uint32_t  len, uint32_t * recv_len);
 
 
+int32_t  enable_or_disable_usart(usart_dev_e  usart, uint32_t enable);
+
+int32_t  usart_init_clk(usart_dev_e  usart,  uint32_t  enable);
+
 
 
 #endif

@@ -208,7 +208,7 @@ static  int32_t   set_usart_baud_rate(usart_dev_e  usart,  uint32_t  baud_rate, 
 }
 
 
-static  int32_t  usart_init_clk(usart_dev_e  usart,  uint32_t  enable)
+int32_t  usart_init_clk(usart_dev_e  usart,  uint32_t  enable)
 {
     uint32_t  rcc_module =  0;
     int32_t   ret  =  0;
@@ -275,10 +275,6 @@ int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
         return  -1;
     }
 
-    if (usart_init_clk(usart,  1)) {
-        return  -1;
-    }
-
     if (cfg->user_cfg.parity == USART_PARITY_EVEN) {
         flag  =  USART_CR1_PCE;
     } else if (cfg->user_cfg.parity == USART_PARITY_ODD) {
@@ -339,6 +335,23 @@ int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
     return   0;
 
 }
+
+
+int32_t  enable_or_disable_usart(usart_dev_e  usart, uint32_t enable)
+{
+    uint32_t  flag,  mask;
+    flag  =  mask  =  0;
+    CHECK_PARAM_VALUE(usart,  USART_MAX_ID);
+
+    flag  =   enable? USART_CR1_UE:  0;
+    mask  =   1 << 13;
+
+    REG32_UPDATE(USART_CR1_REG_ADDR(usart),  flag,  mask);
+    return  0;
+}
+
+
+
 
 static  void  wait_usart_sr_flag(usart_dev_e  usart,  uint32_t  flag,  uint32_t * is_timeout)
 {
