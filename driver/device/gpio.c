@@ -135,8 +135,8 @@ int32_t  set_GPIO_port_alternate_function(uint32_t  port,  uint32_t  pin,  uint3
 
     uint32_t  shift   =   pin > GPIO_PORT_PIN7? pin -  GPIO_PORT_PIN8: pin - GPIO_PORT_PIN0;
 
-    flag  =  af << shift;
-    mask  =  0xf << shift;
+    flag  =  af  <<  (shift * 4);
+    mask  =  0xf <<  (shift * 4);
 
     REG32_UPDATE(reg,  flag,  mask);
 
