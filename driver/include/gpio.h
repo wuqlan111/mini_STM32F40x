@@ -147,7 +147,8 @@ typedef  struct {
 
 int32_t  GPIO_port_bit_config(uint32_t port, GPIO_port_bit_config_t * config);
 int32_t  get_GPIO_port_data(uint32_t  port,  uint32_t * data);
-
+int32_t  lock_or_unlock_port_config(uint32_t  port, uint32_t bit_id, uint32_t  lock);
+int32_t  set_GPIO_port_alternate_function(uint32_t  port,  uint32_t  pin,  uint32_t af);
 
 
 #endif

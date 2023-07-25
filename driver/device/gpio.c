@@ -27,7 +27,7 @@
 #define  GPIOX_AFRH_REG_ADDR(port)                   (GPIO_PORT_REGS_BASE_ADDR + (port) * GPIO_PORT_REG_STEP + 0x24)
 
 
-static  int32_t  lock_or_unlock_port_config(uint32_t  port, uint32_t bit_id, uint32_t  lock)
+int32_t  lock_or_unlock_port_config(uint32_t  port, uint32_t bit_id, uint32_t  lock)
 {
     uint32_t  flag, mask;
     flag  =  mask  =  1<< 16;
@@ -120,8 +120,28 @@ int32_t  set_GPIO_port_data(uint32_t  port, uint32_t bit_set, uint32_t bit_reset
 
 
 
+int32_t  set_GPIO_port_alternate_function(uint32_t  port,  uint32_t  pin,  uint32_t af)
+{
+    int32_t  ret  =  0;
+    uint32_t  flag,  mask,  reg ;
+    flag  =  mask  =   reg = 0;
 
+    CHECK_PARAM_VALUE(port,  GPIO_MAX_PORT);
+    CHECK_PARAM_VALUE(pin,   GPIO_PORT_MAX_PIN);
+    CHECK_PARAM_VALUE(af,    GPIO_PORT_MAX_AF);
 
+    reg  =  pin > GPIO_PORT_PIN7? GPIOX_AFRH_REG_ADDR(port):  GPIOX_AFRL_REG_ADDR(port);
+
+    uint32_t  shift   =   pin > GPIO_PORT_PIN7? pin -  GPIO_PORT_PIN8: pin - GPIO_PORT_PIN0;
+
+    flag  =  af << shift;
+    mask  =  0xf << shift;
+
+    REG32_UPDATE(reg,  flag,  mask);
+
+    return   ret;
+
+}
 
 
 
