@@ -31,13 +31,40 @@ int32_t  console_init(void)
     }
 
 
-    /*set usart1 gpio function*/
+    /*init usart1  rx gpio pin function*/
     GPIO_port_bit_config_t gpio_cfg = {0};
-    gpio_cfg.alternate_function   =  GPIO_PORT_ALTERNATE_MODE;
-    if (GPIO_port_bit_config(GPIO_PORTA,  9,  &gpio_cfg)) {
+    gpio_cfg.pin   = GPIO_PORT_PIN9;
+    gpio_cfg.io_mode   =  GPIO_PORT_ALTERNATE_MODE;
+    gpio_cfg.speed   =  GPIO_SPEED_2MHZ;
+    gpio_cfg.open_drain  =  0;
+
+    if (GPIO_port_bit_config(GPIO_PORTA, &gpio_cfg)) {
         return  -1;
     }
 
+    if (set_GPIO_port_alternate_function(GPIO_PORTA, GPIO_PORT_PIN9,  CONSOLE_USART_ID)) {
+        return  -1;
+    }
+
+    /*init usart1  tx gpio pin function*/
+    gpio_cfg.pin   = GPIO_PORT_PIN10;
+    gpio_cfg.io_mode   =  GPIO_PORT_ALTERNATE_MODE;
+    gpio_cfg.speed   =  GPIO_SPEED_2MHZ;
+    gpio_cfg.open_drain  =  0;
+
+    if (GPIO_port_bit_config(GPIO_PORTA, &gpio_cfg)) {
+        return  -1;
+    }
+
+    if (set_GPIO_port_alternate_function(GPIO_PORTA, GPIO_PORT_PIN10,  CONSOLE_USART_ID)) {
+        return  -1;
+    }
+
+    /*enable usart1 clk*/
+    ret  =  rcc_module_set_op(RCC_MODULE_USART1,  RCC_CLK_ENABLE);
+    if (ret) {
+        return   -1;
+    }
 
     cfg.buffer_cfg.rx_buffer  =  console_rx_buffer;
     cfg.buffer_cfg.rx_sz      =  CONSOLE_USART_BUFFER;

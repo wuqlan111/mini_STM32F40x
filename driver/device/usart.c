@@ -293,6 +293,14 @@ int32_t   usart_init(usart_dev_e  usart,  usart_cfg_t * cfg)
         flag |=  USART_CR1_M;
     }
 
+    if (cfg->user_cfg.tx_enable) {
+        flag  |=  USART_CR1_TE;
+    }
+
+    if (cfg->user_cfg.rx_enable) {
+        flag  |=  USART_CR1_RE;
+    }
+
     REG32_WRITE(USART_CR1_REG_ADDR(usart),  flag);
 
     if (set_usart_baud_rate(usart,  cfg->user_cfg.baud_rate,  1)) {
@@ -354,15 +362,9 @@ static  void  wait_usart_sr_flag(usart_dev_e  usart,  uint32_t  flag,  uint32_t 
 
 static  int32_t  usart_poll_send(usart_dev_e  usart,  uint32_t  len)
 {
-    uint32_t  flag, mask,  is_timeout;
+    uint32_t  is_timeout  =  0;
     int32_t   ret =  0;
     uint8_t * tx_data   =   usart_dev_cfg->tx_buffer;
-    flag = mask  =  is_timeout = 0;
-
-    flag  =  mask  =  USART_CR1_UE | USART_CR1_TE;
-
-    REG32_UPDATE(USART_CR1_REG_ADDR(usart),  flag, mask);
-
 
     for (int32_t i  =  0;  i < len; i++) {
         wait_usart_sr_flag(usart,  USART_SR_TXE, &is_timeout);
@@ -380,8 +382,6 @@ static  int32_t  usart_poll_send(usart_dev_e  usart,  uint32_t  len)
     if (is_timeout) {
         ret =  -1;
     }
-
-    REG32_UPDATE(USART_CR1_REG_ADDR(usart),  0, mask);
 
     return   ret;
 

@@ -48,6 +48,8 @@ typedef  struct {
     uint32_t  data_len:2;
     uint32_t  parity:2;
     uint32_t  stop_bits:2;
+    uint32_t  tx_enable:1;
+    uint32_t  rx_enable:1;
     uint32_t  baud_rate;
     uint32_t  timeout;
 } ATTRIBUTE_ALIGN(4) usart_user_cfg_t;
