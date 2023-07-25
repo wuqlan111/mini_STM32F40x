@@ -3,6 +3,7 @@
 #define  __CONSOLE_H
 
 #include  <stdint.h>
+#include  <stdio.h>
 #include  "util.h"
 
 typedef  enum {
@@ -29,7 +30,7 @@ void  set_system_log_level(uint32_t level);
 
 
 #define  DEBUG_PRINTF_DEBUG(fmt, ...)     __debug_printf(LOG_LEVEL_DEBUG, "[DEBUG]%s:%u - " fmt "\r\n",  \
-                                                __FILE__, __LINE__, ##__VA_ARGS__)
+                                                __FILE__,  __LINE__, ##__VA_ARGS__)
 #define  DEBUG_PRINTF_INFO(fmt, ...)      __debug_printf(LOG_LEVEL_INFO, "[INFO]%s:%u - " fmt "\r\n",   \
                                                 __FILE__, __LINE__, ##__VA_ARGS__)
 #define  DEBUG_PRINTF_NOTICE(fmt, ...)    __debug_printf(LOG_LEVEL_NOTICE, "[NOTICE]%s:%u - " fmt "\r\n",   \

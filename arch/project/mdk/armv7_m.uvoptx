@@ -159,7 +159,7 @@
           <Type>0</Type>
           <LineNumber>89</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134246098</Address>
+          <Address>134246114</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -175,7 +175,7 @@
           <Type>0</Type>
           <LineNumber>59</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134245942</Address>
+          <Address>134245958</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -186,17 +186,33 @@
           <ExecCommand></ExecCommand>
           <Expression>\\armv7_m\../../../subsys/console.c\59</Expression>
         </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>23</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134228002</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>E:\git_repo\mini_STM32F40x\arch\test\main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\armv7_m\../../test/main.c\23</Expression>
+        </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>console_tx_buffer[CONSOLE_USART_BUFFER]</ItemText>
+          <ItemText>log_level</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>console_rx_buffer[CONSOLE_USART_BUFFER]</ItemText>
+          <ItemText>console_tx_buffer</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
