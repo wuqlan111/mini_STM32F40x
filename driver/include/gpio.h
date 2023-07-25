@@ -104,14 +104,37 @@ typedef enum {
     GPIO_PORT_MAX_AF  =  GPIO_PORT_AF15,
 } gpio_alternate_function_e;
 
-#define  GPIO_AF_SYSTEM   GPIO_PORT_AF0
-#define  GPIO_AF_TIM1     GPIO_PORT_AF1
-#define  GPIO_AF_TIM2     GPIO_PORT_AF1
-#define  
-
-
-
-
+#define  GPIO_AF_SYSTEM      GPIO_PORT_AF0
+#define  GPIO_AF_TIM1        GPIO_PORT_AF1
+#define  GPIO_AF_TIM2        GPIO_PORT_AF1
+#define  GPIO_AF_TIM3        GPIO_PORT_AF2
+#define  GPIO_AF_TIM4        GPIO_PORT_AF2
+#define  GPIO_AF_TIM5        GPIO_PORT_AF2
+#define  GPIO_AF_TIM8        GPIO_PORT_AF3
+#define  GPIO_AF_TIM9        GPIO_PORT_AF3
+#define  GPIO_AF_TIM10       GPIO_PORT_AF3
+#define  GPIO_AF_TIM11       GPIO_PORT_AF3
+#define  GPIO_AF_I2CX        GPIO_PORT_AF4
+#define  GPIO_AF_SPI1        GPIO_PORT_AF5
+#define  GPIO_AF_SPI2        GPIO_PORT_AF5
+#define  GPIO_AF_SPI3        GPIO_PORT_AF6
+#define  GPIO_AF_USART1        GPIO_PORT_AF7
+#define  GPIO_AF_USART2        GPIO_PORT_AF7
+#define  GPIO_AF_USART3        GPIO_PORT_AF7
+#define  GPIO_AF_USART4        GPIO_PORT_AF8
+#define  GPIO_AF_USART5        GPIO_PORT_AF8
+#define  GPIO_AF_USART6        GPIO_PORT_AF8
+#define  GPIO_AF_CANX          GPIO_PORT_AF9
+#define  GPIO_AF_TIM12         GPIO_PORT_AF9
+#define  GPIO_AF_TIM13         GPIO_PORT_AF9
+#define  GPIO_AF_TIM14         GPIO_PORT_AF9
+#define  GPIO_AF_OTG_HS        GPIO_PORT_AF10
+#define  GPIO_AF_OTG_FS        GPIO_PORT_AF10
+#define  GPIO_AF_ETH           GPIO_PORT_AF11
+#define  GPIO_AF_FSMC          GPIO_PORT_AF12
+#define  GPIO_AF_SDIO          GPIO_PORT_AF12
+#define  GPIO_AF_DCMI          GPIO_PORT_AF13
+#define  GPIO_AF_EVENTOUT      GPIO_PORT_AF15
 
 
 typedef  struct {
