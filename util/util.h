@@ -20,7 +20,7 @@ static inline void REG##width##_UPDATE(uint32_t  addr, uint##width##_t val, uint
     uint##width##_t tmp = *p;                                  \
     tmp &= ~mask;                                   \
     tmp |= (val & mask);                            \
-    * p = val;                                      \
+    * p = tmp;                                      \
 }                                                   \
 static inline void REG##width##_WAIT(uint32_t  addr, uint##width##_t val, uint##width##_t mask)    \
 {                                                       \

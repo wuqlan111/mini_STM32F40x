@@ -65,6 +65,7 @@ int32_t  GPIO_port_bit_config(uint32_t port, GPIO_port_bit_config_t * config)
 
     CHECK_PARAM_NULL(config);
     CHECK_PARAM_VALUE(port,  GPIO_MAX_PORT);
+    CHECK_PARAM_VALUE(config->pin,  GPIO_PORT_MAX_PIN);
     CHECK_PARAM_VALUE(config->pull_mode,  GPIO_PORT_MAX_PULL);
 
     uint32_t  bit_id  = config->pin;
