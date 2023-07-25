@@ -111,10 +111,7 @@ int32_t  console_fmt_out(char * fmt, ...)
         return  -1;
     }
 
-    console_tx_buffer[len] = '\r';
-    console_tx_buffer[len + 1]  =  '\n';
-
-    ret  =  usart_send_data(CONSOLE_USART_ID,  len + 2);
+    ret  =  usart_send_data(CONSOLE_USART_ID,  len);
 
     return  ret;
 
@@ -140,6 +137,31 @@ int32_t  console_recv_data(uint8_t * buf, uint32_t len,  uint32_t * recv_len)
     return  ret;
 
 }
+
+
+static  uint32_t  log_level  =  0;
+
+void  set_system_log_level(uint32_t level)
+{
+    log_level   =  level;
+}
+
+
+void   __debug_printf(uint32_t level, char * fmt, ...)
+{
+
+    if ( (level < log_level)  || !fmt) {
+        return;
+    }
+
+    va_list args;
+    va_start(args, fmt);
+    console_fmt_out(fmt, args);
+    va_end(args);
+
+}
+
+
 
 
 
