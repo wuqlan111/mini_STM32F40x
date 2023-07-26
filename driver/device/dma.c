@@ -273,6 +273,27 @@ int32_t  DMA_fifo_config(uint32_t dma_id, uint32_t  stream_id, DMA_fifo_config_t
 
 
 
+int32_t  DMA_data_transfer_config(uint32_t dma_id, uint32_t  stream_id, DMA_data_transfer_config_t * config)
+{
+    uint32_t  flag = 0;
+
+    CHECK_PARAM_VALUE(dma_id,  DMA_MAX_ID);
+    CHECK_PARAM_VALUE(stream_id,  DMA_STREAM_NUMBER - 1);
+    CHECK_PARAM_NULL(config);
+
+    CHECK_PARAM_VALUE(config->len,  0xffff);
+
+    REG32_WRITE(DMA_SXPAR_REG_ADDR(dma_id, stream_id),   config->peripheral_addr);
+    REG32_WRITE(DMA_SXM0AR_REG_ADDR(dma_id, stream_id),  config->memory0_addr);
+    REG32_WRITE(DMA_SXM1AR_REG_ADDR(dma_id, stream_id),  config->memory1_addr);
+    REG32_WRITE(DMA_SXNDTR_REG_ADDR(dma_id, stream_id),  config->len);
+
+    return   0;
+
+}
+
+
+
 int32_t  enable_or_disable_DMA_stream(uint32_t dma_id, uint32_t  stream_id, uint32_t enable)
 {
     uint32_t  flag = 0;

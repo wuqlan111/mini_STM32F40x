@@ -77,9 +77,18 @@ typedef struct {
     uint32_t  fifo_threshold:2;
 }ATTRIBUTE_ALIGN(4)  DMA_fifo_config_t;
 
+typedef struct {
+    uint32_t  memory0_addr;
+    uint32_t  memory1_addr;
+    uint32_t  peripheral_addr;
+    uint32_t  len;
+}ATTRIBUTE_ALIGN(4)  DMA_data_transfer_config_t;
+
+
 
 int32_t  DMA_steam_config(uint32_t dma_id, uint32_t  stream_id, DMA_stream_config_t * config);
 int32_t  DMA_fifo_config(uint32_t dma_id, uint32_t  stream_id, DMA_fifo_config_t * config);
+int32_t  DMA_data_transfer_config(uint32_t dma_id, uint32_t  stream_id, DMA_data_transfer_config_t * config);
 int32_t  enable_or_disable_DMA_stream(uint32_t dma_id, uint32_t  stream_id, uint32_t enable);
 
 
