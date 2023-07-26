@@ -226,11 +226,33 @@ int32_t  DMA_fifo_config(uint32_t dma_id, uint32_t  stream_id, DMA_fifo_config_t
 
     flag  =  REG32_READ(DMA_SXCR_REG_ADDR(dma_id, stream_id));
 
-    dma_data_size_e   data_size  =  flag &  DMA_SXCR_
+    dma_data_size_e   psize  =  (flag &  DMA_SxCR_PSIZE) >> 11;
+    dma_data_size_e   msize  =  (flag &  DMA_SxCR_MSIZE) >> 13;
+    dma_data_size_e   dma_size  =  config->direct_mode_disable? msize: psize;
 
+    uint32_t  dma_data_size, dma_burst, fifo_threshold;
+    dma_data_size  =  dma_size  =  fifo_threshold  =  0;
+    if (get_dma_data_len(dma_size,  &dma_data_size)) {
+        return  -1;
+    }
 
+    dma_transfer_busrt_e  mburst =  ( flag & DMA_SxCR_MBURST ) >> 23;
+    dma_transfer_busrt_e  pburst =  ( flag & DMA_SxCR_PBURST ) >> 21;
+    dma_transfer_busrt_e  burst  =  config->direct_mode_disable? mburst: pburst;
 
+    if (get_dma_transfer_burst(burst,  &dma_burst)) {
+        return  -1;
+    }
 
+    if (get_dma_fifo_threshold(config->fifo_threshold,  &fifo_threshold)) {
+        return  -1;
+    }
+
+    uint32_t  burst_size_byte   =  dma_burst * dma_data_size;
+
+    if (fifo_threshold % burst_size_byte) {
+        return  -1;
+    }
 
     flag  |= config->fifo_threshold;
 
@@ -254,20 +276,18 @@ int32_t  DMA_fifo_config(uint32_t dma_id, uint32_t  stream_id, DMA_fifo_config_t
 int32_t  enable_or_disable_DMA_stream(uint32_t dma_id, uint32_t  stream_id, uint32_t enable)
 {
     uint32_t  flag = 0;
-    if ( (dma_id > DMA_MAX_ID) || (stream_id >= DMA_STREAM_NUMBER)) {
-        return  -1;
-    }
+
+    CHECK_PARAM_VALUE(dma_id,  DMA_MAX_ID);
+    CHECK_PARAM_VALUE(stream_id,  DMA_STREAM_NUMBER - 1);
 
     flag = enable? 0x1: 0;
     REG32_UPDATE(DMA_SXCR_REG_ADDR(dma_id, stream_id), flag,  0x1);
+
+    REG32_WAIT(DMA_SXCR_REG_ADDR(dma_id, stream_id), flag,  0x1);
+
     return  0;
 
 }
-
-
-
-
-
 
 
 
