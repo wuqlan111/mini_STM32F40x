@@ -1,5 +1,9 @@
 
 #include  <stdlib.h>
+#include  <string.h>
+#include  <memory.h>
+
+#include  "../include/driver_util.h"
 #include  "../include/dma.h"
 
 
@@ -64,24 +68,111 @@
 #define  DMA_SXFCR_REG_ADDR(dma, stream)       (DMA_STREAM_REGS_BASE_ADDR(dma) + 0x18 * (stream) + 0x14u)
 
 
+#define  DMA_FIFO_SIZE            16
+
+
+static  int32_t  get_dma_data_len(dma_data_size_e  dma_size,  uint32_t * bytes)
+{
+    CHECK_PARAM_NULL(bytes);
+    CHECK_PARAM_VALUE(dma_size,   DMA_DATA_MAX_SIZE);
+
+    *bytes  =  0;
+    switch (dma_size) {
+        case  DMA_DATA_SIZE_BYTE:
+            * bytes  =  1;
+            break;
+
+        case  DMA_DATA_SIZE_HALF_WORD:
+            * bytes  =  2;
+            break;
+        
+        case  DMA_DATA_SIZE_WORD:
+            * bytes  =  4;
+            break;
+    }
+
+    return   0;
+
+}
+
+
+
+static  int32_t  get_dma_transfer_burst(dma_transfer_busrt_e  dma_burst,  uint32_t * burst)
+{
+    CHECK_PARAM_NULL(burst);
+    CHECK_PARAM_VALUE(dma_burst,   DMA_MAX_TRANSFER);
+
+    *burst  =  0;
+    switch (dma_burst) {
+        case  DMA_SINGLE_TRANSFER:
+            * burst  =  1;
+            break;
+
+        case  DMA_INCR4_TRANSFER:
+            * burst  =  4;
+            break;
+
+        case  DMA_INCR8_TRANSFER:
+            * burst  =  8;
+            break;
+
+        case  DMA_INCR16_TRANSFER:
+                * burst  =  16;
+                break;
+    }
+
+    return   0;
+
+}
+
+
+static  int32_t  get_dma_fifo_threshold(dma_fifo_threshold_e  fifo_threshold,  uint32_t * size)
+{
+    CHECK_PARAM_NULL(size);
+    CHECK_PARAM_VALUE(fifo_threshold,   DMA_FIFO_MAX_THRESHOLD);
+
+    *size  =  0;
+    switch (fifo_threshold) {
+        case  DMA_FIFO_THRESHOLD_1_4:
+            * size  =  DMA_FIFO_SIZE / 4;
+            break;
+
+        case  DMA_FIFO_THRESHOLD_2_4:
+            * size  =  DMA_FIFO_SIZE / 2;
+            break;
+
+        case  DMA_FIFO_THRESHOLD_3_4:
+            * size  =  DMA_FIFO_SIZE * 3 / 4;
+            break;
+
+        case  DMA_FIFO_THRESHOLD_FULL:
+            * size  =  DMA_FIFO_SIZE;
+            break;
+    }
+
+    return   0;
+
+}
+
+
+
+
+
+
 int32_t  DMA_steam_config(uint32_t dma_id, uint32_t  stream_id, DMA_stream_config_t * config)
 {
 
     uint32_t  flag, mask;
     flag = mask = 0;
-    if ( (dma_id > DMA_MAX_ID) || (stream_id >= DMA_STREAM_NUMBER) || !config) {
-        return  -1;
-    }
 
-    if ( (config->memory_data_size > DMA_DATA_MAX_SIZE) || 
-                (config->peripheral_data_size > DMA_DATA_MAX_SIZE)) {
-        return  -1;
+    CHECK_PARAM_VALUE(dma_id,  DMA_MAX_ID);
+    CHECK_PARAM_VALUE(stream_id,  DMA_STREAM_NUMBER - 1);
+    CHECK_PARAM_NULL(config);
 
-    }
+    CHECK_PARAM_VALUE(config->memory_data_size,   DMA_DATA_MAX_SIZE);
+    CHECK_PARAM_VALUE(config->peripheral_data_size,   DMA_DATA_MAX_SIZE);
+    CHECK_PARAM_VALUE(config->data_transfer_direction,   DMA_TRANSFER_MAX_DIRECTION);
 
-    if (config->data_transfer_direction >  DMA_TRANSFER_MAX_DIRECTION) {
-        return  -1;
-    }
 
     flag  |=  config->channel << 25;
     flag  |=  config->memory_burst << 23;
@@ -115,23 +206,8 @@ int32_t  DMA_steam_config(uint32_t dma_id, uint32_t  stream_id, DMA_stream_confi
         flag |= 1<<5;
     }
 
-    if (config->transfer_complete_interrupt_enable) {
-        flag |= 1<<4;
-    }
 
-    if (config->half_transfer_interrupt_enable) {
-        flag  |=  1<<3;
-    }
-
-    if (config->transfer_error_interrupt_enable) {
-        flag |=  1<<2;
-    }
-
-    if (config->direct_error_interrupt_enable) {
-        flag |=  0x2;
-    }
-
-    mask  =  0xfeffffe;
+    mask  =  0xfefffe0;
 
     REG32_UPDATE(DMA_SXCR_REG_ADDR(dma_id, stream_id),  flag,  mask);
     return  0;
@@ -143,9 +219,18 @@ int32_t  DMA_fifo_config(uint32_t dma_id, uint32_t  stream_id, DMA_fifo_config_t
 {
     uint32_t  flag, mask;
     flag = mask = 0;
-    if ( (dma_id > DMA_MAX_ID) || (stream_id >= DMA_STREAM_NUMBER) || !config) {
-        return  -1;
-    }
+
+    CHECK_PARAM_NULL(config);
+    CHECK_PARAM_VALUE(dma_id,  DMA_MAX_ID);
+    CHECK_PARAM_VALUE(stream_id,  DMA_STREAM_NUMBER - 1);
+
+    flag  =  REG32_READ(DMA_SXCR_REG_ADDR(dma_id, stream_id));
+
+    dma_data_size_e   data_size  =  flag &  DMA_SXCR_
+
+
+
+
 
     flag  |= config->fifo_threshold;
 
