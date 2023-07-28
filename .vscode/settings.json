@@ -13,6 +13,12 @@
         "memory": "c",
         "functional": "c",
         "random": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "atomic": "c",
+        "array": "c",
+        "string_view": "c",
+        "tuple": "c",
+        "utility": "c",
+        "system_error": "c"
     }
 }
