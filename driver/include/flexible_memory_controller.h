@@ -17,6 +17,16 @@ typedef enum {
     FSMC_CRAM_MAX_PAGE  =  FSMC_CRAM_PAGE_1024,
 } fsmc_cram_page_size_e;
 
+typedef enum {
+    FSMC_ECC_PAGE_256  =  0,
+    FSMC_ECC_PAGE_512,
+    FSMC_ECC_PAGE_1024,
+    FSMC_ECC_PAGE_2048,
+    FSMC_ECC_PAGE_4096,
+    FSMC_ECC_PAGE_8192,
+    FSMC_ECC_MAX_PAGE  =  FSMC_ECC_PAGE_8192,
+} fsmc_ecc_page_size_e;
+
 
 typedef enum {
     FSMC_MEMORY_WIDTH_8  =  0,

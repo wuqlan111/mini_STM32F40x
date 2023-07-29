@@ -100,7 +100,7 @@
 
 
 
-static  int32_t  fsms_psram_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_control_t  * cfg)
+static  int32_t  fsmc_psram_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_control_t  * cfg)
 {
     uint32_t  flag, mask,offset;
     flag   =  mask  =  offset  =  0;
@@ -155,13 +155,76 @@ static  int32_t  fsms_psram_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_ban
 
 
 
+static  int32_t  fsmc_nand_flash_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_control_t  * cfg)
+{
+    uint32_t  flag, mask,offset;
+    flag   =  mask  =  offset  =  0;
+    CHECK_PARAM_NULL(cfg);
+    CHECK_PARAM_VALUE(fsmc_bank,   FSMC_MEMORY_MAX_BANK);
+
+    if (fsmc_bank < FSMC_NAND_FLASH_BANK2) {
+        return  -1;
+    }
+
+    CHECK_PARAM_VALUE(cfg->nand_flash_cfg.ecc_page_size,  FSMC_ECC_MAX_PAGE);
+    CHECK_PARAM_VALUE(cfg->nand_flash_cfg.pbus_width,  FSMC_MEMORY_MAX_WIDTH);
+
+    flag    =   cfg->nand_flash_cfg.ecc_page_size  <<  17;
+    flag   |=   cfg->nand_flash_cfg.ale_re_delay   <<  13;
+    flag   |=   cfg->nand_flash_cfg.cle_re_delay   <<  9;
+    flag   |=   cfg->nand_flash_cfg.pbus_width   << 4;
+
+    if (cfg->nand_flash_cfg.ecc_enable) {
+        flag  |=  1 << 6;
+    }
+
+    if (cfg->nand_flash_cfg.nand_flash) {
+        flag  |=  1 << 3;
+    }
+
+    if (cfg->nand_flash_cfg.wait_enable) {
+        flag  |=  0x2;
+    }
+
+
+    mask   =   0xff77a;
+
+    offset   =   fsmc_bank  - FSMC_NAND_FLASH_BANK2;
+    REG32_UPDATE(FSMC_PCRX_REG_ADDR(offset),  flag,  mask);
+
+    return   0;
+
+}
+
+
+
+
+
+int32_t  fsmc_memory_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_control_t  * cfg)
+{
+    int32_t   ret  =  0;
+    CHECK_PARAM_NULL(cfg);
+    CHECK_PARAM_VALUE(fsmc_bank,  FSMC_MEMORY_MAX_BANK);
+
+    if (fsmc_bank < FSMC_NAND_FLASH_BANK2) {
+        ret  =   fsmc_psram_init_control(fsmc_bank,  cfg);
+    } else {
+        ret  =   fsmc_nand_flash_init_control(fsmc_bank,  cfg);
+    }
+    
+    return   ret;
+
+}
 
 
 
 
 
 
-int32_t  fsmc_memory_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_control_t  * cfg);
+
+
+
+
 
 
 
