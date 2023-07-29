@@ -121,7 +121,7 @@ typedef  union {
 
 int32_t  fsmc_memory_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_control_t  * cfg);
 
-
+int32_t   fsmc_memory_bank_enable_or_disable(fsmc_memory_bank_e fsmc_bank, uint32_t enable);
 
 
 

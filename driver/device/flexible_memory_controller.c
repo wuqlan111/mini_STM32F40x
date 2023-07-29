@@ -220,6 +220,49 @@ int32_t  fsmc_memory_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_contr
 
 
 
+int32_t   fsmc_memory_bank_enable_or_disable(fsmc_memory_bank_e fsmc_bank, uint32_t enable)
+{
+
+    uint32_t  flag,  mask,  offset;
+    flag  =  mask   = offset   =  0;
+    CHECK_PARAM_VALUE(fsmc_bank,  FSMC_MEMORY_MAX_BANK);
+
+
+    if (fsmc_bank  <  FSMC_NAND_FLASH_BANK2) {
+        flag   =  enable?  0x1:  0;
+        mask   =  0x1;
+        offset   =   fsmc_bank  -  FSMC_PSRAM_BANK1;
+
+        REG32_UPDATE(FSMC_BCRX_REG_ADDR(offset),   flag,  mask);
+    } else {
+        flag  =  enable? 0x2:  0;
+        mask  =  0x2;
+        offset   =   fsmc_bank  -  FSMC_NAND_FLASH_BANK2;
+
+        REG32_UPDATE(FSMC_PCRX_REG_ADDR(offset),   flag,  mask);
+    }
+
+    return   0;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
