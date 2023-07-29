@@ -2,6 +2,10 @@
 #include  <stdlib.h>
 
 #include  "watchdog.h"
+#include  "../include/driver_util.h"
+#include  "../../subsys/include/console.h"
+
+
 
 #define  IWDG_KR_KEY            0xffff          // Key value
 #define  IWDG_PR_PR             0x7             // prescaler divider
@@ -21,22 +25,44 @@
 #define  WWDG_SR_EWIF               0x1                  // early wakeup interrupt flag
 
 
+#define  INDEPENDENT_WATCHDOG_REGS_BASE                    (0x40003000u)
+#define  WINDOW_WATCHDOG_REGS_BASE                        (0x40002C00u)
+
+
+#define  IWDG_KR_REG_ADDR            (INDEPENDENT_WATCHDOG_REGS_BASE)
+#define  IWDG_PR_REG_ADDR            (INDEPENDENT_WATCHDOG_REGS_BASE + 0x4u)
+#define  IWDG_RLR_REG_ADDR           (INDEPENDENT_WATCHDOG_REGS_BASE + 0x8u)
+#define  IWDG_SR_REG_ADDR            (INDEPENDENT_WATCHDOG_REGS_BASE + 0xcu)
+
+
+#define  WWDG_CR_REG_ADDR             (WINDOW_WATCHDOG_REGS_BASE)
+#define  WWDG_CFR_REG_ADDR            (WINDOW_WATCHDOG_REGS_BASE + 0x4u)
+#define  WWDG_SR_REG_ADDR             (WINDOW_WATCHDOG_REGS_BASE + 0x8u)
 
 
 
+int32_t   set_iwdg_prescaler_and_reload(uint32_t prescaler, uint32_t  reload)
+{
+    CHECK_PARAM_VALUE(prescaler,  0x7);
+    CHECK_PARAM_VALUE(reload,  0xfff);
+
+    REG32_WRITE(IWDG_KR_REG_ADDR,  0x5555);
+    REG32_WRITE(IWDG_PR_REG_ADDR,  prescaler);
+    REG32_WRITE(IWDG_RLR_REG_ADDR,  reload);
+
+}
 
 
+int32_t  inline  reload_iwdg_value(void)
+{
+    REG32_WRITE(IWDG_KR_REG_ADDR,  0xaaaa);
+}
 
 
-
-
-
-
-
-
-
-
-
+int32_t  inline  start_iwdg(void)
+{
+    REG32_WRITE(IWDG_KR_REG_ADDR,  0xcccc);
+}
 
 
 
