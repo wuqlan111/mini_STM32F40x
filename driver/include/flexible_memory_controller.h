@@ -127,8 +127,8 @@ int32_t   fsmc_memory_bank_enable_or_disable(fsmc_memory_bank_e fsmc_bank, uint3
 
 
 int32_t  fsmc_set_psram_time(fsmc_memory_bank_e fsmc_bank, uint32_t  read_time, fsmc_transfer_time_t * cfg);
-int32_t  fsmc_set_nand_flash_time(fsmc_memory_bank_e fsmc_bank,  fsmc_transfer_time_t * cfg);
-int32_t  fsmc_set_pio_time(fsmc_memory_bank_e fsmc_bank,  fsmc_transfer_time_t * cfg);
+int32_t  fsmc_set_nand_flash_time(fsmc_memory_bank_e fsmc_bank, uint32_t  attribute_memory, fsmc_transfer_time_t * cfg);
+int32_t  fsmc_set_pio_time(fsmc_transfer_time_t * cfg);
 
 
 

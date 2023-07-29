@@ -295,17 +295,57 @@ int32_t  fsmc_set_psram_time(fsmc_memory_bank_e fsmc_bank, uint32_t  read_time, 
 
 
 
-int32_t  fsmc_set_nand_flash_time(fsmc_memory_bank_e fsmc_bank,  fsmc_transfer_time_t * cfg);
+int32_t  fsmc_set_nand_flash_time(fsmc_memory_bank_e fsmc_bank,  uint32_t  attribute_memory,
+                                        fsmc_transfer_time_t * cfg)
+{
+    uint32_t  flag, offset;
+    flag =  offset  =  0;
+    int32_t  ret  =   0;
+
+    CHECK_PARAM_NULL(cfg);
+    CHECK_PARAM_VALUE(fsmc_bank,  FSMC_PC_CARD_BANK4);
+    if (fsmc_bank  <  FSMC_NAND_FLASH_BANK2) {
+        return  -1;
+    }
+
+    offset  =  fsmc_bank  -  FSMC_NAND_FLASH_BANK2;
+
+    flag   =   cfg->nand_flash_time.memory_hiz_time  << 24;
+    flag  |=   cfg->nand_flash_time.memory_hold_time   <<  16;
+    flag  |=   cfg->nand_flash_time.memory_wait_time   <<  8;
+    flag  |=   cfg->nand_flash_time.memory_setup_time;
+
+    if (attribute_memory) {
+        REG32_WRITE(FSMC_PATTX_REG_ADDR(offset),  flag);
+    } else {
+        REG32_WRITE(FSMC_PMEMX_REG_ADDR(offset),  flag);
+    }
+
+    return   0;
+
+}
 
 
 
+int32_t  fsmc_set_pio_time(fsmc_transfer_time_t * cfg)
+{
 
+    uint32_t  flag, offset;
+    flag =  offset  =  0;
+    int32_t  ret  =   0;
 
+    CHECK_PARAM_NULL(cfg);
 
+    flag   =   cfg->nand_flash_time.memory_hiz_time  << 24;
+    flag  |=   cfg->nand_flash_time.memory_hold_time   <<  16;
+    flag  |=   cfg->nand_flash_time.memory_wait_time   <<  8;
+    flag  |=   cfg->nand_flash_time.memory_setup_time;
 
+    REG32_WRITE(FSMC_PIO4_REG_ADDR,  flag);
 
-int32_t  fsmc_set_pio_time(fsmc_memory_bank_e fsmc_bank,  fsmc_transfer_time_t * cfg);
+    return   0;
 
+}
 
 
 
