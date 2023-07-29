@@ -97,6 +97,8 @@ typedef  union {
 typedef  union {
     struct  {
         uint32_t  access_mode:2;
+        uint32_t  data_latency:4;
+        uint32_t  clkdiv:4;
         uint32_t  bus_turn_phase:4;
         uint32_t  data_phase:8;
         uint32_t  addr_hold_phase:4;
@@ -108,7 +110,7 @@ typedef  union {
         uint32_t  memory_hold_time:4;
         uint32_t  memory_wait_time:8;
         uint32_t  memory_setup_time:4;
-    } sram_time;
+    } nand_flash_time;
 } fsmc_transfer_time_t;
 
 
@@ -124,9 +126,9 @@ int32_t  fsmc_memory_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_contr
 int32_t   fsmc_memory_bank_enable_or_disable(fsmc_memory_bank_e fsmc_bank, uint32_t enable);
 
 
-
-
-
+int32_t  fsmc_set_psram_time(fsmc_memory_bank_e fsmc_bank, uint32_t  read_time, fsmc_transfer_time_t * cfg);
+int32_t  fsmc_set_nand_flash_time(fsmc_memory_bank_e fsmc_bank,  fsmc_transfer_time_t * cfg);
+int32_t  fsmc_set_pio_time(fsmc_memory_bank_e fsmc_bank,  fsmc_transfer_time_t * cfg);
 
 
 
