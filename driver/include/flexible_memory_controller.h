@@ -42,6 +42,17 @@ typedef enum {
     FSMC_ACCESS_MAX_MODE  =  FSMC_ACCESS_MODE_D,
 } fsmc_access_mode_e;
 
+typedef  enum {
+    FSMC_PSRAM_BANK1  =  0,
+    FSMC_PSRAM_BANK2,
+    FSMC_PSRAM_BANK3,
+    FSMC_PSRAM_BANK4,
+    FSMC_NAND_FLASH_BANK2,
+    FSMC_NAND_FLASH_BANK3,
+    FSMC_PC_CARD_BANK4,
+    FSMC_MEMORY_MAX_BANK  =  FSMC_PC_CARD_BANK4,
+} fsmc_memory_bank_e;
+
 
 typedef  union {
     struct {
@@ -93,6 +104,12 @@ typedef  union {
 
 
 
+
+
+
+
+
+int32_t  fsmc_memory_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_control_t  * cfg);
 
 
 

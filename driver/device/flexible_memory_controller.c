@@ -2,7 +2,8 @@
 #include  <stdlib.h>
 
 #include  "flexible_memory_controller.h"
-
+#include  "../include/driver_util.h"
+#include  "../../subsys/include/console.h"
 
 
 
@@ -99,6 +100,58 @@
 
 
 
+static  int32_t  fsms_psram_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_control_t  * cfg)
+{
+    uint32_t  flag, mask,offset;
+    flag   =  mask  =  offset  =  0;
+    CHECK_PARAM_NULL(cfg);
+    CHECK_PARAM_VALUE(fsmc_bank,   FSMC_PSRAM_BANK4);
+
+    CHECK_PARAM_VALUE(cfg->sram_cfg.cram_page_size,  FSMC_CRAM_PAGE_1024);
+    CHECK_PARAM_VALUE(cfg->sram_cfg.memory_width,  FSMC_MEMORY_MAX_WIDTH);
+    CHECK_PARAM_VALUE(cfg->sram_cfg.memory_type,  FSMC_MEMORY_MAX_TYPE);
+
+    flag    =   cfg->sram_cfg.cram_page_size  << 16;
+    flag   |=   cfg->sram_cfg.memory_width    << 4;
+    flag   |=   cfg->sram_cfg.memory_type     << 2;
+
+    if (cfg->sram_cfg.write_burst) {
+        flag  |=   1 << 19;
+    }
+
+    if (cfg->sram_cfg.async_wait) {
+        flag  |=  1 << 15;
+    }
+
+    if (cfg->sram_cfg.ext_mode) {
+        flag  |=  1 <<  14;
+    }
+
+    if (cfg->sram_cfg.wait_enable) {
+        flag  |=  1 << 13;
+    }
+
+    if (cfg->sram_cfg.write_enable) {
+        flag  |=  1 << 12;
+    }
+
+    if (cfg->sram_cfg.wait_active_high) {
+        flag  |=  1  << 9;
+    }
+
+    if (cfg->sram_cfg.burst_enable) {
+        flag  |=  1  << 8;
+    }
+
+
+    mask   =   0x7f33c;
+
+    offset   =   fsmc_bank  - FSMC_PSRAM_BANK1;
+    REG32_UPDATE(FSMC_BCRX_REG_ADDR(offset),  flag,  mask);
+
+    return   0;
+
+}
 
 
 
@@ -108,8 +161,7 @@
 
 
 
-
-
+int32_t  fsmc_memory_init_control(fsmc_memory_bank_e fsmc_bank,  fsmc_bank_control_t  * cfg);
 
 
 
