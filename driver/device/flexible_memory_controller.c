@@ -251,7 +251,60 @@ int32_t   fsmc_memory_bank_enable_or_disable(fsmc_memory_bank_e fsmc_bank, uint3
 
 
 
+int32_t  fsmc_set_psram_time(fsmc_memory_bank_e fsmc_bank, uint32_t  read_time, fsmc_transfer_time_t * cfg)
+{
+    uint32_t  flag, offset;
+    flag =  offset  =  0;
+    int32_t  ret  =   0;
 
+    CHECK_PARAM_NULL(cfg);
+    CHECK_PARAM_VALUE(fsmc_bank,  FSMC_PSRAM_BANK4);
+
+    offset  =   fsmc_bank  -  FSMC_PSRAM_BANK1;
+
+    uint32_t  psram_cfg  =  REG32_READ(FSMC_BCRX_REG_ADDR(offset));
+    uint32_t  memory_type  =  (psram_cfg & FSMC_PCRX_PTYP) >> 3;
+
+
+    if (cfg->sram_time.data_latency && (memory_type == FSMC_MEMORY_PSRAM)) {
+        DEBUG_PRINTF_ERROR("data latency for psram must set 0!");
+        return  -1;
+    }
+
+    flag    =   cfg->sram_time.access_mode  << 28;
+    flag   |=   cfg->sram_time.bus_turn_phase   <<  16;
+    flag   |=   cfg->sram_time.data_phase   <<   8;
+    flag   |=   cfg->sram_time.addr_hold_phase    <<  4;
+    flag   |=   cfg->sram_time.addr_setup_phase;
+
+    if (read_time) {
+        flag   |=   cfg->sram_time.data_latency   <<  24;
+        flag   |=   cfg->sram_time.clkdiv   <<  20;
+    }
+
+
+    if (read_time) {
+        REG32_WRITE(FSMC_BTRX_REG_ADDR(offset),  flag);
+    } else {
+        REG32_WRITE(FSMC_BWTRX_REG_ADDR(offset),  flag);
+    }
+
+    return   0;
+
+}
+
+
+
+int32_t  fsmc_set_nand_flash_time(fsmc_memory_bank_e fsmc_bank,  fsmc_transfer_time_t * cfg);
+
+
+
+
+
+
+
+
+int32_t  fsmc_set_pio_time(fsmc_memory_bank_e fsmc_bank,  fsmc_transfer_time_t * cfg);
 
 
 
