@@ -48,7 +48,7 @@
 #define   FSMC_BTRX_BUSTURN                (0xf<<16u)
 #define   FSMC_BTRX_DATAST                 (0xff<<8u)
 #define   FSMC_BTRX_ADDHLD                 (0xf<<4u)
-#define   FSMC_BTRX_ADDSET                 (0xf<u)
+#define   FSMC_BTRX_ADDSET                 (0xfu)
 
 
 #define  FSMC_BWTRX_ACCMOD                 (0x3<<28u)
