@@ -67,6 +67,43 @@ int32_t  inline  start_iwdg(void)
 
 
 
+uint32_t  wwdg_reflash_load(void)
+{
+    uint32_t  t_count  =  REG32_READ(WWDG_CR_REG_ADDR) & WWDG_CR_T;
+    uint32_t  w_count  =  REG32_READ(WWDG_CFR_REG_ADDR) & WWDG_CFR_W;
+
+    return   w_count >= t_count;
+
+}
+
+
+int32_t  wwdg_set_load(uint32_t  value, uint32_t  is_w)
+{
+    uint32_t  flag =  (1 << 6) | value;
+    CHECK_PARAM_VALUE(value, 0x3f);
+
+    if (is_w) {
+        REG32_UPDATE(WWDG_CFR_REG_ADDR,  flag,   WWDG_CFR_W);
+    } else {
+        REG32_UPDATE(WWDG_CR_REG_ADDR,  flag,   WWDG_CR_T);
+    }
+
+    return   0;
+
+}
+
+
+void  set_wwdg_enable(void)
+{
+    REG32_UPDATE(WWDG_CR_REG_ADDR,  1 << 7,  WWDG_CR_WDGA);
+}
+
+
+
+
+
+
+
 
 
 
