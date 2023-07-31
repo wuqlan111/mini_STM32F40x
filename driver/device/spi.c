@@ -3,6 +3,7 @@
 
 #include  "spi.h"
 
+#include  "../include/driver_util.h"
 
 
 #define  SPI_CR1_BIDIMODE           (1<<15)                 // bidirectional data mode enable
@@ -73,13 +74,13 @@ const  uint32_t  I2S_REGS_BASE_ADDR[] =  {0x40003400, 0x40003800, 0x40003C00,  0
 
 
 
-int32_t   global_SPI_config(uint32_t  spi_id, SPI_config_t * config)
+int32_t   SPI_init(spi_dev_e  spi_id, SPI_config_t * config)
 {
     uint32_t  flag,  mask;
     flag = mask = 0;
-    if ( (spi_id > SPI_MAX_ID) || !config) {
-        return  -1;
-    }
+
+    CHECK_PARAM_NULL(config);
+    CHECK_PARAM_VALUE(spi_id,  SPI_MAX_ID);
 
     if (config->bidirectional_mode) {
         flag |=  1 << 15;
@@ -93,20 +94,12 @@ int32_t   global_SPI_config(uint32_t  spi_id, SPI_config_t * config)
         flag  |=  1 << 13;
     }
 
-    if (!config->no_crc_phase) {
-        flag  |=  1 << 12;
-    }
-
     if (config->bit16_data_frame) {
         flag |=  1 << 11;
     }
 
     if (config->receive_only) {
         flag |=  1  << 10;
-    }
-
-    if (config->software_slave_management_enable) {
-        flag |=  1  << 9;
     }
 
     if (config->lsb_transmitted_first) {
@@ -119,6 +112,7 @@ int32_t   global_SPI_config(uint32_t  spi_id, SPI_config_t * config)
         flag |= 1 << 2;
     }
 
+
     if (config->clock_high_idle) {
         flag |=  0x2;
     }
@@ -127,141 +121,35 @@ int32_t   global_SPI_config(uint32_t  spi_id, SPI_config_t * config)
         flag |=  0x1;
     }
 
-    mask  =  0xfebf;
-    REG32_UPDATE(SPI_CR1_REG_ADDR(spi_id), flag,  mask);
+    REG32_WRITE(SPI_CR1_REG_ADDR(spi_id), flag);
 
-    if (config->spi_ti_mode) {
-        flag =  1 << 4;
-    }
-
+    flag   =    0;
     if (config->ss_output_enable) {
-        flag |=  1 << 2;
+        flag  =  1 << 2;
     }
 
-    if (config->tx_buffer_dma_enable) {
-        flag |=  0x2;
-    }
-
-    if (config->rx_buffer_dma_enable) {
-        flag |=  0x1;
-    }
-
-    mask  =  0x17;
-    REG32_UPDATE(SPI_CR2_REG_ADDR(spi_id), flag, mask);
-    return  0;
-
-}
-
-
-int32_t   SPI_interrupt_mask(uint32_t  spi_id,  SPI_I2S_interrupt_mask_t * config)
-{
-    uint32_t  flag,  mask;
-    flag = mask = 0;
-    if ( (spi_id > SPI_MAX_ID) || !config) {
-        return  -1;
-    }
-
-    if (config->tx_buffer_empty_interrupt) {
-        flag  =  1  << 7;
-    }
-
-    if (config->rx_buffer_not_empty_interrupt) {
-        flag  |=  1  << 6;
-    }
-
-    if (config->error_interrupt_enable) {
-        flag |=  1 << 5;
-    }
-
-    mask  =  0xe0;
-    REG32_UPDATE(SPI_CR2_REG_ADDR(spi_id),  flag,  mask);
-    return   0;
-
-}
-
-int32_t   global_I2S_config(uint32_t  i2s_id, I2S_config_t * config)
-{
-    uint32_t  flag,  mask;
-    flag = mask =  0;
-    if ( (i2s_id > I2S_MAX_ID) || !config) {
-        return  -1;
-    }
-
-    if (config->tx_buffer_dma_enable) {
-        flag |= 0x2;
-    }
-
-    if (config->rx_buffer_dma_enable) {
-        flag |= 0x1;
-    }
-
-    mask = 0x3;
-    REG32_UPDATE(SPI_CR2_REG_ADDR(i2s_id), flag,  mask);
-
-    flag  =  config->i2s_configuration_mode << 8;
-
-    if (config->long_frame_synchronization) {
-        flag |=  1 << 7;
-    }
-
-    flag  |=  config->i2s_standard_selection << 4;
-
-    if (config->steady_state_clock_high) {
-        flag |=  1 << 3;
-    }
-
-    flag  |=  config->data_length << 1;
-
-    if (config->channel_bit32_length) {
-        flag |=  0x1;
-    }
-
-    REG32_UPDATE(SPI_I2SCFGR_REG_ADDR(i2s_id), flag,  mask);
-
-    if (config->master_clock_output_enable) {
-        flag  =  1 << 9;
-    }
-
-    if (config->odd_factor_prescale) {
-        flag  |=  1 << 8;
-    }
-
-    flag  |=  config->i2s_linear_prescaler;
-    mask  =  0x3ff;
-    REG32_UPDATE(SPI_I2SCFGR_REG_ADDR(i2s_id),  flag,  mask);
+    REG32_WRITE(SPI_CR2_REG_ADDR(spi_id), flag);
     return  0;
 
 }
 
 
 
-int32_t   I2S_interrupt_mask(uint32_t  i2s_id,  SPI_I2S_interrupt_mask_t * config)
+int32_t  enable_or_disable(spi_dev_e  spi_id,  uint32_t  enable)
 {
     uint32_t  flag,  mask;
     flag = mask = 0;
-    if ( (i2s_id > I2S_MAX_ID) || !config) {
-        return  -1;
-    }
 
-    if (config->tx_buffer_empty_interrupt) {
-        flag  =  1  << 7;
-    }
+    CHECK_PARAM_VALUE(spi_id,  SPI_MAX_ID);
 
-    if (config->rx_buffer_not_empty_interrupt) {
-        flag  |=  1  << 6;
-    }
+    flag    =  enable?  1 << 6:  0;
+    mask    =  SPI_CR1_SPE;
 
-    if (config->error_interrupt_enable) {
-        flag |=  1 << 5;
-    }
+    REG32_UPDATE(SPI_CR1_REG_ADDR(spi_id),  flag,  mask);
 
-    mask  =  0xe0;
-    REG32_UPDATE(SPI_CR2_REG_ADDR(i2s_id),  flag,  mask);
     return   0;
 
 }
-
-
 
 
 
