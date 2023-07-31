@@ -92,10 +92,6 @@ int32_t   SPI_init(spi_dev_e  spi_id, SPI_config_t * config)
         flag  |= 1 << 14;
     }
 
-    if (config->hardware_crc_enable) {
-        flag  |=  1 << 13;
-    }
-
     if (config->bit16_data_frame) {
         flag |=  1 << 11;
     }
@@ -194,6 +190,147 @@ int32_t  set_SPI_baud_rate(spi_dev_e  spi_id, uint32_t  baud_rate)
 
 
 }
+
+
+int32_t  set_SPI_hardware_crc(spi_dev_e  spi_id, uint32_t enable,  uint32_t  polynomial)
+{
+    uint32_t  flag,  mask;
+    int32_t  ret  =  0;
+    flag  =  mask  =  0;
+
+    CHECK_PARAM_VALUE(spi_id,  SPI_MAX_ID);
+    CHECK_PARAM_VALUE(polynomial,    0xffff);
+    if (!polynomial) {
+        return  -1;
+    }
+
+
+    flag  =  enable ?  1 << 13:  0;
+    mask  =  SPI_CR1_CRCEN;
+
+    REG32_WRITE(SPI_CRCPR_REG_ADDR(spi_id),  polynomial);
+    REG32_UPDATE(SPI_CR1_REG_ADDR(spi_id),  flag,   mask);
+
+    return   0;
+
+}
+
+int32_t  wait_SPI_state(spi_dev_e  spi_id, uint32_t  flag,  uint32_t  timesout)
+{
+    uint32_t  timeout_vld   =   timesout? 1:  0;
+    if (flag &  (~0x1ff)) {
+        return  -1;
+    }
+
+    uint32_t  tmp_flag  =  0;
+    do {
+        tmp_flag  =  REG32_READ(SPI_SR_REG_ADDR(spi_id));
+
+        if (tmp_flag & flag) {
+            return  0;
+        }
+
+        timesout =  timeout_vld? timesout - 1: timesout;
+
+        if (timeout_vld && !timesout) {
+            return   -1;
+        }
+
+    } while (1);
+
+    return   -1;
+
+}
+
+
+#define  WAIT_SPI_FLAG_TIMEOUT    1200
+int32_t  SPI_send_data(spi_dev_e  spi_id,  uint8_t * data,  uint32_t len)
+{
+    int32_t   ret =  0;
+    uint32_t  flag, mask;
+
+    CHECK_PARAM_NULL(data);
+    CHECK_PARAM_VALUE(spi_id,  SPI_MAX_ID);
+    if (!len) {
+        return  -1;
+    }
+
+    flag   =   REG32_READ(SPI_CR1_REG_ADDR(spi_id));
+
+    if (flag & SPI_CR1_RXONLY) {
+        return  -1;
+    }
+
+    uint32_t  crc_enable   =   flag & SPI_CR1_CRCEN? 1:  0;
+    uint32_t  is_frame16   =   flag & SPI_CR1_DFF?  1:  0;
+    uint16_t  * val16    =  (uint16_t  *)data;
+    uint32_t  times   =   is_frame16? len >> 1: len;
+
+
+    for (int32_t  i  =  0;  i < times; i++) {
+
+        if (wait_SPI_state(spi_id,  SPI_SR_TXE, WAIT_SPI_FLAG_TIMEOUT)) {
+            return  -1;
+        }
+
+        if (is_frame16) {
+            REG32_WRITE(SPI_DR_REG_ADDR(spi_id), val16[i]);            
+        } else {
+            REG32_WRITE(SPI_DR_REG_ADDR(spi_id), data[i]);  
+        }
+
+        if (crc_enable) {
+            REG32_UPDATE(SPI_CR1_REG_ADDR(spi_id),  1 << 12,  SPI_CR1_CRCNEXT);            
+        }
+    }
+
+    return   0;
+}
+
+
+
+int32_t  SPI_recv_data(spi_dev_e  spi_id,  uint8_t * data,  uint32_t len,  uint32_t * recv_len)
+{
+    int32_t   ret =  0;
+    uint32_t  flag, mask;
+
+    CHECK_PARAM_NULL(data);
+    CHECK_PARAM_NULL(recv_len);
+    CHECK_PARAM_VALUE(spi_id,  SPI_MAX_ID);
+    if (!len) {
+        return  -1;
+    }
+
+    flag   =   REG32_READ(SPI_CR1_REG_ADDR(spi_id));
+
+    uint32_t  crc_enable   =   flag & SPI_CR1_CRCEN? 1:  0;
+    uint32_t  is_frame16   =   flag & SPI_CR1_DFF?  1:  0;
+    uint16_t  * val16    =  (uint16_t  *)data;
+    uint32_t  times   =   is_frame16? len >> 1: len;
+
+
+    for (int32_t  i  =  0;  i < times; i++) {
+
+        if (wait_SPI_state(spi_id,  SPI_SR_RXNE, WAIT_SPI_FLAG_TIMEOUT)) {
+            return  0;
+        }
+
+        if (is_frame16) {
+            val16[i]  =  REG32_READ(SPI_DR_REG_ADDR(spi_id));            
+        } else {
+            data[i]   =  REG32_READ(SPI_DR_REG_ADDR(spi_id));  
+        }
+
+        *recv_len  =  is_frame16?  (i + 1) << 1:  (i + 1);
+        if (crc_enable) {
+            REG32_UPDATE(SPI_CR1_REG_ADDR(spi_id),  1 << 12,  SPI_CR1_CRCNEXT);            
+        }
+    }
+
+    return   0;
+}
+
+
 
 
 
