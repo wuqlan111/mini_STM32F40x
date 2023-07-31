@@ -25,7 +25,6 @@ typedef  struct {
     uint32_t   bit16_data_frame:1;
     uint32_t   receive_only:1;
     uint32_t   lsb_transmitted_first:1;
-    uint32_t   baud_rate_control:3;
     uint32_t   master_configuration:1;
     uint32_t   clock_high_idle:1;
     uint32_t   second_clock_data_capture_edge:1;
@@ -38,6 +37,8 @@ typedef  struct {
 int32_t   SPI_init(spi_dev_e  spi_id, SPI_config_t * config);
 
 int32_t  enable_or_disable(spi_dev_e  spi_id,  uint32_t  enable);
+
+int32_t  set_SPI_baud_rate(spi_dev_e  spi_id, uint32_t  baud_rate);
 
 
 #endif

@@ -4,6 +4,8 @@
 #include  "spi.h"
 
 #include  "../include/driver_util.h"
+#include  "../include/system_rcc.h"
+#include  "math_util.h"
 
 
 #define  SPI_CR1_BIDIMODE           (1<<15)                 // bidirectional data mode enable
@@ -106,8 +108,6 @@ int32_t   SPI_init(spi_dev_e  spi_id, SPI_config_t * config)
         flag |=  1 << 7;
     }
 
-    flag  |=  config->baud_rate_control  << 3;
-
     if (config->master_configuration) {
         flag |= 1 << 2;
     }
@@ -152,6 +152,48 @@ int32_t  enable_or_disable(spi_dev_e  spi_id,  uint32_t  enable)
 }
 
 
+int32_t  set_SPI_baud_rate(spi_dev_e  spi_id, uint32_t  baud_rate)
+{
+    uint32_t  is_apb1, flag,  mask;
+    int32_t  ret  =  0;
+    is_apb1  =  flag  =  mask  =  0;
+
+    CHECK_PARAM_VALUE(spi_id,  SPI_MAX_ID);
+    if (!baud_rate) {
+        return  -1;
+    }
+
+    is_apb1  =  spi_id  ==  SPI1? 0:  1;
+
+    double  apb_clk =  0;
+
+    if (rcc_get_apb_clk_frequency(&apb_clk,  is_apb1)) {
+        return  -1;
+    }
+
+    apb_clk  *=  1000000;
+
+    double  div  =   apb_clk  /  baud_rate; 
+    uint32_t  div_mantissa   =  (uint32_t)div;
+
+    if (div_mantissa > 256) {
+        return  -1;
+    }
+
+    uint32_t  bits  =  0;
+    if ( math_clog2(div_mantissa,  &bits)) {
+        return  -1;
+    }
+
+    flag  =  (bits - 1) << 3;
+    mask  =  SPI_CR1_BR;
+
+    REG32_UPDATE(SPI_CR1_REG_ADDR(spi_id),   flag,  mask);
+
+    return  0;
+
+
+}
 
 
 
