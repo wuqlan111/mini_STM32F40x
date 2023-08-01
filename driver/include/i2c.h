@@ -63,7 +63,8 @@ int32_t  I2C_dev_init(i2c_dev_e  i2c_dev, I2C_config_t * config);
 int32_t  enable_or_disable_I2C(i2c_dev_e i2c_dev, uint32_t enable);
 int32_t  set_I2C_slave_address(i2c_dev_e  i2c_dev, I2C_address_t * config);
 int32_t  set_I2C_transfer_time(i2c_dev_e  i2c_dev, I2C_transfer_time_t * config);
-
+int32_t  I2C_send_data(i2c_dev_e  i2c_dev,  uint8_t * data,  uint32_t len);
+int32_t  I2C_recv_data(i2c_dev_e  i2c_dev,  uint8_t * data,  uint32_t len,  uint32_t * recv_len);
 
 
 #endif

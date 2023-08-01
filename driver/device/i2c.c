@@ -283,5 +283,109 @@ int32_t  set_I2C_transfer_time(i2c_dev_e  i2c_dev, I2C_transfer_time_t * config)
 
 
 
+int32_t  i2c_wait_sr_flag(i2c_dev_e  i2c_dev, uint32_t  is_sr1,  uint32_t  flag, uint32_t  timeout)
+{
+    uint32_t  sr1_rsv  =  0xffff0000 | (1 << 13) | (1 << 5);
+    uint32_t  sr2_rsv  =  0xffff0000  |  ( 1<< 3);
+    uint32_t  timeout_vld  =  timeout ? 1:  0;
+    
+    CHECK_PARAM_VALUE(i2c_dev,  I2C_MAX_DEV);
+
+    if (is_sr1 && (flag & sr1_rsv)) {
+        return  -1;
+    } else if (!is_sr1 && (flag & sr2_rsv)) {
+        return  -1;
+    }
+
+    uint32_t  reg  =  is_sr1 ?  I2C_SR1_REG_ADDR(i2c_dev): I2C_SR2_REG_ADDR(i2c_dev);
+    uint32_t  tmp_flag  =  0;
+    do {
+        tmp_flag  =  REG32_READ(reg);
+
+        if (tmp_flag & flag) {
+            return  0;
+        }
+
+        timeout =  timeout_vld? timeout - 1: timeout;
+
+        if (timeout_vld && !timeout) {
+            return   -1;
+        }
+
+    } while (1);
+
+    return   -1;
+
+}
+
+
+
+int32_t  I2C_send_data(i2c_dev_e  i2c_dev,  uint8_t * data,  uint32_t len)
+{
+    int32_t   ret =  0;
+    uint32_t  flag, mask;
+
+    CHECK_PARAM_NULL(data);
+    CHECK_PARAM_VALUE(i2c_dev,  I2C_MAX_DEV);
+    if (!len) {
+        return  -1;
+    }
+
+    REG32_UPDATE(I2C_CR1_REG_ADDR());
+    for (int32_t  i  =  0; i < len; i++) {
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int32_t  I2C_recv_data(i2c_dev_e  i2c_dev,  uint8_t * data,  uint32_t len,  uint32_t * recv_len);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
