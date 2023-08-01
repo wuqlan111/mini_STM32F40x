@@ -17,41 +17,30 @@
 #define  I2C_MAX_CLOCK_FREQUENCY         (50u)       // max i2c clock 50 MHz
 #define  I2C_MIN_CLOCK_FREQUENCY         (2u)       // min i2c clock 2 MHz
 
-enum {
+typedef  enum {
 
     I2C_DEV0 = 0,
     I2C_DEV1,
     I2C_DEV2,
     I2C_MAX_DEV = I2C_DEV2,
-};
+} i2c_dev_e;
 
 
-enum  {
-
+typedef  enum  {
     SLAVE_TRANS = 0,
     SLAVE_RECV,
     MASTER_TRANS,
     MASTER_RECV
-
-};
+} i2c_dev_mode_e;
 
 typedef  struct {
-
-    uint32_t  SMBus_alert:1;
-    uint32_t  packet_error_check:1;
     uint32_t  acknowledge_enable:1;
     uint32_t  clock_stretch_disable:1;
     uint32_t  general_call_enable:1;
     uint32_t  pec_enable:1;
     uint32_t  arp_enable:1;
-    uint32_t  SMBus_host:1;
-    uint32_t  SMBus_mode:1;
-    uint32_t  DMA_request_enable:1;
-    uint32_t  buffer_interrupt_enable:1;
-    uint32_t  event_interrupt_enable:1;
-    uint32_t  error_interrupt_enable:1;
-    uint32_t  clock_frequency:6;
-
+    uint32_t  fm_mode:1;
+    uint32_t  fm_tlow_thigh_2:1;
 } ATTRIBUTE_ALIGN(4) I2C_config_t;
 
 
@@ -63,11 +52,17 @@ typedef struct {
 } ATTRIBUTE_ALIGN(4) I2C_address_t;
 
 
-int32_t  I2C_dev_config(uint32_t  i2c_dev, I2C_config_t * config);
-int32_t  I2C_start_or_stop_generation(uint32_t i2c_dev, uint32_t start);
-int32_t  enable_or_disable_I2C(uint32_t i2c_dev, uint32_t enable);
-int32_t  set_I2C_slave_address(uint32_t  i2c_dev, I2C_address_t * config);
+typedef struct {
+    uint32_t  pclk_freq:6;       //MHz
+    uint32_t  scl_freq:10;      //KHz
+    uint32_t  trise_time:10;    //ns
+} ATTRIBUTE_ALIGN(4) I2C_transfer_time_t;
 
+
+int32_t  I2C_dev_init(i2c_dev_e  i2c_dev, I2C_config_t * config);
+int32_t  enable_or_disable_I2C(i2c_dev_e i2c_dev, uint32_t enable);
+int32_t  set_I2C_slave_address(i2c_dev_e  i2c_dev, I2C_address_t * config);
+int32_t  set_I2C_transfer_time(i2c_dev_e  i2c_dev, I2C_transfer_time_t * config);
 
 
 

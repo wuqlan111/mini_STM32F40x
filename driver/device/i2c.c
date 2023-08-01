@@ -1,6 +1,9 @@
 
-#include   "../include/i2c.h"
+#include  <stdlib.h>
+#include  <memory.h>
 
+#include   "../include/i2c.h"
+#include   "../include/driver_util.h"
 
 //I2C_CR1 flags
 #define I2C_CR1_RESET     (1<<15)          // i2c under reset state
@@ -92,22 +95,13 @@
 #define  I2C_FLTR_REG_ADDR(i2c)            (I2C_REGS_BASE_ADDR + (i2c) * I2C_REG_ADDR_STEP + 0x24)
 
 
-int32_t  I2C_dev_config(uint32_t  i2c_dev, I2C_config_t * config)
+int32_t  I2C_dev_init(i2c_dev_e  i2c_dev, I2C_config_t * config)
 {
     uint32_t  flag, mask;
     flag = mask = 0;
-    if ( (i2c_dev > I2C_MAX_DEV) || !config ) {
-        return  -1;
-    }
 
-    if ( (config->clock_frequency > I2C_MAX_CLOCK_FREQUENCY) || 
-            (config->clock_frequency < I2C_MIN_CLOCK_FREQUENCY) ) {
-        return  -1;
-    }
-
-    if (config->SMBus_alert) {
-        flag |= 1 << 13;
-    }
+    CHECK_PARAM_NULL(config);
+    CHECK_PARAM_VALUE(i2c_dev,  I2C_MAX_DEV);
 
     if (config->acknowledge_enable) {
         flag |= 1 << 10;
@@ -129,37 +123,19 @@ int32_t  I2C_dev_config(uint32_t  i2c_dev, I2C_config_t * config)
         flag |= 1 << 4;
     }
 
-    if (config->SMBus_host) {
-        flag |= 1 << 3;
-    }
-
-    if (config->SMBus_mode) {
-        flag |=  0x2;
-    }
-
-    mask = 0x44fc;
-    REG32_UPDATE(I2C_CR1_REG_ADDR(i2c_dev), flag, mask);
+    REG32_WRITE(I2C_CR1_REG_ADDR(i2c_dev), flag);
 
     flag = mask = 0;
-    if (config->DMA_request_enable) {
-        flag |= 1 << 11;
+
+    if (config->fm_mode) {
+        flag  =   1 << 15;
     }
 
-    if (config->buffer_interrupt_enable) {
-        flag |= 1 << 10;
+    if (!config->fm_tlow_thigh_2) {
+        flag  |=  1 << 14;
     }
 
-    if (config->event_interrupt_enable) {
-        flag |= 1 << 9;
-    }
-
-    if (config->error_interrupt_enable) {
-        flag |= 1 << 8;
-    }
-
-    flag |= config->clock_frequency;
-    mask  =  0xf3f;
-    REG32_UPDATE(I2C_CR2_REG_ADDR(i2c_dev), flag, mask);
+    REG32_WRITE(I2C_CCR_REG_ADDR(i2c_dev), flag);
 
     return  0;
 
@@ -186,12 +162,10 @@ int32_t  I2C_start_or_stop_generation(uint32_t i2c_dev, uint32_t start)
 }
 
 
-int32_t  enable_or_disable_I2C(uint32_t i2c_dev, uint32_t enable)
+int32_t  enable_or_disable_I2C(i2c_dev_e i2c_dev, uint32_t enable)
 {
     uint32_t  flag = 0;
-    if ( i2c_dev > I2C_MAX_DEV ) {
-        return  -1;
-    }
+    CHECK_PARAM_VALUE(i2c_dev,  I2C_MAX_DEV);
 
     flag = enable ? 0x1: 0;
     REG32_UPDATE(I2C_CR1_REG_ADDR(i2c_dev), flag,  0x1);
@@ -199,13 +173,13 @@ int32_t  enable_or_disable_I2C(uint32_t i2c_dev, uint32_t enable)
 }
 
 
-int32_t  set_I2C_slave_address(uint32_t  i2c_dev, I2C_address_t * config)
+int32_t  set_I2C_slave_address(i2c_dev_e  i2c_dev, I2C_address_t * config)
 {
     uint32_t  flag, mask;
     flag = mask = 0;
-    if ( (i2c_dev > I2C_MAX_DEV)  || !config ) {
-        return  -1;
-    }
+
+    CHECK_PARAM_NULL(config);
+    CHECK_PARAM_VALUE(i2c_dev,  I2C_MAX_DEV);
 
     if ( (config->address1 > 0x3ff) || (config->address2 > 0x3ff) ) {
         return  -1;
@@ -243,6 +217,70 @@ int32_t  set_I2C_slave_address(uint32_t  i2c_dev, I2C_address_t * config)
     return  0;
 
 }
+
+
+
+int32_t  set_I2C_transfer_time(i2c_dev_e  i2c_dev, I2C_transfer_time_t * config)
+{
+    uint32_t  flag, mask;
+    flag = mask = 0;
+
+    CHECK_PARAM_NULL(config);
+    CHECK_PARAM_VALUE(i2c_dev,  I2C_MAX_DEV);
+    CHECK_PARAM_VALUE(config->pclk_freq,  I2C_MAX_CLOCK_FREQUENCY);
+
+    if (config->pclk_freq < I2C_MIN_CLOCK_FREQUENCY) {
+        return   -1;
+    }
+
+    REG32_UPDATE(I2C_CR2_REG_ADDR(i2c_dev),  config->pclk_freq,  I2C_CR2_FREQ);
+
+    flag  =  REG32_READ(I2C_CCR_REG_ADDR(i2c_dev));
+
+    uint32_t  pre_faction =  0;
+
+    if (! (flag & I2C_CCR_FMODE) ) {
+        pre_faction  =  2;
+    } else if ( flag & I2C_CCR_DUTY ) {
+        pre_faction  =  25;
+    } else {
+        pre_faction  =  3;
+    }
+
+    double  pclk_freq  =   config->pclk_freq * 1000000;
+    double  scl_freq   =   config->scl_freq  *  1000;
+    double  div  =  (pclk_freq / scl_freq ) / pre_faction;
+
+    uint32_t  div_mantissa   =  (uint32_t)div;
+
+    if ((double)div_mantissa  !=  div) {
+        div_mantissa ++;
+    }
+
+    if (div_mantissa  > 0xfff) {
+        return  -1;
+    }
+
+    REG32_UPDATE(I2C_CCR_REG_ADDR(i2c_dev),  div_mantissa,  I2C_CCR_CLOCK);
+
+    div   =  (config->trise_time *  config->pclk_freq ) / 1000;
+    div_mantissa   =  (uint32_t) div;
+    if ((double)div_mantissa  !=  div) {
+        div_mantissa ++;
+    }
+
+    div_mantissa ++;
+
+    if (div_mantissa > 0x3f) {
+        return  -1;
+    }
+
+    REG32_WRITE(I2C_TRISE_REG_ADDR(i2c_dev),  div_mantissa );
+
+    return   0;
+
+}
+
 
 
 
