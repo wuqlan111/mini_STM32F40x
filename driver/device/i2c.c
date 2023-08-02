@@ -425,8 +425,90 @@ int32_t  I2C_slave_recv_data(i2c_dev_e  i2c_dev,
 }
 
 
+int32_t  I2C_master_send_slave_addr(i2c_dev_e  i2c_dev, uint32_t  slave_addr,  uint32_t is_send)
+{
+    uint32_t  flag,  mask;
+    flag  =  mask  =  0;
+    CHECK_PARAM_VALUE(i2c_dev,  I2C_MAX_DEV);
+
+    flag  = REG32_READ(I2C_OAR1_REG_ADDR(i2c_dev));
+    uint32_t  is_addr10  =  flag & I2C_OAR1_10BITADDR?  1:  0;
+    uint32_t  addr7    =  (slave_addr & 0x7f) << 1;
+    uint32_t  addr10   =  slave_addr & 0xff;
+
+    uint32_t  header   =   0xf0 | ((slave_addr >> 7) & 0x6);
+    if (!is_send) {
+        header |=  0x1;
+        addr7  |=  0x1;
+    }
+
+    REG32_UPDATE(I2C_CR1_REG_ADDR(i2c_dev),   1 << 8,  I2C_CR1_START);
+
+    if (i2c_wait_sr_flag(i2c_dev, 1, I2C_SR1_SBIT,  I2C_WAIT_FLAG_TIMEOUT)) {
+        return  -1;
+    }
+
+    if (is_addr10) {
+        REG32_WRITE(I2C_DR_REG_ADDR(i2c_dev), header);
+    } else {
+        REG32_WRITE(I2C_DR_REG_ADDR(i2c_dev), addr7);
+    }
+
+    if (is_addr10) {
+        if (i2c_wait_sr_flag(i2c_dev, 1, I2C_SR1_10BITADD,  I2C_WAIT_FLAG_TIMEOUT)) {
+            return  -1;
+        }
+
+        REG32_WRITE(I2C_DR_REG_ADDR(i2c_dev), addr10);
+
+    }
 
 
+    if (i2c_wait_sr_flag(i2c_dev, 1, I2C_SR1_ADDRMATCH,  I2C_WAIT_FLAG_TIMEOUT)) {
+        return  -1;
+    }
+
+    flag  =  REG32_READ(I2C_SR2_REG_ADDR(i2c_dev));
+
+    return   0;
+
+}
+
+
+
+int32_t  I2C_master_send_data(i2c_dev_e  i2c_dev, uint32_t  slave_addr,  uint8_t * data,  uint32_t len)
+{
+    int32_t   ret =  0;
+    uint32_t  flag, mask;
+
+    CHECK_PARAM_NULL(data);
+    CHECK_PARAM_VALUE(i2c_dev,  I2C_MAX_DEV);
+    if (!len) {
+        return  -1;
+    }
+
+    if (I2C_master_send_slave_addr(i2c_dev, slave_addr,  1)) {
+        return   -1;
+    }
+
+    for (int32_t  i  =  0; i < len; i++) {
+        if (i2c_wait_sr_flag(i2c_dev,  1, I2C_SR1_TDREMPTY, 
+                         I2C_WAIT_FLAG_TIMEOUT)) {
+                            return  -1;
+            }
+
+        REG32_WRITE(I2C_DR_REG_ADDR(i2c_dev), data[i]);
+    }
+
+    if (i2c_wait_sr_flag(i2c_dev, 1, I2C_SR1_ACKFAIL,  I2C_WAIT_FLAG_TIMEOUT)) {
+            return  -1;
+    }
+
+    REG32_UPDATE(I2C_SR1_REG_ADDR(i2c_dev),  1 << 9,  I2C_CR1_STOP);
+
+    return   0;
+
+}
 
 
 
