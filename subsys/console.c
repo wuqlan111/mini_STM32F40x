@@ -139,6 +139,34 @@ int32_t  console_recv_data(uint8_t * buf, uint32_t len,  uint32_t * recv_len)
 }
 
 
+int32_t  console_putchar(uint8_t data)
+{
+    int32_t   ret  =   0;
+
+    console_tx_buffer[0]  = data;
+
+    ret  =  usart_send_data(CONSOLE_USART_ID,  1);
+
+    return  ret;
+
+}
+
+int32_t  console_getchar(void)
+{
+    int32_t   ret  =   0;
+    uint32_t   recv_len  =   0;
+
+    ret   =  usart_recv_data(CONSOLE_USART_ID,  1,  recv_len);
+
+    if (ret || !recv_len) {
+        return  -1;
+    }
+
+    return  console_rx_buffer[0];
+
+}
+
+
 static  uint32_t  log_level  =  0;
 
 void  set_system_log_level(uint32_t level)

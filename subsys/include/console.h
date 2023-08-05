@@ -24,6 +24,9 @@ int32_t  console_fmt_out(char * fmt, ...);
 
 int32_t  console_recv_data(uint8_t * buf, uint32_t len,  uint32_t * recv_len);
 
+int32_t  console_putchar(uint8_t data);
+int32_t  console_getchar(void);
+
 void   __debug_printf(uint32_t level, char * fmt, ...);
 
 void  set_system_log_level(uint32_t level);
