@@ -3,6 +3,7 @@
 
 #include  "../include/driver_util.h"
 #include  "../include/crc.h"
+#include  "../../subsys/include/console.h"
 
 #define  CRC_REGS_BASE_ADDR                        (0x40023000u)
 #define  CRC_DR_REG_ADDR                           (CRC_REGS_BASE_ADDR)
@@ -21,6 +22,7 @@ static  int32_t  wait_crc32_complete(uint32_t value,  uint32_t  timesout)
         tmp  =   REG32_READ(CRC_DR_REG_ADDR);
 
         if (tmp !=  value) {
+            DEBUG_PRINTF_INFO("wait crc32 complete failed successful!");
             return   0;
         }
 
@@ -30,6 +32,8 @@ static  int32_t  wait_crc32_complete(uint32_t value,  uint32_t  timesout)
             break;
         }
     } while(1);
+
+    DEBUG_PRINTF_ERROR("wait crc32 complete failed!");
 
     return  -1;
 
@@ -42,11 +46,14 @@ int32_t  get_crc32_of_data(uint8_t * data,  uint32_t  len,   uint32_t * crc)
     CHECK_PARAM_NULL(data);
 
     if (!len || (len & 0x3)) {
+        DEBUG_PRINTF_ERROR("len[%u] invalid!",  len);
         return  -1;
     }
 
     *crc  =  0;
     REG32_WRITE(CRC_CR_REG_ADDR,  0x1);
+
+    DEBUG_PRINTF_DEBUG("crc_data:\t%p,\tlen:\t%u!", data,  len);
 
     uint32_t * val32  =  (uint32_t *)data;
     uint32_t  times  =  len >> 2;
